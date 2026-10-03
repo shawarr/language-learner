@@ -6,9 +6,10 @@ Speaking is the primary mode; writing practice is required too.
 
 ## Ground rules
 
-- **Free tiers only.** Gemini and Groq free tiers, edge-tts for speech. Never add a paid dependency,
-  and keep the number of model calls per interaction down — the free limits are the real budget
-  (see `docs/FOUNDATION.md` for the numbers).
+- **Free tiers only.** Any provider is fine as long as it is good and free — the provider layer is a
+  registry of OpenAI-compatible base URLs, so swapping one is config, not code. Never add a paid
+  dependency, and keep the number of model calls per interaction down: the free limits are the real
+  budget, and one Gemini model allows 20 requests a *day* (see `docs/FOUNDATION.md` §0).
 - **Simple stack, maintainable by one person.** FastAPI + SQLite + vanilla JS, no build step, no
   framework, no bundler, no CDN. Ahmad knows Python, Docker, Kubernetes and vanilla JS; keep it at
   that level.
@@ -32,7 +33,8 @@ app/
   taxonomy.py      the canonical mistake categories                        [foundation]
   prompts.py       prompt loader ({{placeholder}} substitution)            [foundation]
   prompts/*.md     one prompt per file
-  providers/       gemini, groq, fake; llm router, stt, tts                [foundation]
+  providers/       gemini + any OpenAI-compatible endpoint + fake;
+                   llm router (tiers, retry, JSON repair), stt, tts         [foundation]
   routers/         FastAPI routers, registered in routers/__init__.py
   services/        the app logic (tutor, analyzer, srs, curriculum, ...)
   curriculum/      units.json
@@ -51,7 +53,9 @@ tests/             pytest, offline (fake provider), no API keys needed
 - Schema changes go in `db.MIGRATIONS` as idempotent `ALTER TABLE`s. `CREATE TABLE IF NOT EXISTS`
   never adds a column to an existing table, and the live DB has real history in it.
 - All LLM calls go through `app.providers.llm.llm` so rate limits, fallback and JSON repair are
-  handled in one place. Ask for JSON with a schema (`complete_json`), never parse prose.
+  handled in one place. Ask for JSON with a schema (`complete_json`), never parse prose. Pick the
+  tier: default for talk turns, `tier="quality"` for the analyzer and grading, `tier="fast"` for
+  translation and drill grading.
 - Raise `ProviderError`/`LLMUnavailable` and let `main.py`'s handlers turn them into a
   `{"detail", "retryable"}` 503. Never swallow a provider failure into a fake tutor reply.
 - Comments explain *why*, at the density of the existing files. No comment that restates the code.
