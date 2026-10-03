@@ -8,36 +8,261 @@
       "units": [
         {
           "id": "a1.1-1",
-          "title": "First contact 1",
+          "title": "Hallo und Tschüss",
           "can_do": [
-            "placeholder can-do"
+            "greet someone, say goodbye and choose between du and Sie",
+            "say my name, where I come from, where I live and what languages I speak",
+            "ask someone the same things back and understand the answer"
           ],
           "grammar": [
-            "placeholder grammar"
+            "sein in the singular (ich bin / du bist / er, sie ist / Sie sind)",
+            "personal pronouns ich, du, er, sie, Sie",
+            "W-questions with wie, wo, woher, was",
+            "statement word order: verb in second position"
           ],
           "vocab_themes": [
-            "placeholder"
+            "greetings and farewells, formal and informal",
+            "countries, cities, nationalities and languages",
+            "numbers 0-20"
           ],
           "scenarios": [
             {
-              "id": "a1.1-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a1.1-1-nachbarin",
+              "title": "Die neue Nachbarin",
+              "setup": "You are Frau Keller, Ahmad's new neighbour, meeting him in the stairwell of his building in Germany for the first time. Use Sie. Greet him, say your name and ask who he is. Keep every sentence very short; he has just started learning.",
+              "goal": "He says his name and where he comes from, and asks you one question back."
             },
             {
-              "id": "a1.1-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a1.1-1-kollege",
+              "title": "Der neue Kollege",
+              "setup": "You are Jonas, a developer on Ahmad's team in Berlin, and this is your first video call with him. Use du, like German tech teams do. Say hi, introduce yourself in one sentence and ask where he is calling from.",
+              "goal": "He introduces himself, says he lives in Amman and asks where you live or work."
+            },
+            {
+              "id": "a1.1-1-empfang",
+              "title": "Am Empfang",
+              "setup": "You are the receptionist at the company's office in Berlin. Ahmad is visiting for the first time. Use Sie. Ask for his name, which team he belongs to and spell-check his name by asking him to spell it (Wie schreibt man das?).",
+              "goal": "He gives his full name, spells it, and names his team or the person he is visiting."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "Introduce yourself to a new German colleague in six to eight sentences: your name, where you come from, where you live, what you do, which languages you speak. Finish with one question for them.",
+              "hint": "Ich heiße … Ich komme aus … Ich wohne in … Ich bin … von Beruf. Ich spreche … Und du?"
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write a short message for your team's chat channel to introduce yourself on your first day. Say who you are, where you are, what you do and one thing you like. Greet at the start and say goodbye at the end.",
+              "hint": "Hallo zusammen! Ich bin … / Viele Grüße",
+              "words_min": 30,
+              "words_max": 60
+            }
+          }
+        },
+        {
+          "id": "a1.1-2",
+          "title": "Zahlen, Zeit, Termine",
+          "can_do": [
+            "say and understand numbers to 100, prices, phone numbers and dates",
+            "ask for and tell the time and say when something starts and ends",
+            "agree on a time for a call with someone in another time zone"
+          ],
+          "grammar": [
+            "haben in the singular and plural",
+            "regular present tense: ich arbeite, du arbeitest, wir arbeiten",
+            "yes/no questions: verb first (Hast du Zeit?)",
+            "time expressions: um … Uhr, am Montag, von … bis, halb/viertel"
+          ],
+          "vocab_themes": [
+            "numbers 20-100, prices and the euro",
+            "clock times, days of the week, months",
+            "meetings and the calendar: der Termin, die Besprechung, der Anruf"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.1-2-standup-zeit",
+              "title": "Wann ist das Standup?",
+              "setup": "You are Lena, the scrum master of Ahmad's team. The daily standup time has to move and you need to find a slot that works for Ahmad in Amman (one hour ahead of Berlin). Ask when he starts work, suggest a time and check it fits. Use du.",
+              "goal": "He says when he starts and finishes work and agrees on a concrete time for the standup."
+            },
+            {
+              "id": "a1.1-2-personalabteilung",
+              "title": "Anruf von der Personalabteilung",
+              "setup": "You are Frau Berger from HR. You phone Ahmad to complete his employee file: you need his phone number, his date of birth and his email address, and you want to confirm the start date of his contract. Use Sie and read numbers back to him so he can confirm.",
+              "goal": "He gives a phone number, his date of birth and an email address, and confirms a date."
+            },
+            {
+              "id": "a1.1-2-kiosk",
+              "title": "Am Kiosk",
+              "setup": "You are the owner of a kiosk near Berlin Hauptbahnhof. Ahmad wants a bottle of water, a coffee and a newspaper. Tell him the prices one by one, give him the total and ask whether he pays with card or cash. Use Sie.",
+              "goal": "He asks the price of at least one item, understands the total and says how he wants to pay."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Describe your typical working week: which days you work, when you start, when the standup is, when you have lunch and when you stop. Then say your phone number and your birthday in German.",
+              "hint": "Ich arbeite von Montag bis Freitag. Ich fange um … Uhr an. Das Standup ist um …"
+            },
+            "writing": {
+              "prompt": "A colleague in Berlin asks when you are available for a call this week. Reply with two possible days and times in Amman time, say how long the call can be, and ask which one suits them.",
+              "hint": "Am Dienstag habe ich von … bis … Zeit. Passt das?",
+              "words_min": 30,
+              "words_max": 60
+            }
+          }
+        },
+        {
+          "id": "a1.1-3",
+          "title": "Mein Arbeitstag",
+          "can_do": [
+            "say what my job is and what I do on a normal day",
+            "give a very short standup update: what I am doing today",
+            "ask a colleague what they are working on and react to the answer"
+          ],
+          "grammar": [
+            "regular present tense in all persons (wir, ihr, sie)",
+            "separable verbs: anfangen, aufstehen, anrufen, aufhören (ich fange … an)",
+            "time at the front, verb second: Um neun Uhr fange ich an",
+            "the verb arbeiten with als and bei: Ich arbeite als … bei …"
+          ],
+          "vocab_themes": [
+            "jobs and the IT basics: der Server, das Team, der Code, das Meeting",
+            "daily routine verbs and times of day",
+            "simple feelings and states: müde, beschäftigt, fertig"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.1-3-standup",
+              "title": "Das Daily Standup",
+              "setup": "You are Lena, the scrum master, running the daily standup. Ask Ahmad in very simple German what he is doing today and whether he needs help. If he answers in English, give him the German and ask again. Use du.",
+              "goal": "He names at least one task he is doing today and says whether he has a problem or not."
+            },
+            {
+              "id": "a1.1-3-videocall",
+              "title": "Vor dem Meeting",
+              "setup": "You are Jonas, a colleague. You are both early in a video call waiting for the others. Make small talk: ask how he is, how his morning was and what time it is in Amman now. Use du and short sentences.",
+              "goal": "He says how he is, says what time it is in Amman and asks you one question about your day."
+            },
+            {
+              "id": "a1.1-3-tagesablauf",
+              "title": "Ein Tag in Amman",
+              "setup": "You are Mira, a new colleague who is curious how remote work from Amman looks. Ask Ahmad about his day from getting up to finishing work: when he gets up, when he starts, when he eats, when he stops. Use du.",
+              "goal": "He describes his day with at least four activities and at least two separable verbs used correctly."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Give a standup update in German: what you did yesterday is not needed yet, just say what you are working on today, who you are working with, and whether you have a problem. Then describe your working day from getting up to finishing.",
+              "hint": "Heute arbeite ich an … Ich stehe um … auf. Ich fange um … an."
+            },
+            "writing": {
+              "prompt": "Write a message to your manager describing your normal working day: start time, standup, what you usually do, lunch, end of the day. Mention one thing you like about your work.",
+              "hint": "Mein Arbeitstag beginnt um … Ich mache … / Ich finde … gut.",
+              "words_min": 40,
+              "words_max": 70
+            }
+          }
+        },
+        {
+          "id": "a1.1-4",
+          "title": "Essen und Einkaufen",
+          "can_do": [
+            "order food and drink at a bakery, a café or a restaurant and ask what a dish contains",
+            "buy groceries at a supermarket and ask where something is",
+            "say what I like, do not eat or want more of"
+          ],
+          "grammar": [
+            "the accusative with definite and indefinite articles: den, einen (Ich nehme den Kaffee / einen Tee)",
+            "möchte and hätte gern as fixed polite forms",
+            "negation with kein and nicht",
+            "plural forms of common food nouns"
+          ],
+          "vocab_themes": [
+            "bread, cakes and the bakery counter",
+            "supermarket sections, quantities and packaging",
+            "menu, drinks, paying and tipping"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.1-4-baeckerei",
+              "title": "In der Bäckerei",
+              "setup": "You are the woman behind the counter in a busy bakery in Berlin. Greet Ahmad, ask what he would like, offer a choice when he hesitates (Brötchen oder Brezel?), tell him the price and ask if that is everything. Use Sie, speak in short phrases, keep the queue moving.",
+              "goal": "He orders at least two items with quantities, asks what something is or whether it contains something, and pays."
+            },
+            {
+              "id": "a1.1-4-teamessen",
+              "title": "Mittagessen mit dem Team",
+              "setup": "You are the waiter at an Italian restaurant where Ahmad is having lunch with colleagues. Hand him the menu, ask what he wants to drink, then what he wants to eat. When he asks, explain simply what a dish contains. He does not eat pork, so be ready for that question. Use Sie.",
+              "goal": "He orders a drink and a dish and asks whether a dish contains meat or pork."
+            },
+            {
+              "id": "a1.1-4-supermarkt",
+              "title": "Im Supermarkt",
+              "setup": "You are an employee stacking shelves in a supermarket. Ahmad is looking for things on a shopping list: rice, yoghurt, tomatoes, bread. Tell him where things are (Gang drei, hinten links, neben der Kasse) and ask if he needs anything else. Use Sie.",
+              "goal": "He asks where at least two products are and understands and repeats back where to find them."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "You are in a bakery and then a café. Say what you want to order (at least three items with quantities), ask what one of them contains, say one thing you do not eat, and ask how much it costs.",
+              "hint": "Ich hätte gern zwei Brötchen und … Ist da Schweinefleisch drin? Was kostet das?"
+            },
+            "writing": {
+              "prompt": "Write a message to a colleague who is organising a team dinner. Say what you like to eat, what you do not eat, which drink you want, and ask what time and where the dinner is.",
+              "hint": "Ich esse gern … Ich esse kein … Wann und wo ist das Essen?",
+              "words_min": 40,
+              "words_max": 70
+            }
+          }
+        },
+        {
+          "id": "a1.1-5",
+          "title": "Wo ist …?",
+          "can_do": [
+            "ask for the way to a place and understand simple directions",
+            "say where things are in a building or on a street",
+            "ask politely for help when I do not understand"
+          ],
+          "grammar": [
+            "es gibt + accusative (Gibt es hier einen Supermarkt?)",
+            "directions as fixed chunks: links, rechts, geradeaus, die erste Straße links, gegenüber",
+            "können for polite requests: Können Sie mir helfen? Können Sie das wiederholen?",
+            "the Sie imperative: Gehen Sie …, Nehmen Sie …"
+          ],
+          "vocab_themes": [
+            "places in a city and in an office building",
+            "transport words: die Haltestelle, das Gleis, die U-Bahn",
+            "phrases for not understanding: langsamer, noch einmal, wie bitte"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.1-5-auslaenderbehoerde",
+              "title": "Wo ist die Ausländerbehörde?",
+              "setup": "You are a passer-by at a tram stop in Berlin. Ahmad has an appointment at the Ausländerbehörde and does not know how to get there. Explain the way in two or three very simple steps (tram number, how many stops, then on foot) and check that he understood. Use Sie.",
+              "goal": "He asks for the way, asks you to repeat or speak more slowly at least once, and repeats the directions back correctly."
+            },
+            {
+              "id": "a1.1-5-buero",
+              "title": "Im Bürogebäude",
+              "setup": "You are Jonas showing Ahmad around the Berlin office on his first visit. Walk him through: the kitchen, the toilets, the meeting room Mars, his desk. Ask him afterwards where each thing is to check he remembers. Use du.",
+              "goal": "He correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
+            },
+            {
+              "id": "a1.1-5-hauptbahnhof",
+              "title": "Am Hauptbahnhof",
+              "setup": "You are a Deutsche Bahn employee at the information desk. Ahmad wants the train to Hamburg and does not know which platform. Tell him the platform (Gleis) and the departure time, and tell him the platform is upstairs on the left. Use Sie.",
+              "goal": "He asks which platform his train leaves from and when, and confirms the answer back to you."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "A German visitor is standing in front of your home or office building. Explain how to get from there to the nearest supermarket and to the nearest bus stop, in simple steps. Then ask them politely to repeat something you did not understand.",
+              "hint": "Gehen Sie geradeaus, dann die zweite Straße links. Der Supermarkt ist neben … Können Sie das bitte wiederholen?"
+            },
+            "writing": {
+              "prompt": "A colleague is visiting Amman and asks how to get from the airport to your office. Write a message with simple directions: taxi or bus, how long it takes, and where the office is (next to what, which floor).",
+              "hint": "Nimm ein Taxi. Das dauert … Minuten. Das Büro ist im … Stock, neben …",
+              "words_min": 40,
+              "words_max": 80
             }
           }
         }
@@ -50,36 +275,261 @@
       "units": [
         {
           "id": "a1.2-1",
-          "title": "Daily life 1",
+          "title": "Im Team",
           "can_do": [
-            "placeholder can-do"
+            "ask a colleague for help or for a code review and say by when I need it",
+            "say that I do not understand something and ask for an explanation",
+            "explain in simple words what I can, must or want to do today"
           ],
           "grammar": [
-            "placeholder grammar"
+            "modal verbs können, müssen, wollen with the sentence bracket (Ich muss heute den Server neu starten)",
+            "the du imperative for requests: Schau mal, Schick mir, Warte kurz",
+            "possessive articles mein, dein, sein, ihr, unser, Ihr",
+            "verbs with accusative objects: brauchen, haben, suchen, finden"
           ],
           "vocab_themes": [
-            "placeholder"
+            "the developer's day: der Pull Request, der Fehler, die Änderung, der Branch, das Ticket",
+            "asking for and offering help",
+            "understanding and not understanding: Ich verstehe nicht, was bedeutet, kannst du das erklären"
           ],
           "scenarios": [
             {
-              "id": "a1.2-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a1.2-1-review",
+              "title": "Bitte um ein Code-Review",
+              "setup": "You are Mira, a senior developer on Ahmad's team. He is going to ask you to review his pull request. Ask what the change does, how big it is and by when he needs the review. Agree only if he gives you a time. Use du.",
+              "goal": "He asks for a review, says in simple words what the change does, and names a deadline."
             },
             {
-              "id": "a1.2-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a1.2-1-frage-an-chefin",
+              "title": "Eine kurze Frage an die Chefin",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. He joins a short call because he has a question about a task. Ask what the problem is and give him one clear instruction. Check at the end that he knows what to do next. Use Sie; she is friendly but busy.",
+              "goal": "He explains his question, says he does or does not understand your instruction, and repeats what he will do next."
+            },
+            {
+              "id": "a1.2-1-onboarding",
+              "title": "Dem neuen Kollegen helfen",
+              "setup": "You are Tom, a new junior on the team. You cannot get access to the staging cluster and you ask Ahmad for help. Say what you tried, ask what you have to do, and ask follow-up questions when he explains. Use du.",
+              "goal": "He gives you at least two concrete instructions using müssen or the du imperative."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "You need a colleague to review a change today. Explain what the change does in simple words, say why it is urgent, and ask them to look at it by a specific time. Then say one thing you do not understand in their feedback and ask them to explain it.",
+              "hint": "Kannst du bitte meinen Pull Request anschauen? Ich muss das heute deployen. Was bedeutet …?"
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write a chat message to your team: you have a problem with a ticket, explain what you want to do, what does not work, and ask one person for help by a certain time.",
+              "hint": "Ich habe ein Problem mit … Ich will …, aber … Kannst du mir bis … Uhr helfen?",
+              "words_min": 40,
+              "words_max": 80
+            }
+          }
+        },
+        {
+          "id": "a1.2-2",
+          "title": "Freizeit und Wochenende",
+          "can_do": [
+            "talk about my hobbies, sport and what I like doing in my free time",
+            "say what I did at the weekend in a few simple sentences and ask a colleague about theirs",
+            "tell German colleagues a few things about Amman and Jordan"
+          ],
+          "grammar": [
+            "present tense with vowel change: fahren, lesen, sehen, schlafen, essen (du fährst, er liest)",
+            "gern, lieber, am liebsten",
+            "time expressions with am, im, um and frequency words: oft, manchmal, nie, jeden Tag",
+            "the sentence connector und / aber / oder (no change in word order)"
+          ],
+          "vocab_themes": [
+            "hobbies, sport and the gym",
+            "weather and seasons, warm Amman and cold Berlin",
+            "Amman and Jordan: die Altstadt, das Tote Meer, die Wüste, das Essen"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.2-2-montag",
+              "title": "Montagmorgen",
+              "setup": "You are Jonas, waiting with Ahmad for the others to join the Monday standup. Ask about his weekend, tell him about yours in simple sentences (you went hiking), and ask what he likes doing in his free time. Use du.",
+              "goal": "He says what he likes doing in his free time with gern or lieber and asks you about your hobbies."
+            },
+            {
+              "id": "a1.2-2-fitnessstudio",
+              "title": "Im Fitnessstudio",
+              "setup": "You are the receptionist at a gym in Berlin. Ahmad wants a trial session. Ask what days and times he wants to train, which sport he does, and explain the opening hours and the price per month. Use Sie.",
+              "goal": "He says when and how often he wants to train, asks the price, and understands the opening hours."
+            },
+            {
+              "id": "a1.2-2-amman",
+              "title": "Erzähl mir von Amman",
+              "setup": "You are Mira, a colleague who has never been to Jordan. Ask Ahmad what Amman is like: the weather, the food, what people do at the weekend, what he would show a visitor. React with interest and ask one follow-up question per answer. Use du.",
+              "goal": "He describes Amman with at least four facts (weather, food, places, free time) and recommends one thing to do."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Tell a German colleague about your free time: what you like doing, how often, and what you do at the weekend. Then tell them three things about Amman that a visitor should know.",
+              "hint": "Am Wochenende gehe ich gern … Ich mache oft … In Amman ist es im Sommer …"
+            },
+            "writing": {
+              "prompt": "A colleague is coming to Amman for a week. Write them a message with tips: the weather now, what to eat, two places to see, and one thing you can do together at the weekend.",
+              "hint": "Im Oktober ist es … Du musst … essen. Wir können am Samstag …",
+              "words_min": 40,
+              "words_max": 80
+            }
+          }
+        },
+        {
+          "id": "a1.2-3",
+          "title": "Das war gestern",
+          "can_do": [
+            "say what I did yesterday and last week in the Perfekt",
+            "give a complete standup update: yesterday, today, blockers",
+            "tell a colleague in simple words why a task is late"
+          ],
+          "grammar": [
+            "Perfekt with haben: regular participles ge-…-t (gemacht, getestet, gearbeitet)",
+            "Perfekt with sein for movement and change: gegangen, gefahren, gekommen, aufgestanden",
+            "the most common irregular participles: gesehen, geschrieben, gelesen, gefunden, gegessen",
+            "participle at the end of the sentence, separable verbs in the Perfekt (angefangen, angerufen)"
+          ],
+          "vocab_themes": [
+            "work verbs in the past: deployen, testen, fixen, schreiben, besprechen",
+            "time expressions for the past: gestern, vorgestern, letzte Woche, am Montag",
+            "the standup: der Blocker, die Aufgabe, fertig, noch nicht"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.2-3-standup-gestern",
+              "title": "Standup: gestern, heute, Blocker",
+              "setup": "You are Lena, the scrum master, running the standup. Ask Ahmad the three standup questions one at a time: what he did yesterday, what he is doing today, whether anything is blocking him. If he answers yesterday in the present tense, repeat it back in the Perfekt as a question (Du hast den Server neu gestartet?). Use du.",
+              "goal": "He answers all three questions and uses the Perfekt correctly for at least two things he did yesterday."
+            },
+            {
+              "id": "a1.2-3-wochenende",
+              "title": "Wie war dein Wochenende?",
+              "setup": "You are Tom, a colleague. It is Monday. Ask Ahmad what he did at the weekend and tell him in short Perfekt sentences what you did (cooked, met friends, slept long). Ask follow-up questions about where, with whom and how it was. Use du.",
+              "goal": "He narrates at least four weekend activities in the Perfekt, including one verb with sein."
+            },
+            {
+              "id": "a1.2-3-verspaetung",
+              "title": "Das Ticket ist noch nicht fertig",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. A task he promised for Friday is not finished. Ask calmly what happened, what he did, and when it will be ready now. Use Sie; you are not angry, you want facts.",
+              "goal": "He explains in the Perfekt what he did and what went wrong, and names a new date."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Give a full standup update for a real day last week: what you did yesterday (at least four things in the Perfekt), what you are doing today, and one blocker. Then say what you did last weekend.",
+              "hint": "Gestern habe ich … getestet und … geschrieben. Ich bin um … aufgestanden. Heute mache ich …"
+            },
+            "writing": {
+              "prompt": "Write a short message to your manager explaining why a task is late: what you did on Monday and Tuesday, what problem you found, and when the task will be finished now.",
+              "hint": "Am Montag habe ich … Dann habe ich ein Problem gefunden: … Das Ticket ist am … fertig.",
+              "words_min": 40,
+              "words_max": 80
+            }
+          }
+        },
+        {
+          "id": "a1.2-4",
+          "title": "Unterwegs",
+          "can_do": [
+            "buy a train ticket at a machine or a counter and find my platform",
+            "understand an announcement that my train is late and ask what to do",
+            "take a bus, a taxi or the U-Bahn and say where I want to go"
+          ],
+          "grammar": [
+            "mit dem Zug, mit der Bahn, mit dem Bus as fixed chunks (the dative itself comes in A2.1)",
+            "separable verbs for travel: abfahren, ankommen, einsteigen, umsteigen, aussteigen",
+            "Wie komme ich zum / zur …? as a fixed question",
+            "ordinal numbers for platforms and floors: das erste Gleis, der dritte Stock"
+          ],
+          "vocab_themes": [
+            "train travel: die Fahrkarte, das Gleis, die Verspätung, der Anschluss, die Durchsage",
+            "bus, U-Bahn, taxi and the airport",
+            "times and durations: die Fahrt dauert, in zehn Minuten"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.2-4-automat",
+              "title": "Am Fahrkartenautomaten",
+              "setup": "You are a friendly older man standing behind Ahmad at a Deutsche Bahn ticket machine in Berlin. He looks lost. Offer help, ask where he wants to go and when, and walk him through the machine step by step: destination, time, one person, pay by card. Use Sie.",
+              "goal": "He says where he wants to go and when, follows your steps, and confirms which ticket he bought."
+            },
+            {
+              "id": "a1.2-4-verspaetung",
+              "title": "Der Zug hat Verspätung",
+              "setup": "You are a Deutsche Bahn conductor (Zugbegleiter) on a train to Hamburg that is forty minutes late. Ahmad will miss his connection. Explain the delay in one short sentence, tell him which train he can take instead and from which platform, and ask him to show his ticket. Use Sie.",
+              "goal": "He asks why the train is late or when it arrives, asks about his connection, and understands the alternative train and platform."
+            },
+            {
+              "id": "a1.2-4-taxi",
+              "title": "Taxi vom Flughafen",
+              "setup": "You are a taxi driver at Frankfurt airport. Ahmad gets in. Ask where he is going, tell him roughly how long it takes and what it costs, and make a little small talk: where he comes from, whether it is his first time in Germany. Use Sie.",
+              "goal": "He gives the address or hotel name, asks how long the ride takes or what it costs, and answers your small-talk questions."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "You are at a station in Germany. Say where you want to go and ask for the next train, the platform and the price. Then: the train is late. Ask when it arrives and what you can do about your connection. Finally say how you get from the station to your hotel.",
+              "hint": "Ich möchte nach … fahren. Wann fährt der nächste Zug? Von welchem Gleis? Der Zug hat Verspätung. Wie komme ich zum Hotel?"
+            },
+            "writing": {
+              "prompt": "You are travelling to the Berlin office. Write a message to a colleague who will pick you up: which train you take, when it leaves and arrives, and what to do if the train is late.",
+              "hint": "Ich nehme den Zug um … Er kommt um … in Berlin an. Wenn der Zug Verspätung hat, …",
+              "words_min": 40,
+              "words_max": 80
+            }
+          }
+        },
+        {
+          "id": "a1.2-5",
+          "title": "Meine Wohnung",
+          "can_do": [
+            "describe my flat: the rooms, the furniture and what I like about it",
+            "ask the key questions about a flat on offer: size, rent, extra costs, from when",
+            "say what I am looking for in a flat in Germany"
+          ],
+          "grammar": [
+            "the plural of common nouns for home: die Zimmer, die Fenster, die Schlüssel, die Nachbarn",
+            "the place prepositions in, an, auf, neben, hinter, vor, über, unter with fixed dative forms (im Wohnzimmer, auf dem Tisch)",
+            "wie viel, wie groß, wie teuer, wie lange questions",
+            "the verbs suchen, brauchen, kosten, mieten with accusative objects"
+          ],
+          "vocab_themes": [
+            "rooms and furniture",
+            "renting: die Miete, die Kaution, die Nebenkosten, der Vermieter, möbliert",
+            "the flat ad: der Stock, der Balkon, die Küche, ab sofort"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.2-5-wohnung-beschreiben",
+              "title": "Wo wohnst du in Amman?",
+              "setup": "You are Mira, a colleague, chatting with Ahmad on a call. Ask about his flat in Amman: how many rooms, which floor, whether he has a balcony, what his favourite room is, what his home office looks like. Ask follow-up questions. Use du.",
+              "goal": "He describes his flat with at least three rooms and says where two pieces of furniture are."
+            },
+            {
+              "id": "a1.2-5-anzeige",
+              "title": "Anruf wegen der Anzeige",
+              "setup": "You are Herr Weber, a landlord in Berlin. Ahmad calls about your flat ad: two rooms, forty-eight square metres, 950 euros warm, available from the first of next month. Answer his questions briefly and ask what he does for a living and when he could view the flat. Use Sie.",
+              "goal": "He asks at least three key questions (size, rent, extra costs, from when) and agrees on a viewing day."
+            },
+            {
+              "id": "a1.2-5-was-suchst-du",
+              "title": "Was für eine Wohnung suchst du?",
+              "setup": "You are Jonas, a colleague who moved to Berlin last year. Ahmad is thinking about a move to Germany. Ask what kind of flat he is looking for, which area, how much he wants to pay, whether furnished or not, and give him one honest tip about the Berlin housing market. Use du.",
+              "goal": "He says what he is looking for with at least four criteria (rooms, area, rent, furnished) and asks you one question about finding a flat."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Describe your flat in Amman: the rooms, where your desk and your bed are, which floor, what you like about it. Then say what kind of flat you want in Germany and ask a landlord three questions about a flat ad.",
+              "hint": "Meine Wohnung hat … Zimmer. Im Wohnzimmer steht … Ich suche … Wie hoch sind die Nebenkosten?"
+            },
+            "writing": {
+              "prompt": "Write a message to a landlord about a flat ad: who you are, what you do, which flat you mean, three questions about it, and when you can come for a viewing.",
+              "hint": "Guten Tag Herr …, ich interessiere mich für die Wohnung in der … Ist die Wohnung möbliert? Wann kann ich sie besichtigen?",
+              "words_min": 40,
+              "words_max": 80
             }
           }
         }
@@ -92,36 +542,261 @@
       "units": [
         {
           "id": "a2.1-1",
-          "title": "Getting things done 1",
+          "title": "Termine machen",
           "can_do": [
-            "placeholder can-do"
+            "make, move and cancel an appointment by phone with a doctor's practice or an office",
+            "say when something happens relative to something else: before the meeting, after lunch, since Monday",
+            "reschedule a meeting with a colleague and give a reason"
           ],
           "grammar": [
-            "placeholder grammar"
+            "the dative after mit, bei, nach, von, zu, aus, seit: mit dem Kollegen, bei der Ärztin, seit einem Monat",
+            "dative articles dem, der, den (plural -n) and einem, einer",
+            "time prepositions: am, um, im, vor, nach, zwischen, ab",
+            "Ich hätte gern einen Termin / Könnten wir … verschieben? as fixed polite forms"
           ],
           "vocab_themes": [
-            "placeholder"
+            "appointments: der Termin, verschieben, absagen, bestätigen, die Uhrzeit",
+            "the practice and the office: die Sprechstunde, die Praxis, das Bürgeramt, das Wartezimmer",
+            "reasons and excuses: leider, dringend, krank, verhindert"
           ],
           "scenarios": [
             {
-              "id": "a2.1-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a2.1-1-praxis",
+              "title": "Termin in der Praxis",
+              "setup": "You are the receptionist at a doctor's practice in Berlin. Ahmad calls for an appointment. Ask whether he is a new patient, what it is about, and offer him two slots. Make him say his name, date of birth and insurance. Use Sie, brisk but polite.",
+              "goal": "He asks for an appointment, gives a reason, chooses one of your slots and confirms the date and time back to you."
             },
             {
-              "id": "a2.1-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a2.1-1-buergeramt",
+              "title": "Termin beim Bürgeramt",
+              "setup": "You are an employee at the Bürgeramt hotline. Ahmad needs an appointment for his Anmeldung after moving to Berlin. Tell him the next free date is in three weeks, explain what he must bring (Pass, Wohnungsgeberbestätigung) and ask if the date works. Use Sie.",
+              "goal": "He says what he needs the appointment for, asks what documents to bring, and either accepts the date or asks for an earlier one."
+            },
+            {
+              "id": "a2.1-1-verschieben",
+              "title": "Können wir das Meeting verschieben?",
+              "setup": "You are Mira, a colleague. Ahmad has a 1:1 with you tomorrow at ten but something has come up. Let him explain, ask for a reason, and negotiate a new time; you are busy before lunch all week. Use du.",
+              "goal": "He asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "Phone a dentist's practice: ask for an appointment, say since when you have had the problem, say which days and times you can, and confirm the appointment. Then call a colleague and move your meeting to another day with a reason.",
+              "hint": "Ich hätte gern einen Termin. Ich habe seit einer Woche … Nach dem Standup kann ich. Könnten wir das Meeting auf Donnerstag verschieben?"
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write an email to the Bürgeramt or to a practice: you have to cancel your appointment on a certain date, give the reason, and ask for a new one. Say which days and times you are free.",
+              "hint": "Sehr geehrte Damen und Herren, leider kann ich den Termin am … nicht wahrnehmen, weil … Ich bitte um einen neuen Termin …",
+              "words_min": 60,
+              "words_max": 100
+            }
+          }
+        },
+        {
+          "id": "a2.1-2",
+          "title": "Krank: Arzt und Apotheke",
+          "can_do": [
+            "call in sick at work and say roughly what is wrong and how long I will be away",
+            "describe symptoms to a doctor and understand simple instructions",
+            "buy medicine at a pharmacy and understand how to take it"
+          ],
+          "grammar": [
+            "modal verbs dürfen and sollen: Sie sollen viel trinken, Darf ich arbeiten?",
+            "dative with feelings and the body: Mir geht es schlecht, Mir ist übel, Der Kopf tut mir weh",
+            "seit + time and the present tense: Ich habe seit drei Tagen Husten",
+            "the imperative Sie-form for instructions: Nehmen Sie, Bleiben Sie, Kommen Sie wieder"
+          ],
+          "vocab_themes": [
+            "the body and symptoms: Kopfschmerzen, Fieber, Husten, Schnupfen, Bauchschmerzen",
+            "the doctor's visit: die Krankschreibung (AU), das Rezept, die Versichertenkarte, untersuchen",
+            "the pharmacy: die Tablette, die Tropfen, dreimal täglich, vor dem Essen"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.1-2-krankmeldung",
+              "title": "Ich bin krank",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. He calls in the morning because he is ill. Ask what is wrong, how long he thinks he will be off, whether anything urgent needs handing over, and remind him he needs a doctor's note (Krankschreibung) from the third day. Use Sie, warm and brief.",
+              "goal": "He says what is wrong using a dative expression, estimates how long he will be away, and names one task someone must take over."
+            },
+            {
+              "id": "a2.1-2-beim-arzt",
+              "title": "Beim Hausarzt",
+              "setup": "You are Dr. Lange, a GP in Berlin. Ahmad comes in with a cold and a sore throat. Ask what he has, since when, whether he has fever, and whether he takes any medication. Then give three instructions with sollen and the imperative, and offer a sick note. Use Sie.",
+              "goal": "He describes at least three symptoms with seit and a dative expression, and repeats back your instructions."
+            },
+            {
+              "id": "a2.1-2-apotheke",
+              "title": "In der Apotheke",
+              "setup": "You are the pharmacist. Ahmad has a prescription and also wants something for a headache. Explain how to take each medicine (how often, when, how long), ask whether he has allergies, and tell him the price. Use Sie.",
+              "goal": "He hands over the prescription, asks for something for a headache, and asks or confirms how often and when to take it."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Call your manager and say you are ill: what is wrong, since when, how long you will be away, who takes over. Then you are at the doctor: describe your symptoms in detail and ask whether you may work from home.",
+              "hint": "Mir geht es nicht gut. Ich habe seit gestern Fieber und … Ich bleibe heute zu Hause. Darf ich im Homeoffice arbeiten?"
+            },
+            "writing": {
+              "prompt": "Write a message to your team: you are ill, say roughly what is wrong, what you will not manage today, which tasks are urgent and who should take them, and when you expect to be back.",
+              "hint": "Hallo zusammen, ich bin krank und bleibe heute zu Hause. Mir tut … weh. Das Deployment muss … Ich melde mich am …",
+              "words_min": 60,
+              "words_max": 100
+            }
+          }
+        },
+        {
+          "id": "a2.1-3",
+          "title": "Wohnungssuche",
+          "can_do": [
+            "view a flat, ask the landlord detailed questions and say what I like and do not like",
+            "compare two flats and give reasons for my choice",
+            "report a problem in the flat to the landlord and ask for a repair"
+          ],
+          "grammar": [
+            "dative verbs: gefallen, gehören, helfen, passen, fehlen (Die Wohnung gefällt mir)",
+            "personal pronouns in the dative: mir, dir, ihm, ihr, uns, Ihnen",
+            "comparative and als: größer, teurer, heller, besser … als",
+            "weil clauses with the verb at the end: Ich nehme die Wohnung, weil sie hell ist"
+          ],
+          "vocab_themes": [
+            "the viewing: die Besichtigung, die Heizung, der Keller, die Waschmaschine, renoviert",
+            "the contract: der Mietvertrag, die Kündigungsfrist, die Kaution, die Schufa, der Mieterverein",
+            "problems in the flat: kaputt, funktioniert nicht, reparieren, der Handwerker"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.1-3-besichtigung",
+              "title": "Die Wohnungsbesichtigung",
+              "setup": "You are Herr Weber, a landlord showing Ahmad a two-room flat in Berlin. Walk him through the rooms, mention the heating is new and the windows are old, name the rent and extra costs, and ask about his job and income. Answer his questions honestly. Use Sie.",
+              "goal": "He asks at least four questions about the flat and the contract and says what he likes and what he does not like, using gefallen."
+            },
+            {
+              "id": "a2.1-3-vergleich",
+              "title": "Welche Wohnung nimmst du?",
+              "setup": "You are Jonas, a colleague. Ahmad has seen two flats: a bright, expensive one near the office and a bigger, cheaper one far out. Ask him to describe both and to compare them, then ask which one he takes and why. Push for reasons with weil. Use du.",
+              "goal": "He compares the two flats with at least three comparatives and gives his decision with a weil clause."
+            },
+            {
+              "id": "a2.1-3-heizung",
+              "title": "Die Heizung ist kalt",
+              "setup": "You are Herr Weber, Ahmad's landlord. He calls in November because the heating in his flat does not work. Ask since when, which rooms, whether he turned the thermostat up, and promise to send a technician; try to make it next week. Use Sie.",
+              "goal": "He describes the problem with seit and the dative, insists on a quicker repair, and agrees a date for the technician."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "You have viewed two flats in Berlin. Describe both, compare them (size, price, light, location), say which one you want and why. Then call the landlord of your current flat: the heating is broken, describe the problem and ask for a repair this week.",
+              "hint": "Die erste Wohnung ist heller, aber teurer als … Ich nehme …, weil … Die Heizung funktioniert seit Montag nicht. Können Sie einen Handwerker schicken?"
+            },
+            "writing": {
+              "prompt": "Write an email to your landlord about two problems in the flat (for example the heating and a broken window). Describe each problem, say since when, say why it is urgent, and ask when a technician can come.",
+              "hint": "Sehr geehrter Herr Weber, seit … funktioniert … nicht. Das ist ein Problem, weil … Bitte schicken Sie …",
+              "words_min": 60,
+              "words_max": 100
+            }
+          }
+        },
+        {
+          "id": "a2.1-4",
+          "title": "Konto und Vertrag",
+          "can_do": [
+            "open a bank account and ask about fees, the card and online banking",
+            "choose a phone or internet contract and understand duration, price and cancellation",
+            "fill in a form with someone's help and say where something is or where it goes"
+          ],
+          "grammar": [
+            "two-way prepositions (in, an, auf, über, unter, vor, hinter, neben, zwischen): accusative for movement, dative for position",
+            "the question words wohin and wo",
+            "verbs with prepositions as chunks: warten auf, sich interessieren für, fragen nach",
+            "the modal verb müssen in formal contexts: Sie müssen das Formular unterschreiben"
+          ],
+          "vocab_themes": [
+            "the bank: das Girokonto, die Überweisung, die Gebühr, die Karte, die IBAN",
+            "contracts: die Laufzeit, die Kündigung, monatlich, der Tarif, das Datenvolumen",
+            "forms: das Formular, ausfüllen, unterschreiben, die Unterlagen, die Kopie"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.1-4-bank",
+              "title": "Ein Konto eröffnen",
+              "setup": "You are a bank adviser in Berlin. Ahmad wants to open a current account for his salary. Ask for his passport, his registration (Meldebescheinigung) and his employer, explain the monthly fee and that the card comes by post, and ask whether he wants online banking. Use Sie.",
+              "goal": "He says what he needs, asks about fees and the card, and answers your document questions."
+            },
+            {
+              "id": "a2.1-4-handyvertrag",
+              "title": "Der Handyvertrag",
+              "setup": "You are a salesperson in a phone shop. Ahmad needs a German SIM card. Offer him two options: a prepaid card and a 24-month contract that is cheaper per month but has a long notice period. Explain data volume, price and Kündigungsfrist, and let him choose. Use Sie.",
+              "goal": "He asks about price, data and cancellation, and chooses one option with a reason."
+            },
+            {
+              "id": "a2.1-4-formular",
+              "title": "Das Formular ausfüllen",
+              "setup": "You are Mira, a colleague, helping Ahmad fill in a German form for his health insurance on a call. He has the form in front of him. Tell him where each piece of information goes (in das Feld oben rechts, unter der Adresse) and ask him what he has written. Use du.",
+              "goal": "He asks where at least two things go, says where he has written them using the correct preposition and case, and asks what one German word on the form means."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "You are at a bank: explain that you want to open an account, ask three questions about fees, card and online banking. Then explain to a friend where your documents are on your desk and where you put the signed form, using position and movement prepositions.",
+              "hint": "Ich möchte ein Girokonto eröffnen. Wie hoch ist die Gebühr? Der Pass liegt auf dem Tisch. Ich lege das Formular in den Umschlag."
+            },
+            "writing": {
+              "prompt": "Write an email to a phone company: you want to cancel your contract at the end of its term. Give your customer number, say which contract, from when, and ask for a written confirmation. Use the formal letter form.",
+              "hint": "Sehr geehrte Damen und Herren, hiermit kündige ich meinen Vertrag mit der Kundennummer … zum … Bitte bestätigen Sie …",
+              "words_min": 60,
+              "words_max": 100
+            }
+          }
+        },
+        {
+          "id": "a2.1-5",
+          "title": "Was ist passiert?",
+          "can_do": [
+            "tell what happened during an incident in order: first, then, after that, in the end",
+            "explain why something went wrong and what I did to fix it",
+            "tell a colleague about a problem I solved last week"
+          ],
+          "grammar": [
+            "Präteritum of sein, haben and the modal verbs: war, hatte, konnte, musste, wollte",
+            "sequence words with verb-second: zuerst, dann, danach, später, am Ende",
+            "weil and deshalb for cause and effect (clause order with each)",
+            "Perfekt of verbs with prefixes and foreign verbs: deployt, konfiguriert, neu gestartet, zurückgesetzt"
+          ],
+          "vocab_themes": [
+            "the incident: der Ausfall, der Fehler, die Ursache, das Rollback, das Log, die Warnung",
+            "fixing: neu starten, zurücksetzen, prüfen, die Lösung, funktionieren",
+            "the team reaction: der Alarm, die Nachricht, Bescheid sagen, informieren"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.1-5-deploy-kaputt",
+              "title": "Das Deployment ist kaputt",
+              "setup": "You are Lena, the scrum master. Yesterday evening a deployment by Ahmad broke the staging environment for an hour. In the standup, ask him what happened, step by step: what he did first, what went wrong, how he noticed, what he did then. Ask for the cause. Use du.",
+              "goal": "He narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb."
+            },
+            {
+              "id": "a2.1-5-chefin-erklaeren",
+              "title": "Erklärung für die Chefin",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. A customer complained about an outage. Ask Ahmad to explain what happened, why, how long it took, and what he will do so it does not happen again. Ask one critical follow-up question. Use Sie.",
+              "goal": "He explains the cause with weil, says how long the outage lasted, and names one concrete measure for the future."
+            },
+            {
+              "id": "a2.1-5-problem-geloest",
+              "title": "Ein Problem, das ich gelöst habe",
+              "setup": "You are Tom, a junior colleague. Ahmad solved a tricky problem last week (slow database, full disk, broken pipeline, whatever he chooses). Ask him to tell you the story: what the problem was, how he found the cause, what he tried, what finally worked. Ask what you can learn from it. Use du.",
+              "goal": "He tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Tell the story of a real incident or problem at work: what happened first, how you noticed, what the cause was, what you tried, what worked in the end, and how long it took. Use at least six steps and say why the problem happened.",
+              "hint": "Zuerst habe ich … deployt. Dann war der Server nicht erreichbar. Das Problem war …, weil … Deshalb habe ich …"
+            },
+            "writing": {
+              "prompt": "Write a short incident message for your team channel about an outage: what happened, when it started and ended, what the cause was, what you did, and what the next step is.",
+              "hint": "Gestern um … Uhr war … nicht erreichbar. Die Ursache war … Ich habe … zurückgesetzt. Nächster Schritt: …",
+              "words_min": 60,
+              "words_max": 110
             }
           }
         }
@@ -134,36 +809,261 @@
       "units": [
         {
           "id": "a2.2-1",
-          "title": "Settling in 1",
+          "title": "Das 1:1 mit der Chefin",
           "can_do": [
-            "placeholder can-do"
+            "talk about my goals, my workload and what I need in a 1:1 with my manager",
+            "say what I think and believe, and ask whether something is possible",
+            "ask for holiday or a change of working hours and give reasons"
           ],
           "grammar": [
-            "placeholder grammar"
+            "dass clauses: Ich glaube, dass das Team zu viele Tickets hat",
+            "indirect yes/no questions with ob: Ich möchte wissen, ob ich im Dezember Urlaub nehmen kann",
+            "wenn clauses for conditions and time: Wenn ich früher anfange, kann ich früher aufhören",
+            "verbs with dass: finden, denken, glauben, hoffen, meinen, wissen"
           ],
           "vocab_themes": [
-            "placeholder"
+            "the 1:1: das Ziel, das Feedback, die Priorität, die Arbeitsbelastung, die Entwicklung",
+            "holiday and hours: der Urlaub, die Überstunden, die Gleitzeit, der Feiertag",
+            "opinions and feelings at work: zufrieden, gestresst, motiviert, unsicher"
           ],
           "scenarios": [
             {
-              "id": "a2.2-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a2.2-1-ziele",
+              "title": "Ziele für das Quartal",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager, in your monthly 1:1. Ask how the last month went, what went well, what was difficult, and what he wants to learn or achieve next quarter. Offer one piece of feedback (his documentation is good, his estimates are too optimistic). Use Sie.",
+              "goal": "He describes how the month went with at least two dass clauses and names one concrete goal for next quarter."
             },
             {
-              "id": "a2.2-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "a2.2-1-urlaub",
+              "title": "Urlaub beantragen",
+              "setup": "You are Frau Dr. Sommer. Ahmad wants two weeks off in a period that overlaps with a release. Ask when exactly, why then, who covers his on-call duty, and propose a compromise. Use Sie; you want to say yes but need the release covered.",
+              "goal": "He asks for the holiday with an indirect question (ob), gives a reason, and agrees on who covers his tasks."
+            },
+            {
+              "id": "a2.2-1-zu-viel",
+              "title": "Zu viele Tickets",
+              "setup": "You are Frau Dr. Sommer. Ahmad has too much on his plate and wants to talk about priorities. Ask him to list what he is working on, then ask which tasks he thinks are most important and which can wait. Decide together. Use Sie.",
+              "goal": "He lists at least three tasks, says which he thinks are most important using finden/glauben + dass, and proposes what to drop or delay."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "Prepare your side of a 1:1: say how the last month went, what you are satisfied with and what was hard, what you want to learn next quarter, and ask whether you can take holiday in a specific week. Use dass, ob and wenn.",
+              "hint": "Ich finde, dass … gut gelaufen ist. Ich weiß nicht, ob … Wenn ich im Dezember Urlaub nehme, …"
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write an email to your manager before your 1:1: three topics you want to discuss, your opinion on each in one or two sentences, and a question about holiday or working hours.",
+              "hint": "Liebe Frau Dr. Sommer, ich möchte im 1:1 über … sprechen. Ich glaube, dass … Außerdem möchte ich fragen, ob …",
+              "words_min": 70,
+              "words_max": 120
+            }
+          }
+        },
+        {
+          "id": "a2.2-2",
+          "title": "Reklamationen",
+          "can_do": [
+            "complain politely about a wrong invoice, a missing parcel or a service that does not work",
+            "say what I ordered, what I received and what I want to happen now",
+            "cancel a contract or a subscription and ask for a confirmation"
+          ],
+          "grammar": [
+            "polite Konjunktiv II chunks: Könnten Sie …?, Ich hätte gern …, Ich würde gern …, Wäre es möglich …?",
+            "noch nicht, nicht mehr, kein … mehr, schon",
+            "aber / sondern after a negation: nicht zwei, sondern drei Pakete",
+            "Perfekt with the dative of the person: Ich habe Ihnen geschrieben, Sie haben mir geantwortet"
+          ],
+          "vocab_themes": [
+            "invoices and money: die Rechnung, der Betrag, die Mahnung, zurückzahlen, die Erstattung",
+            "parcels: die Packstation, die Sendungsnummer, zustellen, der Nachbar, abholen",
+            "complaining: sich beschweren, reklamieren, der Fehler, die Frist, die Bestätigung"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.2-2-rechnung",
+              "title": "Die Rechnung ist falsch",
+              "setup": "You are an agent on the hotline of an internet provider. Ahmad's invoice is sixty euros higher than his contract says. Ask for his customer number, ask what is wrong, defend the charge once (a router rental fee), then offer to check and refund if he insists politely. Use Sie.",
+              "goal": "He explains what the invoice says versus what the contract says, uses at least two polite Konjunktiv II chunks, and gets a concrete promise (refund or callback date)."
+            },
+            {
+              "id": "a2.2-2-packstation",
+              "title": "Das Paket ist nicht da",
+              "setup": "You are a DHL customer service agent. Ahmad's tracking says his parcel was delivered to a Packstation, but the Packstation shows nothing. Ask for the shipment number, ask when and where, and offer either a search request or a new delivery. Use Sie.",
+              "goal": "He gives the shipment number and the delivery date, says what the tracking shows versus what he sees, and chooses one solution."
+            },
+            {
+              "id": "a2.2-2-kuendigung",
+              "title": "Das Fitnessstudio kündigen",
+              "setup": "You are the manager of a gym. Ahmad wants to cancel his membership because he is moving. Tell him the notice period is three months, ask for proof of the move, and try once to keep him with a discount. Use Sie.",
+              "goal": "He states clearly that he wants to cancel, asks about the notice period and the proof needed, and asks for a written confirmation."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Call a company about a wrong invoice: say who you are, what the contract says, what the invoice says, and what you want them to do. Be polite but firm. Then call a parcel service about a missing parcel and ask what happens next.",
+              "hint": "Ich habe eine Frage zu meiner Rechnung. Im Vertrag steht …, aber auf der Rechnung steht … Könnten Sie das bitte prüfen? Mein Paket ist noch nicht angekommen."
+            },
+            "writing": {
+              "prompt": "Write a formal complaint email about a wrong invoice: your customer number, what is wrong, what you expect (correction and refund), and a deadline. Keep it polite.",
+              "hint": "Sehr geehrte Damen und Herren, auf meiner Rechnung vom … steht ein Betrag von …, aber … Ich bitte Sie, … Bitte antworten Sie bis zum …",
+              "words_min": 70,
+              "words_max": 120
+            }
+          }
+        },
+        {
+          "id": "a2.2-3",
+          "title": "Kollegen und Kultur",
+          "can_do": [
+            "make and respond to invitations and hold a conversation at a team dinner",
+            "talk about traditions, food and daily life in Jordan and ask about Germany",
+            "explain something about my culture (Ramadan, family, hospitality) simply and answer questions"
+          ],
+          "grammar": [
+            "adjective endings after definite and indefinite articles in the nominative and accusative: der neue Kollege, ein kleines Restaurant",
+            "the connectors denn, deshalb, trotzdem and their word order",
+            "Würdest du …? / Hättest du Lust …? for invitations",
+            "ordinal numbers and dates: am dritten Oktober, im neunten Monat"
+          ],
+          "vocab_themes": [
+            "the team dinner: einladen, die Einladung, anstoßen, die Vorspeise, teilen, die Rechnung",
+            "culture and traditions: das Fest, der Feiertag, fasten, die Familie, die Gastfreundschaft",
+            "German work culture: pünktlich, direkt, der Feierabend, duzen, siezen"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.2-3-teamessen",
+              "title": "Das Teamessen",
+              "setup": "You are Jonas, sitting next to Ahmad at a team dinner in Berlin. Chat: ask what he thinks of the food, tell him about a German dish, ask whether people eat out a lot in Amman, and invite him to a football match on Saturday. Use du, relaxed.",
+              "goal": "He keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason."
+            },
+            {
+              "id": "a2.2-3-ramadan",
+              "title": "Fragen über den Ramadan",
+              "setup": "You are Mira, a colleague who is curious and a bit worried about doing something wrong. Ramadan is starting. Ask Ahmad what it means for him, whether it is okay to eat in front of him in calls, whether meeting times should change, and what Eid is like with his family. Use du.",
+              "goal": "He explains Ramadan and Eid in simple sentences, says what he needs or does not need at work, and uses deshalb or trotzdem at least once."
+            },
+            {
+              "id": "a2.2-3-einladung",
+              "title": "Eine Einladung nach Hause",
+              "setup": "You are Lena, a colleague. You invite Ahmad to dinner at your home next Friday when he is in Berlin. Tell him who else is coming, ask what he eats and does not eat, and whether he can bring something. Also ask what hospitality is like in Jordan. Use du.",
+              "goal": "He accepts the invitation politely, says what he does not eat, offers to bring something, and describes one Jordanian hospitality custom."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "You are at a team dinner in Germany. Describe a typical Jordanian dinner with your family, explain one tradition (for example Ramadan or hospitality), say what surprises you about German work culture, and invite a colleague to visit Amman.",
+              "hint": "Bei uns isst die ganze Familie zusammen. Wir essen … Im Ramadan fasten wir, deshalb … Hättest du Lust, nach Amman zu kommen?"
+            },
+            "writing": {
+              "prompt": "Write a message to your team to invite them to an online dinner or a get-together when you visit Berlin: when, where, what you plan, what you will bring from Jordan, and ask who is coming and what they do not eat.",
+              "hint": "Liebes Team, ich bin vom … bis … in Berlin. Hättet ihr Lust auf …? Ich bringe … mit. Wer kommt mit?",
+              "words_min": 70,
+              "words_max": 120
+            }
+          }
+        },
+        {
+          "id": "a2.2-4",
+          "title": "Technik erklären",
+          "can_do": [
+            "explain in simple German how something technical works, step by step",
+            "say what is important, why we do something and what you have to do to get a result",
+            "compare two solutions and recommend one"
+          ],
+          "grammar": [
+            "man + verb for general statements: Man muss zuerst das Image bauen",
+            "infinitive with zu: Es ist wichtig, die Logs zu prüfen; Ich habe vergessen, den Cache zu leeren",
+            "um … zu for purpose: Wir nutzen Kubernetes, um die Services zu skalieren",
+            "the superlative: am schnellsten, der beste Weg, das größte Problem"
+          ],
+          "vocab_themes": [
+            "the pipeline: bauen, testen, ausrollen, die Umgebung, das Image, der Container",
+            "explaining: der Schritt, zuerst, das bedeutet, zum Beispiel, einfach gesagt",
+            "comparing solutions: der Vorteil, der Nachteil, sicher, schnell, teuer, einfach"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.2-4-pipeline",
+              "title": "Wie funktioniert unsere Pipeline?",
+              "setup": "You are Tom, a junior developer who has never seen the deployment pipeline. Ask Ahmad to explain what happens when he pushes code: step by step, until it is live. Ask why each step exists and what happens when a test fails. Use du.",
+              "goal": "He explains at least five steps in order using man and zuerst/dann, and explains the purpose of one step with um … zu."
+            },
+            {
+              "id": "a2.2-4-rollback",
+              "title": "Warum brauchen wir ein Rollback?",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager, who is not technical. Ahmad wants budget for a better rollback mechanism. Ask what a rollback is in plain words, why it matters, what happens today without it, and what it costs. Use Sie.",
+              "goal": "He explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it."
+            },
+            {
+              "id": "a2.2-4-vergleich",
+              "title": "Zwei Lösungen",
+              "setup": "You are Mira, a senior colleague. The team must choose between two solutions for logging (a hosted service versus running it yourselves). Ask Ahmad for the advantages and disadvantages of each and a recommendation. Challenge one of his points. Use du.",
+              "goal": "He names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Explain to a non-technical colleague how a change gets from your laptop to production, in at least five steps, and why two of the steps exist. Then compare two tools or approaches you know and recommend one.",
+              "hint": "Zuerst schreibt man den Code. Dann … Wir testen, um Fehler zu finden. Die beste Lösung ist …, weil …"
+            },
+            "writing": {
+              "prompt": "Write a short how-to for a new colleague: how to deploy a service to the staging environment in five to seven steps. Use man or the imperative, say what is important, and say what to do if something fails.",
+              "hint": "Zuerst muss man … Es ist wichtig, … zu … Wenn der Test fehlschlägt, …",
+              "words_min": 70,
+              "words_max": 120
+            }
+          }
+        },
+        {
+          "id": "a2.2-5",
+          "title": "Pläne und Zukunft",
+          "can_do": [
+            "talk about my plans for a move to Germany and what I will do first",
+            "say what happens if certain conditions are met and what I am preparing for",
+            "ask HR or a relocation service about visa, moving and first steps"
+          ],
+          "grammar": [
+            "the future with werden: Ich werde im März umziehen; and the present tense for planned events",
+            "reflexive verbs: sich vorbereiten, sich bewerben, sich anmelden, sich freuen auf",
+            "wenn + main clause for conditions in the future: Wenn das Visum da ist, kündige ich die Wohnung",
+            "zuerst / dann / danach / schließlich for ordered plans"
+          ],
+          "vocab_themes": [
+            "the move: der Umzug, das Visum, die Blaue Karte, das Arbeitsvisum, die Krankenversicherung",
+            "first steps in Germany: die Anmeldung, die Steuer-ID, das Konto, die Wohnungssuche",
+            "hopes and worries: hoffen, Angst haben vor, sich freuen auf, nervös, gespannt"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.2-5-relocation",
+              "title": "Gespräch mit der Personalabteilung",
+              "setup": "You are Frau Berger from HR. The company wants to move Ahmad to Berlin next year. Explain what the company pays for (flights, one month of temporary housing, the visa lawyer) and ask about his timeline, whether he comes alone, and what worries him. Use Sie.",
+              "goal": "He asks at least three questions about the relocation, says when he could move using werden or the present tense, and names one thing he is worried about or looking forward to."
+            },
+            {
+              "id": "a2.2-5-erste-wochen",
+              "title": "Die ersten Wochen in Deutschland",
+              "setup": "You are Jonas, a colleague who moved to Berlin from Austria two years ago. Ahmad asks you what to do in the first weeks. Describe the order (Anmeldung, bank, insurance, phone), then ask him what he will do first and what he is preparing now. Use du.",
+              "goal": "He lists his first three steps in order with zuerst/dann/danach and uses at least one reflexive verb and one wenn clause."
+            },
+            {
+              "id": "a2.2-5-familie",
+              "title": "Was sagt deine Familie?",
+              "setup": "You are Mira, a colleague, on a relaxed call. Ask Ahmad how his family feels about the move, what he will miss about Amman, what he is looking forward to in Germany, and what he wants to have achieved after one year. Use du.",
+              "goal": "He talks about feelings with sich freuen auf or Angst haben vor, says what he will miss, and names one goal for the first year."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Describe your plan for a move to Germany: when you will go, what you will do first, second and third, what has to happen before (visa, flat), what you are looking forward to and what worries you.",
+              "hint": "Ich werde wahrscheinlich im … umziehen. Zuerst melde ich mich an, dann … Wenn ich eine Wohnung habe, … Ich freue mich auf …"
+            },
+            "writing": {
+              "prompt": "Write an email to HR about your relocation: your preferred timeline, three questions (visa, temporary housing, insurance), what you are already preparing, and what you need from them by when.",
+              "hint": "Sehr geehrte Frau Berger, ich plane, im … nach Berlin zu ziehen. Ich bereite mich gerade auf … vor. Könnten Sie mir sagen, ob …",
+              "words_min": 70,
+              "words_max": 120
             }
           }
         }
@@ -176,36 +1076,261 @@
       "units": [
         {
           "id": "b1.1-1",
-          "title": "Holding your own 1",
+          "title": "Meinung sagen",
           "can_do": [
-            "placeholder can-do"
+            "give my opinion in a technical discussion and support it with two or three arguments",
+            "agree, disagree and concede a point politely",
+            "weigh two sides of a question and come to a conclusion"
           ],
           "grammar": [
-            "placeholder grammar"
+            "obwohl and während for contrast, with the verb at the end",
+            "two-part connectors: entweder … oder, nicht nur … sondern auch, zwar … aber, weder … noch",
+            "opinion phrases: Ich bin der Meinung, dass …; Meiner Meinung nach …; Ich sehe das anders",
+            "einerseits … andererseits and the weighing-up structure"
           ],
           "vocab_themes": [
-            "placeholder"
+            "the architecture discussion: die Entscheidung, der Vorschlag, das Risiko, die Komplexität, die Wartung",
+            "agreeing and disagreeing: zustimmen, widersprechen, überzeugen, der Kompromiss, Recht haben",
+            "remote work and the office: das Homeoffice, die Zusammenarbeit, der Austausch, die Zeitzone"
           ],
           "scenarios": [
             {
-              "id": "b1.1-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "b1.1-1-architektur",
+              "title": "Kubernetes oder Serverless?",
+              "setup": "You are Mira, a senior developer, in an architecture discussion. You argue for moving a service to a serverless platform; Ahmad is sceptical. Make two arguments (less operations work, cheaper at low traffic), listen to his, concede one point and hold the other. Use du.",
+              "goal": "He states his opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not."
             },
             {
-              "id": "b1.1-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "b1.1-1-review-streit",
+              "title": "Ich sehe das anders",
+              "setup": "You are Tom, a colleague who left a review comment asking Ahmad to rewrite his deployment script in a different way. Defend your comment with one good reason and one weak one. Let him disagree politely and look for a middle way. Use du.",
+              "goal": "He disagrees politely, explains why he made his choice, accepts the good reason and rejects the weak one, and proposes a middle way."
+            },
+            {
+              "id": "b1.1-1-homeoffice",
+              "title": "Homeoffice oder Büro?",
+              "setup": "You are Jonas, a colleague who thinks the whole team should be in the Berlin office at least three days a week. Ahmad works fully remote from Amman. Ask what he thinks, give your arguments (spontaneous exchange, team feeling), and ask him to weigh both sides honestly. Use du.",
+              "goal": "He weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "Take a position on a real technical question in your team (for example: should you adopt a new tool, should everything be in Kubernetes). State your opinion, give three arguments, admit one argument against, and say what you would decide. Speak for about two minutes.",
+              "hint": "Meiner Meinung nach sollten wir … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …"
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write a comment for a team discussion thread: the team must decide between two tools or approaches. Weigh both sides (at least two points each), take a position and explain your recommendation.",
+              "hint": "Einerseits ist … einfacher, andererseits … Ich bin der Meinung, dass wir … Nicht nur …, sondern auch …",
+              "words_min": 90,
+              "words_max": 150
+            }
+          }
+        },
+        {
+          "id": "b1.1-2",
+          "title": "Das Postmortem",
+          "can_do": [
+            "present the timeline of an incident at length and in order, with causes and effects",
+            "describe what was done, by whom and what had happened before",
+            "propose measures so that the incident does not happen again"
+          ],
+          "grammar": [
+            "Passiv in the present and Präteritum: wird ausgelöst, wurde neu gestartet, wurden informiert",
+            "Plusquamperfekt for what had happened before: Der Alarm hatte schon ausgelöst, bevor …",
+            "temporal clauses with nachdem, bevor, während, sobald, bis",
+            "the Präteritum of common verbs in narration: ging, kam, sah, lief, fand, gab"
+          ],
+          "vocab_themes": [
+            "the postmortem: die Ursache, die Auswirkung, der Zeitstrahl, die Maßnahme, die Lehre, schuldfrei",
+            "monitoring: der Alarm, die Überwachung, die Latenz, der Ausfall, die Wiederherstellung",
+            "responsibility: zuständig, übernehmen, informieren, eskalieren"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.1-2-vorstellen",
+              "title": "Das Postmortem vorstellen",
+              "setup": "You are Lena, facilitating a blameless postmortem meeting. Ask Ahmad to walk the team through the timeline of last week's outage: what had happened before, when the alarm went off, what was done and by whom, when the service was restored. Interrupt twice with a precise question about times and causes. Use du.",
+              "goal": "He narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once."
+            },
+            {
+              "id": "b1.1-2-ursache",
+              "title": "Fragen der Chefin zur Ursache",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. After the postmortem you want to understand the root cause, not the symptoms. Ask why the configuration change was not caught, who had reviewed it, why the alarm came late, and what exactly will change. Use Sie; you are calm and precise.",
+              "goal": "He explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
+            },
+            {
+              "id": "b1.1-2-kunde",
+              "title": "Erklärung für den Kunden",
+              "setup": "You are Herr Brandt, a customer's IT manager. Your users had no access for two hours yesterday. Ask Ahmad on a call what happened, whether data was lost, what was done, and how you can be sure it will not happen again. Use Sie, polite but demanding.",
+              "goal": "He explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Present a postmortem of a real or realistic incident: the timeline with at least six events, what had happened before, how it was detected, what was done and by whom, the root cause, and two measures. Speak for two to three minutes.",
+              "hint": "Um 14:05 Uhr wurde der Alarm ausgelöst. Davor hatte ein Kollege die Konfiguration geändert. Nachdem wir … hatten, … Als Maßnahme werden wir …"
+            },
+            "writing": {
+              "prompt": "Write the written postmortem for your team wiki: summary, timeline, root cause, impact, what went well, what went badly, and the measures with an owner each. Use the Passiv where it fits.",
+              "hint": "Zusammenfassung: … Zeitstrahl: … Ursache: Die Änderung wurde nicht getestet, weil … Maßnahmen: …",
+              "words_min": 100,
+              "words_max": 160
+            }
+          }
+        },
+        {
+          "id": "b1.1-3",
+          "title": "Höflich verhandeln",
+          "can_do": [
+            "negotiate a deadline or a scope with a product manager and propose alternatives",
+            "insist politely on something I have a right to, such as a repair in my flat",
+            "give advice and say what I would do in someone's place"
+          ],
+          "grammar": [
+            "Konjunktiv II of the modal verbs and the auxiliaries: könnte, müsste, sollte, dürfte, hätte, wäre",
+            "würde + infinitive for wishes, suggestions and hypotheticals",
+            "unreal conditions: Wenn wir mehr Zeit hätten, würden wir … / Wenn ich du wäre, …",
+            "an deiner Stelle würde ich … and softening with vielleicht, eigentlich, eventuell"
+          ],
+          "vocab_themes": [
+            "negotiation: die Frist, der Umfang, der Kompromiss, die Priorität, verschieben, einplanen",
+            "rights and duties as a tenant: der Mangel, die Mietminderung, die Frist setzen, verpflichtet sein",
+            "advice: der Rat, empfehlen, vorschlagen, abwarten, sich beschweren"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.1-3-deadline",
+              "title": "Die Deadline ist nicht realistisch",
+              "setup": "You are Sabine, the product manager. You need a feature by the end of the month because sales promised it. Ahmad thinks it needs two more weeks. Push back once, ask what could be delivered on time, and accept a reduced scope if he argues well. Use du.",
+              "goal": "He explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date."
+            },
+            {
+              "id": "b1.1-3-vermieter",
+              "title": "Die Heizung, zum dritten Mal",
+              "setup": "You are Herr Weber, Ahmad's landlord. The heating has been broken for two weeks and you have been slow. Ahmad calls again. Make excuses (the technician is busy), then react when he mentions a deadline and the possibility of a rent reduction. Use Sie.",
+              "goal": "He stays polite but sets a clear deadline with Konjunktiv II forms, mentions his rights as a tenant, and gets a firm date."
+            },
+            {
+              "id": "b1.1-3-rat",
+              "title": "Was würdest du machen?",
+              "setup": "You are Tom, a junior colleague. You are on call this weekend for the first time and you are nervous; also you think the on-call rota is unfair because you are on it twice as often as others. Ask Ahmad for advice on both things. Use du.",
+              "goal": "He gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Negotiate with a product manager who wants a feature too early: explain the problem, propose two alternatives, and say what you would do in their place. Then call your landlord about a repair that is overdue and set a polite but firm deadline.",
+              "hint": "Könnten wir den Umfang reduzieren? Wenn wir zwei Wochen mehr hätten, könnten wir … Ich wäre Ihnen dankbar, wenn der Handwerker bis Freitag käme."
+            },
+            "writing": {
+              "prompt": "Write an email to your landlord: the heating has been broken for two weeks despite two calls. Describe the problem, set a deadline, say what you will do if it is not fixed (rent reduction), and stay polite.",
+              "hint": "Sehr geehrter Herr Weber, trotz meiner Anrufe vom … ist die Heizung immer noch defekt. Ich bitte Sie, den Mangel bis zum … zu beheben. Andernfalls müsste ich …",
+              "words_min": 90,
+              "words_max": 150
+            }
+          }
+        },
+        {
+          "id": "b1.1-4",
+          "title": "Ausländerbehörde und Co.",
+          "can_do": [
+            "handle an appointment at the Ausländerbehörde: explain my situation, understand which documents are needed and what happens next",
+            "deal with a missing document or a refusal and ask what my options are",
+            "understand and use the formal vocabulary of residence, insurance and registration"
+          ],
+          "grammar": [
+            "relative clauses in the nominative, accusative and dative: der Mitarbeiter, der mir geholfen hat; das Dokument, das ich brauche",
+            "relative clauses with prepositions: die Behörde, bei der ich den Antrag gestellt habe",
+            "the genitive: der Name des Arbeitgebers, das Ende des Vertrags",
+            "prepositions with the genitive: wegen, trotz, während, innerhalb, außerhalb"
+          ],
+          "vocab_themes": [
+            "residence: der Aufenthaltstitel, die Blaue Karte, der Antrag, die Verlängerung, die Fiktionsbescheinigung",
+            "documents: die Meldebescheinigung, der Arbeitsvertrag, die Gehaltsabrechnung, beglaubigt, die Kopie",
+            "insurance and registration: die Krankenkasse, gesetzlich, privat, die Steuer-ID, der Beitrag"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.1-4-aufenthaltstitel",
+              "title": "Termin bei der Ausländerbehörde",
+              "setup": "You are Frau Nowak, a case worker at the Berlin Ausländerbehörde. Ahmad has an appointment for his Blue Card. Ask for his passport, contract, salary statement and health insurance proof. One document is missing (the Meldebescheinigung). Explain what he must do within two weeks and what he gets today. Use Sie, formal, not unfriendly.",
+              "goal": "He explains his situation, hands over the documents, asks what he must do about the missing one and by when, and repeats the next steps back correctly."
+            },
+            {
+              "id": "b1.1-4-krankenkasse",
+              "title": "Welche Krankenkasse?",
+              "setup": "You are an adviser at a public health insurance company (gesetzliche Krankenkasse). Ahmad calls to join. Explain what the contribution depends on, what is covered, that the employer pays half, and ask about his salary, start date and family. Use Sie.",
+              "goal": "He asks at least three questions using a relative clause or a genitive, and gives the information you need to enrol him."
+            },
+            {
+              "id": "b1.1-4-abgelehnt",
+              "title": "Der Antrag wurde abgelehnt",
+              "setup": "You are a volunteer at a migration advice centre. Ahmad's application for a residence permit extension was refused because of a formal error in the form. Ask him what the letter says, explain that he can file an objection (Widerspruch) within one month, and go through what he needs. Use Sie.",
+              "goal": "He summarises the letter using a relative clause, asks what his options are, and says what he will do within which deadline."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Explain to a case worker at the Ausländerbehörde who you are, what you are applying for, which documents you have brought and which one is missing and why. Ask what happens next and by when. Use relative clauses and at least one genitive.",
+              "hint": "Ich bin der Mitarbeiter, dessen Vertrag Sie hier sehen. Das Dokument, das fehlt, ist … Wegen des Umzugs habe ich … Innerhalb welcher Frist muss ich …?"
+            },
+            "writing": {
+              "prompt": "Write a formal letter to the Ausländerbehörde: refer to your appointment and application, explain which document you are sending now and why it was missing, and ask for a confirmation that your application is complete.",
+              "hint": "Sehr geehrte Frau Nowak, bezüglich meines Antrags vom … sende ich Ihnen die Meldebescheinigung, die bei dem Termin gefehlt hat. Wegen … Ich bitte um …",
+              "words_min": 90,
+              "words_max": 150
+            }
+          }
+        },
+        {
+          "id": "b1.1-5",
+          "title": "Amman und Berlin im Vergleich",
+          "can_do": [
+            "compare life in Amman and in Germany: work, housing, food, climate, directness",
+            "talk about cultural differences without clichés and ask what things mean",
+            "say how I feel about living abroad and what I miss"
+          ],
+          "grammar": [
+            "je … desto: Je länger ich hier bin, desto besser verstehe ich die Leute",
+            "comparative and superlative with adjective endings: ein größeres Problem, die wichtigste Frage",
+            "prepositional adverbs: darüber, damit, davon, worauf, womit (Ich freue mich darauf, dass …)",
+            "indirect questions with question words: Ich frage mich, warum …; Ich weiß nicht, wie …"
+          ],
+          "vocab_themes": [
+            "culture and habits: die Gewohnheit, die Direktheit, die Höflichkeit, das Missverständnis, die Nachbarschaft",
+            "city life: die Mietpreise, der Verkehr, die Sicherheit, die Lebenshaltungskosten, das Wetter",
+            "feelings abroad: das Heimweh, sich wohlfühlen, vermissen, sich gewöhnen an, dazugehören"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.1-5-direktheit",
+              "title": "Sind die Deutschen wirklich so direkt?",
+              "setup": "You are Jonas, a colleague, at a beer after work. Ahmad has had a misunderstanding: a colleague's blunt review comment felt rude to him. Ask what happened, explain how it was meant, and ask how feedback works in Jordan. Compare honestly. Use du.",
+              "goal": "He describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means."
+            },
+            {
+              "id": "b1.1-5-stadtvergleich",
+              "title": "Amman oder Berlin?",
+              "setup": "You are Mira, a colleague who is considering a sabbatical somewhere warm. Ask Ahmad to compare Amman and Berlin: rent, traffic, safety, food, weather, friendliness. Ask what he misses from Amman and what he prefers in Berlin. Use du.",
+              "goal": "He compares the cities in at least five areas with comparatives and superlatives and says what he misses using vermissen or Heimweh."
+            },
+            {
+              "id": "b1.1-5-nachbar",
+              "title": "Smalltalk mit dem Nachbarn",
+              "setup": "You are Herr Schulz, Ahmad's retired neighbour in Berlin who likes to chat in the stairwell. Ask how he is settling in, whether he has got used to the weather and the quiet hours (Ruhezeiten), and tell him about the Hausordnung. Ask what people in Amman do differently as neighbours. Use Sie.",
+              "goal": "He talks about settling in with sich gewöhnen an or sich wohlfühlen, asks what one rule means, and describes neighbourhood life in Amman in comparison."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Compare living in Amman and in Germany in at least five areas: work, housing, food, weather, how people talk to each other. Say what you miss, what you prefer, what you are getting used to, and what you still do not understand. Speak for two to three minutes.",
+              "hint": "Je länger ich hier bin, desto … Die Mieten sind das größte Problem. Ich habe mich an … gewöhnt. Ich frage mich, warum …"
+            },
+            "writing": {
+              "prompt": "Write a message to a friend in Amman who is thinking about moving to Germany: compare the two places honestly in at least four areas, say what surprised you, what you miss, and give one piece of advice.",
+              "hint": "In Berlin ist … teurer als in Amman, aber … Was mich überrascht hat: … Ich vermisse … An deiner Stelle würde ich …",
+              "words_min": 100,
+              "words_max": 160
             }
           }
         }
@@ -218,36 +1343,261 @@
       "units": [
         {
           "id": "b1.2-1",
-          "title": "At length 1",
+          "title": "Projekte präsentieren",
           "can_do": [
-            "placeholder can-do"
+            "present a plan or a project to the team with a clear structure: goal, current state, steps, risks",
+            "describe what has been done and what still has to be done, in formal and neutral language",
+            "answer critical questions from stakeholders and admit what I do not know yet"
           ],
           "grammar": [
-            "placeholder grammar"
+            "Passiv with modal verbs: Die Datenbank muss migriert werden; Das kann nicht automatisiert werden",
+            "Passiv Perfekt: Der Dienst ist bereits umgestellt worden",
+            "participles as adjectives: das laufende System, die getesteten Änderungen, der geplante Umzug",
+            "nominalisation for signposting: die Einführung, die Umstellung, die Überprüfung, die Entscheidung"
           ],
           "vocab_themes": [
-            "placeholder"
+            "presenting: die Gliederung, der Überblick, der aktuelle Stand, der nächste Schritt, zusammenfassen",
+            "projects: die Migration, der Meilenstein, der Zeitplan, das Risiko, die Abhängigkeit, der Aufwand",
+            "stakeholders: der Auftraggeber, die Erwartung, der Nutzen, die Kosten, absichern"
           ],
           "scenarios": [
             {
-              "id": "b1.2-1-a",
-              "title": "Placeholder A",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "b1.2-1-migration",
+              "title": "Der Migrationsplan",
+              "setup": "You are Lena, facilitating a planning meeting. Ahmad presents his plan to migrate the services to a new cluster. Let him present without interruption, then ask about the order of steps, the downtime, what has already been done and what the biggest risk is. Use du.",
+              "goal": "He presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions."
             },
             {
-              "id": "b1.2-1-b",
-              "title": "Placeholder B",
-              "setup": "Placeholder setup.",
-              "goal": "Placeholder goal."
+              "id": "b1.2-1-stakeholder",
+              "title": "Kritische Fragen",
+              "setup": "You are Herr Brandt, the customer's IT manager. Ahmad has presented a change that affects your systems. Ask what it means for you concretely, how long the downtime will be, what happens if it fails, and why you should trust the timeline. Be sceptical but fair. Use Sie.",
+              "goal": "He answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what he does not know yet and when he will know."
+            },
+            {
+              "id": "b1.2-1-quartal",
+              "title": "Was haben wir im Quartal geschafft?",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. In the quarterly review, ask him to summarise what his team delivered, what was postponed and why, which numbers improved, and what he proposes for next quarter. Push for honesty about what did not work. Use Sie.",
+              "goal": "He summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next quarter."
             }
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Placeholder speaking task."
+              "prompt": "Present a project you are working on or planning: the goal, the current state, what has already been done, what must still be done and by whom, the biggest risk, and the next step. Structure it clearly and speak for about three minutes.",
+              "hint": "Ich gebe euch zuerst einen Überblick. Ziel ist die Umstellung auf … Der erste Schritt ist bereits abgeschlossen worden. Die Datenbank muss noch migriert werden."
             },
             "writing": {
-              "prompt": "Placeholder writing task."
+              "prompt": "Write a project status update for your manager and a non-technical stakeholder: summary, what has been completed, what is in progress, what is blocked and why, risks, and the decision you need from them.",
+              "hint": "Zusammenfassung: … Abgeschlossen: Der Dienst ist auf … umgestellt worden. In Arbeit: … Blockiert: … Entscheidung nötig: …",
+              "words_min": 110,
+              "words_max": 170
+            }
+          }
+        },
+        {
+          "id": "b1.2-2",
+          "title": "Konflikt und Feedback",
+          "can_do": [
+            "give a colleague critical feedback that is concrete, kind and leads somewhere",
+            "receive criticism, ask what exactly is meant and say what I will change",
+            "clear up a conflict about who is responsible for a mistake and apologise where appropriate"
+          ],
+          "grammar": [
+            "Konjunktiv II of the past: Ich hätte das testen sollen; Das wäre nicht passiert, wenn …",
+            "modal particles for tone: doch, mal, eigentlich, ja, schon (Das war doch nicht so gemeint)",
+            "reported opinion with meinen, sagen, finden + dass, and indirect questions",
+            "verbs with prepositions for conflict: sich ärgern über, sich entschuldigen für, sich einigen auf, sich verlassen auf"
+          ],
+          "vocab_themes": [
+            "feedback: die Rückmeldung, konstruktiv, konkret, der Vorschlag, die Erwartung, loben, kritisieren",
+            "conflict: der Vorwurf, das Missverständnis, die Verantwortung, sich entschuldigen, klären, die Schuld",
+            "tone: ehrlich gesagt, offen gesagt, ich habe den Eindruck, es geht mir darum"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.2-2-feedback-geben",
+              "title": "Feedback für Tom",
+              "setup": "You are Tom, a junior developer. Ahmad is your mentor and needs to tell you that your pull requests are too big and rarely tested, which costs the team time. React a little defensively at first, then ask what exactly he expects. Use du.",
+              "goal": "He gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you."
+            },
+            {
+              "id": "b1.2-2-feedback-bekommen",
+              "title": "Kritik von der Chefin",
+              "setup": "You are Frau Dr. Sommer, Ahmad's manager. In a review you tell him that his communication during incidents is too quiet: the team hears about problems too late. Give one concrete example. Then listen to how he takes it. Use Sie.",
+              "goal": "He asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what he would have done differently, and proposes a concrete change."
+            },
+            {
+              "id": "b1.2-2-wer-war-das",
+              "title": "Wer hat die Pipeline kaputt gemacht?",
+              "setup": "You are Mira, a colleague, annoyed. A change in the pipeline broke everyone's builds this morning and you think it was Ahmad's commit. Say so directly. In fact both of you changed the same file; let him find that out. Use du.",
+              "goal": "He stays calm, clears up the facts with sich einigen auf or klären, takes his share of the responsibility, apologises for his part, and proposes how to avoid it next time."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Two situations: first, give a junior colleague critical feedback about their work, concretely and kindly, and agree on a change. Second, a colleague blames you for an outage that was partly your fault. Clear it up, take your share, apologise and propose a fix.",
+              "hint": "Mir ist aufgefallen, dass … Ich hätte das vielleicht früher ansprechen sollen. Das war doch nicht so gemeint. Lass uns darauf einigen, dass …"
+            },
+            "writing": {
+              "prompt": "Write a message to a colleague after a conflict about a broken build: say what happened from your view, what you should have done differently, apologise for your part, and propose a concrete way to avoid it in future.",
+              "hint": "Ehrlich gesagt hätte ich den Branch vorher testen sollen. Es tut mir leid, dass … Ich schlage vor, dass wir in Zukunft …",
+              "words_min": 110,
+              "words_max": 170
+            }
+          }
+        },
+        {
+          "id": "b1.2-3",
+          "title": "Beschwerde schriftlich",
+          "can_do": [
+            "write a formal objection to a wrong invoice, a reminder or a utility bill",
+            "cancel a contract in time and in the correct form and insist on confirmation",
+            "argue a case on the phone with a company that is not cooperating"
+          ],
+          "grammar": [
+            "formal connectors: daher, somit, infolgedessen, andernfalls, dennoch, hinsichtlich",
+            "conditional clauses with falls, sofern and soweit",
+            "formal Passiv for reporting and demanding: Der Betrag wurde abgebucht; Ich bitte darum, dass der Betrag erstattet wird",
+            "the structure of a formal letter: Betreff, Anrede, Bezug, Forderung, Frist, Grußformel"
+          ],
+          "vocab_themes": [
+            "money and law: die Mahnung, der Widerspruch, die Frist, fristgerecht, die Mahngebühr, erstatten, abbuchen",
+            "the utility bill: die Nebenkostenabrechnung, der Zählerstand, die Nachzahlung, die Vorauszahlung, der Verteilerschlüssel",
+            "contracts: kündigen, die Kündigungsbestätigung, die Laufzeit, sich verlängern, der Widerruf"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.2-3-mahnung",
+              "title": "Die Mahnung",
+              "setup": "You are an agent in the accounts department of an electricity provider. Ahmad received a reminder with a fee for an invoice he paid on time. Ask for the invoice number and the payment date, claim the payment is not visible, and only concede when he offers proof. Use Sie.",
+              "goal": "He states the facts with dates, uses formal connectors (daher, andernfalls), insists on cancellation of the fee, and names what proof he will send by when."
+            },
+            {
+              "id": "b1.2-3-nebenkosten",
+              "title": "Die Nebenkostenabrechnung",
+              "setup": "You are Herr Weber, Ahmad's landlord. You sent a utility bill with a large back payment. Ahmad has questions: the heating costs doubled and the distribution key is unclear. Defend it vaguely, then agree to send the underlying documents (Belege) when he asks for them properly. Use Sie.",
+              "goal": "He asks precise questions about at least two items, asks to see the Belege using a formal phrase, and says he will pay only after checking, with a conditional (falls/sofern)."
+            },
+            {
+              "id": "b1.2-3-kuendigung-telefon",
+              "title": "Die Kündigung wurde nicht bestätigt",
+              "setup": "You are an agent in the retention team of a mobile provider. Ahmad cancelled his contract in writing two months ago and has no confirmation; the contract will renew automatically next week. Claim you have no record of the letter and offer a better tariff. Use Sie.",
+              "goal": "He explains when and how he cancelled, rejects the offer politely, insists on written confirmation with a deadline, and says what he will do otherwise."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Phone a company that sent you a reminder for an invoice you paid: state the facts with dates, demand that the fee be cancelled, say what proof you will send, set a deadline and say what you will do if they do not react. Formal, calm, complete.",
+              "hint": "Der Betrag wurde am … überwiesen. Daher ist die Mahngebühr nicht berechtigt. Ich bitte darum, dass … Andernfalls werde ich …"
+            },
+            "writing": {
+              "prompt": "Write a formal letter of objection to a utility bill: refer to the bill, name the two items you dispute and why, ask for the underlying documents, state that you will pay only after checking, and set a deadline. Use the full formal letter structure.",
+              "hint": "Betreff: Widerspruch gegen die Nebenkostenabrechnung vom … Sehr geehrter Herr Weber, hinsichtlich der Heizkosten … Daher bitte ich Sie, mir die Belege … zu senden. Sofern …",
+              "words_min": 120,
+              "words_max": 180
+            }
+          }
+        },
+        {
+          "id": "b1.2-4",
+          "title": "Vorstellungsgespräch und Karriere",
+          "can_do": [
+            "talk about my career so far, my strengths and weaknesses and what I want next",
+            "handle a job interview or an internal transfer interview in German",
+            "discuss salary, relocation and conditions and ask good questions back"
+          ],
+          "grammar": [
+            "lassen: etwas machen lassen, sich etwas zeigen lassen; sich + lassen for possibility",
+            "brauchen + nur/nicht + zu: Sie brauchen nur anzurufen",
+            "Plusquamperfekt and Präteritum together in a career narrative",
+            "two-part connectors and je … desto in argument (review)"
+          ],
+          "vocab_themes": [
+            "career: der Werdegang, die Erfahrung, die Stärke, die Schwäche, die Weiterbildung, die Verantwortung",
+            "the interview: die Stelle, die Anforderungen, das Gehalt, die Probezeit, der Arbeitsvertrag, die Kündigungsfrist",
+            "conditions: das Bruttogehalt, die Urlaubstage, das Homeoffice, der Umzugszuschuss, verhandeln"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.2-4-interview",
+              "title": "Das Gespräch mit dem Teamleiter",
+              "setup": "You are Herr Krüger, team lead of the platform team in Munich. Ahmad is interviewing for an internal transfer to your team. Ask about his career so far, a difficult situation he solved, a weakness, why he wants to move, and what he expects from you. Use Sie, professional and curious.",
+              "goal": "He narrates his career with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions."
+            },
+            {
+              "id": "b1.2-4-gehalt",
+              "title": "Gehalt und Umzug",
+              "setup": "You are Frau Berger from HR. You make Ahmad an offer for the Munich position: a salary below what he hoped, thirty days of holiday, a relocation bonus. Let him negotiate; you have some room on salary and more on the relocation package. Use Sie.",
+              "goal": "He states his expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing."
+            },
+            {
+              "id": "b1.2-4-meetup",
+              "title": "Beim DevOps-Meetup",
+              "setup": "You are Katja, an engineer at a Berlin DevOps meetup. You get talking to Ahmad over pizza. Ask what he does, what stack he works with, what he is proud of, and tell him your company is hiring. Keep it natural and informal. Use du.",
+              "goal": "He describes his work and one project he is proud of in some detail, asks about your work, and reacts to the hiring hint with a question or a polite deferral."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Imagine an interview for a position in Germany: introduce your career so far (what you had done before your current job, what you did, what you learned), describe a difficult problem you solved, name a strength and a weakness with examples, and ask the interviewer two questions. Speak for three minutes.",
+              "hint": "Bevor ich zu … kam, hatte ich … gearbeitet. Eine schwierige Situation war … Ich lasse mir gern Dinge erklären. Wie sieht ein typischer Tag im Team aus?"
+            },
+            "writing": {
+              "prompt": "Write a cover letter (Anschreiben) for an internal position in Germany: why you are applying, what you bring with you (two concrete achievements), what you want to learn, and your availability. Formal letter structure.",
+              "hint": "Sehr geehrter Herr Krüger, mit großem Interesse habe ich … Seit … bin ich für … verantwortlich. Dabei habe ich … Ich könnte ab … anfangen.",
+              "words_min": 120,
+              "words_max": 180
+            }
+          }
+        },
+        {
+          "id": "b1.2-5",
+          "title": "Leben in Deutschland",
+          "can_do": [
+            "tell the story of my move and my first year at length, with details and feelings",
+            "describe a health problem in detail to a doctor and understand a diagnosis and options",
+            "hold a longer conversation about life, work and future plans with anyone, in du or Sie"
+          ],
+          "grammar": [
+            "subordinate clauses before the main clause and chains of clauses: Als ich ankam, wusste ich noch nicht, dass …",
+            "word order in the middle field: time, cause, manner, place (TeKaMoLo)",
+            "relative clauses with was and wo: alles, was ich brauche; die Stadt, wo ich wohne",
+            "text cohesion: connectors and prepositional adverbs across sentences (dabei, dadurch, trotzdem, außerdem)"
+          ],
+          "vocab_themes": [
+            "the first year: ankommen, sich einleben, die Herausforderung, der Rückblick, stolz sein auf",
+            "health in detail: die Beschwerden, die Untersuchung, die Diagnose, die Überweisung, der Facharzt, der Stress, der Schlaf",
+            "the future: langfristig, sich niederlassen, die Einbürgerung, offen bleiben, abwägen"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.2-5-rueckblick",
+              "title": "Ein Jahr in Deutschland",
+              "setup": "You are Herr Schulz, Ahmad's retired neighbour, over coffee. It has been a year since he moved in. Ask him to tell the whole story: the arrival, the first weeks, what was hardest, what he is proud of, what has changed for him. Listen, react, ask for details. Use Sie.",
+              "goal": "He narrates the year at length with at least eight connected sentences, uses subordinate clauses before main clauses, and expresses at least two feelings."
+            },
+            {
+              "id": "b1.2-5-facharzt",
+              "title": "Beim Facharzt",
+              "setup": "You are Dr. Vogel, a specialist (orthopaedist). Ahmad has had back pain for months from sitting and sleeps badly. Ask detailed questions about the pain, his desk, his sport, his sleep and stress; give a diagnosis in plain words; offer two options (physiotherapy, a change of workplace setup) and ask him to decide. Use Sie.",
+              "goal": "He describes his symptoms in detail with time and manner, understands and repeats the diagnosis, asks about both options, and chooses one with a reason."
+            },
+            {
+              "id": "b1.2-5-zukunft",
+              "title": "Bleibst du?",
+              "setup": "You are Mira, a close colleague, on a walk. Ask Ahmad whether he sees himself staying in Germany long term, what would make him stay or leave, how his family sees it, and what he would tell someone in Amman who wants to do the same. Use du.",
+              "goal": "He weighs staying and leaving with conditions and feelings, uses relative clauses with was or wo, and gives a piece of advice with reasons."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Tell the story of your move to Germany, real or imagined, from the decision to today: what happened, what was hard, what helped, what you are proud of, and what you plan long term. Then describe one health problem you had in detail. Speak for three to four minutes.",
+              "hint": "Als ich die Entscheidung getroffen hatte, … Das Schwierigste war …, weil … Alles, was ich brauchte, … Langfristig möchte ich …"
+            },
+            "writing": {
+              "prompt": "Write a longer text for a friend or a blog: your first year in Germany. Tell it in order with details, say what was harder and easier than expected, what you learned about yourself and about Germany, and what you would do differently. Use connectors so the text reads as one piece.",
+              "hint": "Als ich im … ankam, … Dabei habe ich gelernt, dass … Trotzdem … Rückblickend würde ich …",
+              "words_min": 130,
+              "words_max": 200
             }
           }
         }
