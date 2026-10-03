@@ -32,6 +32,19 @@ diffed word-by-word against the exact text spoken.
 .venv/bin/python scripts/stt_compare.py samples/
 ```
 
+### Re-running it with a real voice (3 minutes, from the phone)
+
+The app has a transcription lab so this does not require recording voice memos and moving files to
+the server. Open the app, type the sentence you are about to say into the lab box, hold to record,
+read it aloud. Each sample is saved with both transcripts to `DATA_DIR/stt-lab/`, then:
+
+```bash
+.venv/bin/python scripts/stt_lab_report.py data/stt-lab
+```
+
+It prints the word-level diff per engine and a "mistakes preserved exactly" tally. Read the eight
+sentences in the table below in your own voice and the caveat under it goes away.
+
 **Caveat, stated plainly:** synthesised speech is not Ahmad's accent. What this design *does* test
 cleanly is the thing we actually fear — the words are unambiguous in the audio, so any difference in
 the transcript is the engine editing rather than mishearing. Accent robustness still needs real
@@ -79,10 +92,21 @@ transcription artefact and must never be logged as a vocabulary mistake; the pro
 
 ## 4. Results — Gemini verbatim transcription
 
-Where it ran, the strict verbatim instruction worked **perfectly**: clips 01, 05 and a later
-re-probe of 01 came back exactly as spoken, including `habe … gegangen` and `Gestern ich habe`.
-On faithfulness alone Gemini looks at least as good as Whisper, possibly better — it has no
-acoustic guess to make, because it is reading the words rather than decoding phonemes.
+Where it ran, the strict verbatim instruction worked **perfectly** — 4 for 4, including the one
+clip Whisper repaired:
+
+| Clip | Said | Gemini wrote | |
+|---|---|---|---|
+| 01 | Ich **habe** … gegangen | identical | ✅ |
+| 05 | **Gestern ich habe** viel gearbeitet | identical | ✅ |
+| 01 (re-probe) | Ich **habe** … gegangen | identical | ✅ |
+| 02 | Ich fahre mit **den** Bus | mit **den** Bus — **kept, where Whisper wrote "dem"** | ✅ |
+
+So on faithfulness Gemini is the better engine, and the reason is structural rather than lucky: it
+has no acoustic guess to make. Whisper decodes phonemes and resolves a mumbled `den`/`dem` with a
+prior trained on correct German; Gemini reads the utterance as a whole. That is also why it is the
+right engine for the §5 mitigation — it is specifically good at the thing Whisper is specifically
+bad at.
 
 It is nonetheless **unusable as the primary engine**, for two measured reasons:
 
@@ -102,6 +126,10 @@ the audio-aware analysis path in §5 — a call that happens once every eight tu
 
 Since the leak is confined to endings that Whisper can't hear reliably, the fix is to let the
 analyzer hear the original audio rather than only the transcript:
+
+Direct evidence for this, from the lab: on the clip where Whisper wrote `mit dem Bus`, Gemini
+returned `mit den Bus` from the same audio. The error is recoverable — it just needs the engine
+that can hear it.
 
 - `LLMRequest(audio=..., audio_mime=...)` is already wired, and `complete_json` accepts
   `audio`/`audio_mime`. The Gemini path re-encodes browser recordings to 16 kHz mono mp3 with ffmpeg

@@ -59,7 +59,8 @@
 </div>
 
 <div class="card" id="stt-card" hidden>
-  <label>Record German, compare both transcription engines</label>
+  <label for="said">Transcription lab — type what you are about to say, then hold to record</label>
+  <input id="said" placeholder="Ich fahre mit den Bus zur Arbeit." enterkeyhint="done">
   <button id="rec">Hold to talk</button>
   <pre id="stt-out"></pre>
 </div>
@@ -129,10 +130,14 @@ async function start() {
       const fd = new FormData();
       fd.append('file', blob, 'clip.' + (rec.mimeType.includes('mp4') ? 'm4a' : 'webm'));
       fd.append('compare', 'true');
+      // What he meant to say: without it the saved sample cannot be diffed later.
+      fd.append('said', $('#said').value);
       try {
         const res = await api('/api/voice/transcribe', { method:'POST', body: fd });
-        show(sttOut, 'mime: ' + rec.mimeType + '\n\n' + Object.entries(res)
-          .map(([k,v]) => k + ':\n  ' + v).join('\n\n'), 'ok');
+        const said = $('#said').value.trim();
+        show(sttOut, 'mime: ' + rec.mimeType + (said ? '\nsaid: ' + said : '') + '\n\n'
+          + ['groq','gemini'].filter(k => res[k]).map(k => k + ':\n  ' + res[k]).join('\n\n')
+          + (res.saved ? '\n\nsaved as ' + res.saved : ''), 'ok');
       } catch (e) { show(sttOut, 'STT failed: ' + e.message, 'err'); }
     };
     rec.start();
