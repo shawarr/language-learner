@@ -281,6 +281,35 @@ async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
                      transcript=transcript_raw if voice else None, transcript_provider=stt_provider if voice else None)
 
 
+async def discard_turn(session_id: int, user_message_id: int) -> dict:
+    """"That's not what I said": drop the user message, the tutor's answer to it and its recording,
+    so a transcription error never reaches the mistake log."""
+    session = await _load(session_id)
+    user = await db.fetchone("SELECT id, audio_path FROM messages WHERE id=? AND session_id=? AND role='user'",
+                             (user_message_id, session_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="no such message in this session")
+    following = await db.fetchone("SELECT id, role FROM messages WHERE session_id=? AND id > ? ORDER BY id LIMIT 1",
+                                  (session_id, user_message_id))
+    ids = [user["id"]] + ([following["id"]] if following and following["role"] == "assistant" else [])
+    # analyzed_count is a prefix length over the session's messages in id order; a deleted row
+    # inside that prefix shortens it, one outside leaves it alone. Otherwise the rows after the
+    # discarded ones would slide into the "seen" prefix and never be analysed.
+    order = [r["id"] for r in await db.fetchall("SELECT id FROM messages WHERE session_id=? ORDER BY id", (session_id,))]
+    seen = int(session["analyzed_count"] or 0)
+    still_seen = seen - sum(1 for mid in ids if order.index(mid) < seen)
+    try:
+        await db.conn.execute(f"DELETE FROM messages WHERE id IN ({','.join('?' * len(ids))})", tuple(ids))
+        await db.conn.execute("UPDATE sessions SET user_turns = MAX(0, user_turns - 1), analyzed_count=? WHERE id=?",
+                              (max(0, still_seen), session_id))
+        await db.conn.commit()
+    except Exception:
+        await db.conn.rollback()
+        raise
+    analyzer.discard_audio([user["audio_path"]])
+    return {"ok": True, "deleted": len(ids)}
+
+
 async def end_session(session_id: int) -> dict:
     """Closes the session, then analyses what is new. Idempotent: ending twice costs no model call."""
     session = await _load(session_id)

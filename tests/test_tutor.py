@@ -308,6 +308,51 @@ async def test_end_session_sweeps_the_recordings_after_a_successful_analysis(fre
     assert (await fresh_db.fetchone("SELECT audio_path FROM messages WHERE id=?", (spoken["user_message_id"],)))["audio_path"] is None
 
 
+async def test_discard_turn_removes_the_pair_and_its_recording(fresh_db):
+    FakeProvider.canned = TURN
+    sid = (await tutor.start_session())["session"]["id"]
+    first = await tutor.take_turn(sid, "Ich heiße Ahmad.")
+    second = await _voice_turn(sid, "ich habe gegangen", audio_ext="webm")
+    kept = tutor.turns_dir() / f"{sid}-{second['user_message_id']}.webm"
+    assert kept.exists()
+    assert await tutor.discard_turn(sid, second["user_message_id"]) == {"ok": True, "deleted": 2}
+    ids = [r["id"] for r in await fresh_db.fetchall("SELECT id FROM messages WHERE session_id=? ORDER BY id", (sid,))]
+    assert ids == [first["user_message_id"] - 1, first["user_message_id"], first["message_id"]]
+    assert (await fresh_db.fetchone("SELECT user_turns FROM sessions WHERE id=?", (sid,)))["user_turns"] == 1
+    assert not kept.exists()
+    for bad in (second["user_message_id"], first["message_id"], 999):
+        with pytest.raises(HTTPException) as e:
+            await tutor.discard_turn(sid, bad)
+        assert e.value.status_code == 404, "gone, an assistant row, unknown: all 404"
+    other = (await tutor.start_session())["session"]["id"]
+    with pytest.raises(HTTPException) as e:
+        await tutor.discard_turn(other, first["user_message_id"])
+    assert e.value.status_code == 404, "a message from another session"
+    with pytest.raises(HTTPException) as e:
+        await tutor.discard_turn(other + 9, first["user_message_id"])
+    assert e.value.status_code == 404
+    assert (await tutor.discard_turn(sid, first["user_message_id"]))["deleted"] == 2
+    assert (await fresh_db.fetchone("SELECT user_turns FROM sessions WHERE id=?", (sid,)))["user_turns"] == 0
+
+
+async def test_discard_turn_keeps_analyzed_count_consistent(fresh_db):
+    FakeProvider.canned = TURN
+    sid = (await tutor.start_session())["session"]["id"]
+    t1, t2, t3 = [await tutor.take_turn(sid, f"Satz {i}") for i in range(3)]  # rows: a0 u1 a1 u2 a2 u3 a3
+
+    async def analyzed() -> int:
+        return (await fresh_db.fetchone("SELECT analyzed_count FROM sessions WHERE id=?", (sid,)))["analyzed_count"]
+
+    await fresh_db.execute("UPDATE sessions SET analyzed_count=5 WHERE id=?", (sid,))  # a0..a2 seen, u3 a3 not
+    await tutor.discard_turn(sid, t1["user_message_id"])
+    assert await analyzed() == 3, "two seen rows gone: the prefix shrinks by two"
+    await tutor.discard_turn(sid, t3["user_message_id"])
+    assert await analyzed() == 3, "unseen rows gone: the prefix is untouched"
+    await tutor.discard_turn(sid, t2["user_message_id"])
+    assert await analyzed() == 1
+    assert (await fresh_db.fetchone("SELECT COUNT(*) AS n FROM messages WHERE session_id=?", (sid,)))["n"] == 1
+
+
 async def test_get_session_and_recent_sessions(fresh_db):
     FakeProvider.canned = TURN
     assert await tutor.get_session(1) is None
@@ -409,6 +454,19 @@ def test_voice_turn_returns_the_raw_transcript(auth_client, monkeypatch):
     assert FakeProvider.calls[-1].messages[-1].content == "ich habe gegangen", "the raw transcript goes to the tutor as is"
     kept = tutor.turns_dir() / f"{sid}-{turn['user_message_id']}.webm"
     assert kept.read_bytes() == b"\x1aE\xdf\xa3fake", "the recording waits for the analyzer"
+
+
+def test_discard_route(auth_client):
+    FakeProvider.canned = TURN
+    sid = auth_client.post("/api/talk/session", json={}).json()["session"]["id"]
+    turn = auth_client.post("/api/talk/turn", json={"session_id": sid, "text": "Ich bin müde."}).json()
+    r = auth_client.post(f"/api/talk/session/{sid}/discard", json={"user_message_id": turn["user_message_id"]})
+    assert r.status_code == 200 and r.json() == {"ok": True, "deleted": 2}
+    found = auth_client.get(f"/api/talk/session/{sid}").json()
+    assert len(found["messages"]) == 1 and found["session"]["user_turns"] == 0
+    assert auth_client.post(f"/api/talk/session/{sid}/discard", json={"user_message_id": turn["user_message_id"]}).status_code == 404
+    assert auth_client.post(f"/api/talk/session/{sid + 9}/discard", json={"user_message_id": 1}).status_code == 404
+    assert auth_client.post(f"/api/talk/session/{sid}/discard", json={}).status_code == 422
 
 
 def test_silent_recording_is_a_400_with_no_rows(auth_client, monkeypatch):

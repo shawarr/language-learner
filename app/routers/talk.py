@@ -17,6 +17,10 @@ class StartBody(BaseModel):
     scenario_id: str | None = None
 
 
+class DiscardBody(BaseModel):
+    user_message_id: int
+
+
 def _session_id(value: object) -> int:
     try:
         return int(value)  # type: ignore[arg-type]
@@ -63,6 +67,12 @@ async def turn(request: Request):
 @router.post("/session/{session_id}/end")
 async def end_session(session_id: int):
     return await tutor.end_session(session_id)
+
+
+@router.post("/session/{session_id}/discard")
+async def discard_turn(session_id: int, body: DiscardBody):
+    """"That's not what I said": the disputed turn leaves the session before the analyzer sees it."""
+    return await tutor.discard_turn(session_id, body.user_message_id)
 
 
 @router.get("/session/{session_id}")
