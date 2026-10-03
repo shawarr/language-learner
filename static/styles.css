@@ -300,7 +300,9 @@ textarea.input { resize: none; line-height: 1.5; }
 .meter.thin { height: 4px; }
 
 /* ---- words ---------------------------------------------------------- */
-.word { border-radius: 4px; padding: 0 1px; cursor: pointer; }
+.word { border-radius: 4px; padding: 0 1px; cursor: pointer;
+  /* A word is a tap target, so iOS must not offer its own long-press callout over it. */
+  -webkit-touch-callout: none; }
 .word:active { background: var(--accent-dim); }
 .hidden-text { filter: blur(6px); -webkit-user-select: none; user-select: none; transition: filter var(--base) var(--ease); }
 .hidden-text.revealed { filter: none; }
@@ -364,7 +366,7 @@ textarea.input { resize: none; line-height: 1.5; }
 .mic-wrap { display: flex; flex-direction: column; gap: var(--s-1); }
 .mic-row { display: flex; align-items: center; justify-content: center; gap: var(--s-4); position: relative; }
 .mic-row .side { position: absolute; right: 0; }
-.mic-btn {
+.mic-btn { -webkit-touch-callout: none;
   width: 72px; height: 72px; border-radius: 50%;
   background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
   touch-action: none; -webkit-user-select: none; user-select: none;
@@ -377,6 +379,16 @@ textarea.input { resize: none; line-height: 1.5; }
 .mic-btn:disabled { opacity: .45; }
 .mic-label { font-size: var(--t-xs); color: var(--text-dim); text-align: center; min-height: 16px; }
 .mic-panel { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: var(--s-2) 0; animation: rise var(--fast) var(--ease); }
+/* Holding the mic is a gesture, not a text interaction. Pointer capture keeps the events on the
+   button, but a drag still lands over the chat bubbles, and on iOS that starts a selection and the
+   "Copy / Look Up" callout — which is what makes hold-to-talk feel broken. Clamped for the whole
+   document, because the thumb travels outside the button by design (slide away to cancel). */
+html.recording, html.recording * {
+  -webkit-user-select: none !important; user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+html.recording { cursor: default; }
+
 .mic-panel.cancel .mic-hint { color: var(--bad); font-weight: 600; }
 .mic-hint { font-size: var(--t-xs); color: var(--text-dim); }
 .mic-timer { font-variant-numeric: tabular-nums; font-weight: 600; font-size: var(--t-lg); }

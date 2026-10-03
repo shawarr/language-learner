@@ -9,6 +9,15 @@ import { Recorder, unlockAudio, stop as stopAudio } from './audio.js';
 
 let explained = false;
 
+/* While the thumb is down, the page is being gestured on, not read: suppress text selection and the
+   iOS long-press callout document-wide, and drop any selection that already started. Released on
+   every exit path, including a cancelled or failed recording, so the page never stays unselectable. */
+function setRecordingGesture(on) {
+  document.documentElement.classList.toggle('recording', on);
+  if (!on) return;
+  try { window.getSelection()?.removeAllRanges(); } catch { /* fine */ }
+}
+
 export function explainMicDenied(e) {
   const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
   if (denied && !explained) {
@@ -43,6 +52,7 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk', si
     rec = r;
     try { await r.start(); } catch (e) { rec = null; explainMicDenied(e); return; }
     if (rec !== r) { r.cancel(); return; }   // released before getUserMedia resolved
+    setRecordingGesture(true);
     btn.classList.add('on');
     panel.hidden = false;
     panel.classList.remove('cancel');
@@ -53,6 +63,7 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk', si
   async function finish(doCancel) {
     const r = rec;
     rec = null;
+    setRecordingGesture(false);
     btn.classList.remove('on');
     panel.hidden = true;
     if (!r) return;
@@ -65,12 +76,15 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk', si
   }
 
   btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  // Safari can begin a selection from the press before pointerdown's preventDefault takes effect.
+  btn.addEventListener('selectstart', (e) => e.preventDefault());
   btn.addEventListener('pointerdown', (e) => {
     if (busy || rec) return;
     e.preventDefault();
     unlockAudio();
     stopAudio();
     haptic(12);
+    setRecordingGesture(true);   // before getUserMedia: the callout can appear during that await
     try { btn.setPointerCapture(e.pointerId); } catch { /* fine */ }
     startX = e.clientX; startY = e.clientY; cancel = false;
     start();
@@ -81,8 +95,8 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk', si
     panel.classList.toggle('cancel', cancel);
     hint.textContent = cancel ? 'Release to cancel' : 'Release to send · slide away to cancel';
   });
-  btn.addEventListener('pointerup', () => finish(cancel));
-  btn.addEventListener('pointercancel', () => finish(true));
+  btn.addEventListener('pointerup', () => { setRecordingGesture(false); finish(cancel); });
+  btn.addEventListener('pointercancel', () => { setRecordingGesture(false); finish(true); });
   btn.addEventListener('lostpointercapture', () => { if (rec) finish(cancel); });
   // Backgrounding the app mid-recording: stop cleanly rather than leaving a dangling stream.
   document.addEventListener('visibilitychange', () => { if (document.hidden && rec) finish(true); });

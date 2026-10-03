@@ -98,3 +98,21 @@ def test_no_secret_in_the_repo_tree():
         assert not re.search(r"AIza[0-9A-Za-z_\-]{30,}|gsk_[0-9A-Za-z]{40,}", f.read_text(errors="ignore")), \
             f"looks like an API key in {name}"
     assert checked > 50, f"only scanned {checked} tracked files — is git ls-files working?"
+
+
+def test_the_hold_gesture_cannot_select_text():
+    """Holding the mic is a gesture. Without these, dragging the thumb over the chat selects the
+    bubbles and iOS raises its "Copy / Look Up" callout, which is what makes hold-to-talk feel broken.
+    """
+    css = (Path(settings.static_dir) / "styles.css").read_text()
+    assert "html.recording" in css, "no document-wide clamp while recording"
+    clamp = css[css.index("html.recording"):][:500]
+    assert "user-select: none !important" in clamp
+    assert "-webkit-touch-callout: none !important" in clamp
+    # A tapped word is a control, so it must not offer the native long-press menu either.
+    word_rule = css[css.index(".word {"):][:260]
+    assert "-webkit-touch-callout: none" in word_rule
+
+    mic = (Path(settings.static_dir) / "js" / "mic.js").read_text()
+    assert mic.count("setRecordingGesture(false)") >= 3, "the clamp must be released on every exit path"
+    assert "selectstart" in mic
