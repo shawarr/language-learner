@@ -1,12 +1,12 @@
-/* Audio: iOS unlock, TTS playback through /api/tts, and a hold-to-talk recorder.
+/* Audio: iOS unlock, TTS playback through /api/tts, and the MediaRecorder wrapper.
 
    - unlockAudio(): iOS only allows playback that started from a user gesture. Playing a silent clip
-     on the first tap buys the page permission for later programmatic plays (a trick kept from the
-     foundation's diagnostic page).
-   - speak(text, speed): fetches (and caches by URL) the mp3 from the server; "slow" is a separate
-     server-side render, never playbackRate, which sounds awful on phones.
+     on the first tap buys the page permission for later programmatic plays.
+   - speak(text, speed): fetches (and caches by text+speed) the mp3 from the server; "slow" is a
+     separate server-side render, never playbackRate, which sounds awful on phones. Playback
+     progress is reported so a message can draw its thin progress line.
    - Recorder: MediaRecorder with NO forced mime type (iOS → audio/mp4, Chrome → audio/webm), plus an
-     AnalyserNode level meter so it is obvious that recording is live. */
+     AnalyserNode level meter: a real meter, so an OS-muted mic shows as silence. */
 import { api } from './api.js';
 
 let unlocked = false;
@@ -33,23 +33,22 @@ async function fetchClip(text, speed) {
 }
 
 export function stop() {
-  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; onStateChange(null); }
+  if (currentAudio) { const a = currentAudio; currentAudio = null; a.pause(); a.currentTime = 0; onStateChange(null); }
 }
 
 /* Resolves when playback ends. Rejects with {name:'NotAllowedError'} when iOS refuses autoplay,
-   so the caller can show a tap-to-play button rather than failing silently. */
+   so the caller shows a tap-to-play button rather than failing silently. */
 export async function speak(text, speed = 'normal', { id } = {}) {
   const url = await fetchClip(text, speed);
   stop();
   const audio = new Audio(url);
   currentAudio = audio;
-  onStateChange({ id, speed, playing: true });
+  onStateChange({ id, speed, playing: true, progress: 0 });
+  audio.ontimeupdate = () => {
+    if (currentAudio === audio && audio.duration) onStateChange({ id, speed, playing: true, progress: audio.currentTime / audio.duration });
+  };
   await audio.play();
-  await new Promise((resolve) => {
-    audio.onended = resolve;
-    audio.onpause = resolve;
-    audio.onerror = resolve;
-  });
+  await new Promise((resolve) => { audio.onended = resolve; audio.onpause = resolve; audio.onerror = resolve; });
   if (currentAudio === audio) { currentAudio = null; onStateChange(null); }
 }
 
@@ -59,18 +58,14 @@ export class Recorder {
   constructor({ onLevel, onTick } = {}) {
     this.onLevel = onLevel || (() => {});
     this.onTick = onTick || (() => {});
-    this.rec = null;
-    this.chunks = [];
-    this.stream = null;
-    this.ctx = null;
-    this.startedAt = 0;
+    this.rec = null; this.chunks = []; this.stream = null; this.ctx = null; this.startedAt = 0;
   }
 
   static get supported() { return !!(navigator.mediaDevices && window.MediaRecorder); }
 
   async start() {
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.rec = new MediaRecorder(this.stream);       // let the browser pick the container
+    this.rec = new MediaRecorder(this.stream);       // the browser picks the container
     this.chunks = [];
     this.rec.ondataavailable = (e) => { if (e.data && e.data.size) this.chunks.push(e.data); };
     this.rec.start(250);

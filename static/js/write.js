@@ -1,13 +1,13 @@
-/* Write screen: a task from the current unit, his text, inline corrections, and an improved version
-   with the changes highlighted. The draft lives in localStorage until it is submitted, so a 503 or
-   an expired cookie never eats a paragraph. */
+/* Write screen (docs/DESIGN.md §5): the task pinned at the top (collapsible), a generous textarea,
+   a live word count against the target. On submit his text is re-rendered with the wrong spans
+   underlined in amber — tapping one reveals the explanation inline — and the improved version sits
+   below with the changed words highlighted. The draft is saved on every keystroke. */
 import { api } from './api.js';
-import { h, clear, toast, sheet, errorLine, prefs, spinner, fmtDate, tappableWords } from './ui.js';
+import { h, clear, toast, sheet, errorLine, prefs, skeleton, fmtDate, tappableWords, catChip, setExpanded } from './ui.js';
 
-const S = { root: null, body: null, task: prefs.get('writeTask', null), result: null, textarea: null, pending: false };
+const S = { body: null, task: prefs.get('writeTask', null), result: null, textarea: null, pending: false };
 
 export function mount(el) {
-  S.root = el;
   const head = h('header', { class: 'screen-head' }, h('h1', {}, 'Write'),
     h('span', { class: 'grow' }),
     h('button', { class: 'btn small ghost', type: 'button', onClick: () => newTask(true) }, 'New task'));
@@ -28,7 +28,7 @@ async function newTask(confirmDiscard = false) {
   }
   S.result = null;
   prefs.set('writeDraft', '');
-  clear(S.body).append(spinner('Picking a task…'));
+  clear(S.body).append(h('div', { class: 'card' }, skeleton(3)), skeleton(1, { tall: true }));
   try {
     S.task = await api('/api/write/prompt', { timeout: 60000 });
     prefs.set('writeTask', S.task);
@@ -41,11 +41,24 @@ async function newTask(confirmDiscard = false) {
 
 function words(text) { return (text.trim().match(/\S+/g) || []).length; }
 
+function taskCard(t, open = true) {
+  const panel = h('div', { class: 'corr-panel', hidden: !open, style: { height: open ? 'auto' : '0px' } },
+    h('div', { class: 'stack', style: { paddingTop: '8px' } },
+      h('p', {}, t.task),
+      t.to ? h('p', { class: 'muted small' }, 'To: ', t.to) : null,
+      (t.must_include || []).length ? h('div', { class: 'chip-row wrap' }, t.must_include.map((m) => h('span', { class: 'chip small' }, m))) : null,
+      h('p', { class: 'muted xs' }, `${t.words_min}–${t.words_max} words`)));
+  const toggle = h('button', { class: 'task-toggle', type: 'button', 'aria-expanded': String(open),
+    onClick: () => setExpanded(toggle, panel, toggle.getAttribute('aria-expanded') !== 'true') },
+    h('span', { class: 'card-title' }, 'Your task'), h('span', { class: 'muted xs' }, 'show / hide'));
+  return h('div', { class: 'card task-card' }, toggle, panel);
+}
+
 function render() {
   const t = S.task;
   clear(S.body);
-  const counter = h('span', { class: 'muted small' });
-  S.textarea = h('textarea', { class: 'input write-area', rows: '7', placeholder: 'Schreib hier…', autocapitalize: 'sentences',
+  const counter = h('span', { class: 'muted xs' });
+  S.textarea = h('textarea', { class: 'input write-area', rows: '8', placeholder: 'Schreib hier…', autocapitalize: 'sentences', lang: 'de', 'aria-label': 'Your text',
     onInput: () => { prefs.set('writeDraft', S.textarea.value); update(); } });
   S.textarea.value = prefs.get('writeDraft', '');
   const submit = h('button', { class: 'btn primary block', type: 'button', onClick: submitText }, 'Get feedback');
@@ -54,14 +67,7 @@ function render() {
     counter.textContent = `${n} words · aim for ${t.words_min}–${t.words_max}`;
     submit.disabled = n === 0 || S.pending;
   };
-  S.body.append(
-    h('div', { class: 'card stack task-card' },
-      h('div', { class: 'card-title' }, 'Your task'),
-      h('p', {}, t.task),
-      t.to ? h('p', { class: 'muted small' }, 'To: ', t.to) : null,
-      (t.must_include || []).length ? h('div', { class: 'chip-row' }, t.must_include.map((m) => h('span', { class: 'chip small' }, m))) : null),
-    S.textarea, h('div', { class: 'row between' }, counter), submit,
-    recentSection());
+  S.body.append(taskCard(t, true), S.textarea, h('div', { class: 'row between' }, counter), submit, recentSection());
   update();
 }
 
@@ -87,28 +93,32 @@ async function submitText() {
 
 function renderResult(text, r) {
   clear(S.body);
+  const corrections = r.corrections || [];
   const stars = '★'.repeat(r.score || 0) + '☆'.repeat(5 - (r.score || 0));
+  const expl = h('div', { class: 'stack' });
   S.body.append(
     h('div', { class: 'card stack' },
-      h('div', { class: 'row between' }, h('div', { class: 'card-title' }, 'Feedback'), h('span', { class: 'stars' }, stars)),
+      h('div', { class: 'row between' }, h('div', { class: 'card-title' }, 'Feedback'), h('span', { class: 'stars', 'aria-label': `${r.score} of 5` }, stars)),
       r.strengths ? h('p', {}, h('b', {}, 'Good: '), r.strengths) : null,
       r.next_time ? h('p', {}, h('b', {}, 'Next time: '), r.next_time) : null),
     h('div', { class: 'card stack' },
-      h('div', { class: 'card-title' }, r.corrections.length ? `Your text · ${r.corrections.length} corrections` : 'Your text · no corrections'),
-      h('p', { class: 'write-text' }, markCorrections(text, r.corrections)),
-      r.corrections.length ? h('p', { class: 'muted small' }, 'Tap a marked part to see why.') : null),
+      h('div', { class: 'card-title' }, corrections.length ? `Your text · ${corrections.length} to look at` : 'Your text · nothing to correct'),
+      h('p', { class: 'write-text', lang: 'de' }, markCorrections(text, corrections, expl)),
+      expl,
+      corrections.length ? h('p', { class: 'muted xs' }, 'Tap an underlined part to see why.') : null),
     r.improved ? h('div', { class: 'card stack' },
       h('div', { class: 'card-title' }, 'One level up'),
-      h('p', { class: 'write-text' }, diffWords(text, r.improved)),
-      h('p', { class: 'muted small' }, 'Highlighted: what changed. Tap any word to look it up.')) : null,
+      h('p', { class: 'write-text', lang: 'de' }, diffWords(text, r.improved)),
+      h('p', { class: 'muted xs' }, 'Highlighted: what changed. Tap any word to look it up.')) : null,
     h('div', { class: 'btn-row' },
       h('button', { class: 'btn', type: 'button', onClick: () => { S.result = null; prefs.set('writeDraft', text); render(); } }, 'Edit & resubmit'),
       h('button', { class: 'btn primary', type: 'button', onClick: () => newTask() }, 'New task')),
     recentSection());
 }
 
-/* Wrap each correction's `wrong` span in his text (first unmarked occurrence) in a tappable mark. */
-function markCorrections(text, corrections) {
+/* Wrap each correction's `wrong` span (first unmarked occurrence) in a tappable amber mark; the
+   explanation opens inline under the text, one at a time. */
+function markCorrections(text, corrections, explEl) {
   const frag = document.createDocumentFragment();
   const spans = [];
   for (const c of corrections) {
@@ -124,25 +134,37 @@ function markCorrections(text, corrections) {
   }
   spans.sort((a, b) => a.start - b.start);
   let pos = 0;
+  let openMark = null;
+  const explain = (mark, c) => {
+    const same = openMark === mark;
+    if (openMark) openMark.classList.remove('open');
+    clear(explEl);
+    openMark = null;
+    if (same) return;
+    openMark = mark;
+    mark.classList.add('open');
+    explEl.append(h('div', { class: 'inline-expl' },
+      h('div', { class: 'corr-pair', lang: 'de' }, h('s', {}, c.wrong), ' → ', h('b', {}, c.right)),
+      h('div', { class: 'corr-expl' }, h('span', {}, c.explanation || ''), catChip(c.category))));
+  };
   for (const s of spans) {
     if (s.start > pos) frag.append(document.createTextNode(text.slice(pos, s.start)));
-    frag.append(h('mark', { class: 'wrong', role: 'button', tabindex: '0', onClick: () => explain(s.c) }, text.slice(s.start, s.end)));
+    const mark = h('mark', { class: 'wrong', role: 'button', tabindex: '0', 'aria-label': `Correction: ${s.c.right}` }, text.slice(s.start, s.end));
+    mark.addEventListener('click', () => explain(mark, s.c));
+    mark.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); explain(mark, s.c); } });
+    frag.append(mark);
     pos = s.end;
   }
   if (pos < text.length) frag.append(document.createTextNode(text.slice(pos)));
   const unplaced = corrections.filter((c) => !spans.some((s) => s.c === c));
   if (unplaced.length) {
-    frag.append(h('div', { class: 'stack', style: { marginTop: '8px' } }, unplaced.map((c) =>
-      h('button', { class: 'btn small ghost', type: 'button', onClick: () => explain(c) }, `“${c.wrong}” → “${c.right}”`))));
+    frag.append(h('div', { class: 'chip-row wrap', style: { marginTop: '8px' } }, unplaced.map((c) => {
+      const chip = h('button', { class: 'chip small', type: 'button', lang: 'de' }, `${c.wrong} → ${c.right}`);
+      chip.addEventListener('click', () => explain(chip, c));
+      return chip;
+    })));
   }
   return frag;
-}
-
-function explain(c) {
-  sheet.open(h('div', { class: 'stack' },
-    h('div', { class: 'corr-pair' }, h('s', {}, c.wrong), ' → ', h('b', {}, c.right)),
-    h('p', {}, c.explanation || ''),
-    c.category ? h('span', { class: 'cat' }, c.category.replace(/_/g, ' ')) : null), { title: 'Correction' });
 }
 
 /* Word-level LCS diff: words of `after` that are not in the common subsequence get highlighted. */
@@ -163,24 +185,28 @@ function diffWords(before, after) {
   }
   const frag = document.createDocumentFragment();
   b.forEach((w, k) => {
-    const node = tappableWords(w, (word, sentence) => lookup(word, after));
+    const node = tappableWords(w, (word) => lookup(word, after));
     frag.append(keep.has(k) ? node : h('mark', { class: 'better' }, node), document.createTextNode(' '));
   });
   return frag;
 }
 
 async function lookup(word, sentence) {
-  const body = h('div', { class: 'stack' }, spinner('Looking up…'));
-  sheet.open(body, { title: word });
+  const lemma = h('div', { class: 'lemma', lang: 'de' }, word);
+  const tr = h('p', { class: 'translation' }, '');
+  const note = h('p', { class: 'lookup-note' }, 'looking up…');
+  const add = h('button', { class: 'btn primary block', type: 'button', disabled: true }, 'Add to vocab');
+  sheet.open(h('div', { class: 'stack' }, lemma, tr, note, add), { title: null });
   try {
     const d = await api('/api/vocab/translate', { method: 'POST', body: { word, context: sentence }, timeout: 30000 });
-    const add = h('button', { class: 'btn primary block', type: 'button', disabled: d.in_vocab, onClick: async () => {
+    lemma.textContent = d.lemma || word; tr.textContent = d.translation || '—'; note.textContent = d.note || '';
+    add.disabled = !!d.in_vocab; add.textContent = d.in_vocab ? 'In your deck' : 'Add to vocab';
+    add.addEventListener('click', async () => {
       add.disabled = true;
-      try { await api('/api/vocab', { method: 'POST', body: { word: d.lemma || word, translation: d.translation, example: sentence, source: 'manual' } }); add.textContent = 'In your vocab'; }
+      try { await api('/api/vocab', { method: 'POST', body: { word: d.lemma || word, translation: d.translation, example: sentence, source: 'manual' } }); add.textContent = 'In your deck'; }
       catch (e) { add.disabled = false; toast(e.detail || 'Could not add.', { kind: 'err' }); }
-    } }, d.in_vocab ? 'In your vocab' : 'Add to vocab');
-    clear(body).append(h('div', { class: 'lemma' }, d.lemma || word), h('p', { class: 'translation' }, d.translation), d.note ? h('p', { class: 'muted small' }, d.note) : null, add);
-  } catch (e) { clear(body).append(errorLine(e)); }
+    });
+  } catch (e) { clear(note).append(errorLine(e)); }
 }
 
 function recentSection() {
@@ -188,11 +214,11 @@ function recentSection() {
   const det = h('details', { class: 'recent' }, h('summary', {}, 'Recent writings'), list);
   det.addEventListener('toggle', async () => {
     if (!det.open || list.childElementCount) return;
-    list.append(spinner());
+    list.append(skeleton(3, { tall: true }));
     try {
       const data = await api('/api/write/recent?limit=10');
       clear(list);
-      if (!data.items.length) list.append(h('p', { class: 'muted small' }, 'Nothing yet.'));
+      if (!data.items.length) list.append(h('p', { class: 'muted small' }, 'Nothing yet. Your first piece lands here.'));
       for (const w of data.items) {
         list.append(h('button', { class: 'card recent-row', type: 'button', onClick: () => renderResult(w.text, w.feedback || { corrections: [] }) },
           h('div', { class: 'row between' }, h('span', { class: 'small' }, fmtDate(w.created_at)), h('span', { class: 'stars small' }, '★'.repeat(w.score || 0))),

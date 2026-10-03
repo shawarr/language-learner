@@ -1,9 +1,8 @@
 /* Checkpoint: one speaking task + one writing task for the current unit, graded against a rubric.
    Pass → the "you're now in A1.2" moment. Fail → review focus, retake any time, no penalty. */
 import { api, audioFilename } from './api.js';
-import { h, clear, toast, errorLine, prefs, spinner } from './ui.js';
+import { h, clear, errorLine, prefs, skeleton } from './ui.js';
 import { createHoldToTalk } from './mic.js';
-import { speak, unlockAudio } from './audio.js';
 
 const S = { root: null, body: null, cp: null, recording: null, speakingText: '', busy: false };
 
@@ -18,7 +17,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(spinner('Loading…'));
+  clear(S.body).append(h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(3)));
   try {
     S.cp = await api('/api/checkpoint/current');
     S.recording = null;
@@ -41,10 +40,10 @@ function render() {
   const sp = cp.tasks.speaking, wr = cp.tasks.writing;
   const speakStatus = h('div', { class: 'stack' });
   const mic = createHoldToTalk({ onResult: (res) => { S.recording = res; S.speakingText = ''; showRecorded(speakStatus, res, mic); update(); }, label: 'Hold to answer' });
-  const typedArea = h('textarea', { class: 'input', rows: '4', placeholder: 'Or type your spoken answer…', autocapitalize: 'sentences',
+  const typedArea = h('textarea', { class: 'input', rows: '4', placeholder: 'Or type your spoken answer…', autocapitalize: 'sentences', lang: 'de', 'aria-label': 'Spoken answer, typed',
     onInput: () => { S.speakingText = typedArea.value.trim(); if (S.speakingText) S.recording = null; update(); } });
   const counter = h('span', { class: 'muted small' });
-  const writeArea = h('textarea', { class: 'input write-area', rows: '7', placeholder: 'Schreib hier…', autocapitalize: 'sentences',
+  const writeArea = h('textarea', { class: 'input write-area', rows: '7', placeholder: 'Schreib hier…', autocapitalize: 'sentences', lang: 'de', 'aria-label': 'Written answer',
     onInput: () => { prefs.set('cpDraft', writeArea.value); update(); } });
   writeArea.value = prefs.get('cpDraft', '');
   const submit = h('button', { class: 'btn primary block', type: 'button', onClick: () => submitAll(writeArea.value.trim(), submit) }, 'Submit checkpoint');
@@ -114,7 +113,7 @@ function renderResult(r) {
       r.summary ? h('p', {}, r.summary) : null),
     (r.review_focus || []).length ? h('div', { class: 'card stack' }, h('div', { class: 'card-title' }, 'Review focus'),
       h('div', { class: 'chip-row wrap' }, r.review_focus.map((f) => h('span', { class: 'chip small' }, f)))) : null,
-    r.speaking_transcript ? h('details', {}, h('summary', { class: 'muted small' }, 'What the transcriber heard'), h('p', { class: 'small' }, r.speaking_transcript)) : null,
+    r.speaking_transcript ? h('details', {}, h('summary', { class: 'muted small' }, 'What the transcriber heard'), h('p', { class: 'small', lang: 'de' }, r.speaking_transcript)) : null,
     h('div', { class: 'btn-row' },
       h('button', { class: 'btn', type: 'button', onClick: () => window.dtSwitchTo('progress') }, 'Progress'),
       h('button', { class: 'btn primary', type: 'button', onClick: () => window.dtSwitchTo('talk') }, 'Talk')));

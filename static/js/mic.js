@@ -1,9 +1,10 @@
-/* Hold-to-talk control, shared by Talk, Placement and Checkpoint.
+/* Hold-to-talk control, shared by Talk, Placement and Checkpoint (docs/DESIGN.md §4 "The mic").
 
-   Press and hold → record (timer + level meter visible), release → onResult({blob, mime, durationMs}),
-   slide up or sideways → cancel, like a voice note. Pointer capture keeps the gesture on the button
-   even when the thumb drifts. Recordings under 600 ms are treated as an accidental tap. */
-import { h, toast, sheet } from './ui.js';
+   Press: recording starts immediately, 12 ms haptic, the button scales down. While recording: a
+   gentle pulse, a live level meter and a timer. Release: 20 ms haptic, onResult({blob, mime,
+   durationMs}). Slide ≥ 80 px away before releasing to cancel ("release to cancel" shown).
+   Pointer capture keeps the gesture on the button when the thumb drifts. Under 600 ms is a tap. */
+import { h, toast, sheet, haptic } from './ui.js';
 import { Recorder, unlockAudio, stop as stopAudio } from './audio.js';
 
 let explained = false;
@@ -22,14 +23,14 @@ export function explainMicDenied(e) {
 }
 
 /* onStart (optional, async) runs before recording and may return false to abort (e.g. no session). */
-export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk' } = {}) {
+export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk', side = null } = {}) {
   const btn = h('button', { class: 'mic-btn', type: 'button', 'aria-label': label }, micIcon());
   const timerEl = h('div', { class: 'mic-timer' }, '0:00');
   const level = h('i');
-  const hint = h('div', { class: 'mic-hint muted small' }, 'Release to send · slide up to cancel');
+  const hint = h('div', { class: 'mic-hint' }, 'Release to send · slide away to cancel');
   const panel = h('div', { class: 'mic-panel', hidden: true }, timerEl, h('div', { class: 'meter mic-level' }, level), hint);
-  const labelEl = h('span', { class: 'mic-label muted small' }, label);
-  const el = h('div', { class: 'mic-wrap' }, panel, h('div', { class: 'mic-row' }, btn, labelEl));
+  const labelEl = h('div', { class: 'mic-label' }, label);
+  const el = h('div', { class: 'mic-wrap' }, panel, h('div', { class: 'mic-row' }, btn, side ? h('div', { class: 'side' }, side) : null), labelEl);
   let rec = null, startX = 0, startY = 0, cancel = false, busy = false;
 
   async function start() {
@@ -46,6 +47,7 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk' } =
     panel.hidden = false;
     panel.classList.remove('cancel');
     timerEl.textContent = '0:00';
+    level.style.width = '0%';
   }
 
   async function finish(doCancel) {
@@ -58,6 +60,7 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk' } =
     if (doCancel) { r.cancel(); return; }
     const result = await r.stop();
     if (!result || !result.blob.size || tooShort) { toast('Hold the button while you speak.'); return; }
+    haptic(20);
     onResult && onResult(result);
   }
 
@@ -67,19 +70,22 @@ export function createHoldToTalk({ onResult, onStart, label = 'Hold to talk' } =
     e.preventDefault();
     unlockAudio();
     stopAudio();
+    haptic(12);
     try { btn.setPointerCapture(e.pointerId); } catch { /* fine */ }
     startX = e.clientX; startY = e.clientY; cancel = false;
     start();
   });
   btn.addEventListener('pointermove', (e) => {
     if (!rec) return;
-    cancel = (startY - e.clientY) > 70 || Math.abs(e.clientX - startX) > 90;
+    cancel = Math.hypot(e.clientX - startX, e.clientY - startY) >= 80;
     panel.classList.toggle('cancel', cancel);
-    hint.textContent = cancel ? 'Release to cancel' : 'Release to send · slide up to cancel';
+    hint.textContent = cancel ? 'Release to cancel' : 'Release to send · slide away to cancel';
   });
   btn.addEventListener('pointerup', () => finish(cancel));
   btn.addEventListener('pointercancel', () => finish(true));
   btn.addEventListener('lostpointercapture', () => { if (rec) finish(cancel); });
+  // Backgrounding the app mid-recording: stop cleanly rather than leaving a dangling stream.
+  document.addEventListener('visibilitychange', () => { if (document.hidden && rec) finish(true); });
 
   return {
     el,

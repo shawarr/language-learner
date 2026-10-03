@@ -13,6 +13,7 @@ export class ApiError extends Error {
     this.retryable = retryable;
   }
   get offline() { return this.status === 0; }
+  get cancelled() { return this.status === -1; }
 }
 
 let onUnauthorized = () => {};
@@ -30,9 +31,10 @@ function describe(status, data) {
   return `Request failed (${status})`;
 }
 
-export async function api(path, { method = 'GET', body, headers = {}, timeout = 120000, raw = false } = {}) {
+export async function api(path, { method = 'GET', body, headers = {}, timeout = 120000, raw = false, signal = null } = {}) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
+  if (signal) signal.addEventListener('abort', () => ctrl.abort(), { once: true });
   const opts = { method, credentials: 'same-origin', headers: { ...headers }, signal: ctrl.signal };
   if (body instanceof FormData) opts.body = body;
   else if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
@@ -41,7 +43,10 @@ export async function api(path, { method = 'GET', body, headers = {}, timeout = 
     res = await fetch(path, opts);
   } catch (e) {
     clearTimeout(timer);
-    if (e.name === 'AbortError') throw new ApiError(0, 'The request timed out. Check the connection and retry.', true);
+    if (e.name === 'AbortError') {
+      if (signal && signal.aborted) throw new ApiError(-1, 'Cancelled.', false);
+      throw new ApiError(0, 'The request timed out. Check the connection and retry.', true);
+    }
     throw new ApiError(0, navigator.onLine === false ? 'You are offline.' : 'Network error. Retry in a moment.', true);
   }
   clearTimeout(timer);
@@ -67,11 +72,11 @@ export async function api(path, { method = 'GET', body, headers = {}, timeout = 
 }
 
 /* Multipart upload of a recording. `fields` are extra form fields. */
-export function upload(path, blob, filename, fields = {}) {
+export function upload(path, blob, filename, fields = {}, opts = {}) {
   const fd = new FormData();
   for (const [k, v] of Object.entries(fields)) if (v != null) fd.append(k, v);
   fd.append('file', blob, filename);
-  return api(path, { method: 'POST', body: fd });
+  return api(path, { method: 'POST', body: fd, ...opts });
 }
 
 /* MediaRecorder picks its own container: iOS gives audio/mp4, Chrome audio/webm. Name the file so

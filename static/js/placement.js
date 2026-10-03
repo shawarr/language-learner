@@ -1,7 +1,7 @@
 /* Placement: first launch (or a re-run from Progress). Three spoken tasks of rising difficulty and
    one written task, then a conservative placement. Skippable: "start at A1.1". */
 import { api, upload, audioFilename } from './api.js';
-import { h, clear, toast, errorLine, spinner } from './ui.js';
+import { h, clear, toast, errorLine, spinner, skeleton, de } from './ui.js';
 import { speak, unlockAudio } from './audio.js';
 import { createHoldToTalk } from './mic.js';
 
@@ -51,7 +51,7 @@ function renderIntro(err) {
 }
 
 async function start() {
-  clear(S.body).append(spinner('Preparing…'));
+  clear(S.body).append(h('div', { class: 'card' }, skeleton(3)));
   try {
     const data = await api('/api/placement/start', { method: 'POST', body: {} });
     S.session = data.session_id;
@@ -64,7 +64,7 @@ async function start() {
 
 async function skip() {
   if (S.rerun) { leave(); return; }
-  clear(S.body).append(spinner());
+  clear(S.body).append(h('div', { class: 'card' }, skeleton(2)));
   try {
     await api('/api/placement/skip', { method: 'POST', body: {} });
     finishUp();
@@ -77,7 +77,7 @@ function renderTask() {
   clear(S.body);
   const saved = S.answers[t.id];
   const status = h('div', { class: 'stack' });
-  const promptDe = t.prompt_de ? h('p', { class: 'help-german' }, t.prompt_de,
+  const promptDe = t.prompt_de ? h('p', { class: 'help-german' }, de(t.prompt_de),
     h('button', { class: 'btn small ghost', type: 'button', onClick: () => { unlockAudio(); speak(t.prompt_de).catch(() => {}); } }, '▶')) : null;
   S.body.append(
     h('div', { class: 'row between muted small' }, h('span', {}, `Task ${S.idx + 1} of ${S.tasks.length}`), h('span', { class: 'cat' }, t.kind === 'speak' ? 'speak' : 'write')),
@@ -95,7 +95,7 @@ function renderTask() {
 }
 
 function textAnswer(t, status) {
-  const area = h('textarea', { class: 'input', rows: '5', placeholder: 'Auf Deutsch…', autocapitalize: 'sentences' });
+  const area = h('textarea', { class: 'input', rows: '5', placeholder: 'Auf Deutsch…', autocapitalize: 'sentences', lang: 'de', 'aria-label': 'Your answer' });
   const btn = h('button', { class: 'btn primary block', type: 'button', onClick: () => sendText(t, area.value.trim(), status, btn) }, 'Save answer');
   return h('div', { class: 'stack' }, area, btn);
 }
@@ -130,14 +130,14 @@ function showSaved(status, t, r) {
   clear(status).append(
     h('div', { class: 'card subtle stack' },
       h('div', { class: 'transcript-label' }, r.transcript_provider ? `transcript · ${r.transcript_provider}` : 'your answer'),
-      h('p', {}, r.text)),
+      h('p', { lang: 'de' }, r.text)),
     h('div', { class: 'btn-row' },
       h('button', { class: 'btn', type: 'button', onClick: () => { delete S.answers[t.id]; renderTask(); } }, 'Redo'),
       h('button', { class: 'btn primary', type: 'button', onClick: () => { S.idx += 1; renderTask(); } }, S.idx + 1 < S.tasks.length ? 'Next' : 'Finish')));
 }
 
 async function finish() {
-  clear(S.body).append(spinner('Placing you…'));
+  clear(S.body).append(h('div', { class: 'card stack' }, h('h2', {}, 'Placing you'), h('p', { class: 'muted' }, 'Reading your four answers against the CEFR descriptors. A few seconds.'), spinner('Grading…')));
   try {
     const r = await api('/api/placement/finish', { method: 'POST', body: { session_id: S.session }, timeout: 90000 });
     renderResult(r);

@@ -82,6 +82,21 @@ async function boot() {
   for (const tab of $$('.tab')) tab.addEventListener('click', () => { unlockAudio(); switchTo(tab.dataset.tab); });
   document.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
 
+  // iOS keeps the layout viewport under the keyboard; size #app to the visual viewport so the
+  // composer stays glued above the keys and the last message stays visible (DESIGN.md §3).
+  const vv = window.visualViewport;
+  if (vv) {
+    const app = $('#app');
+    const sync = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      app.style.height = kb > 80 ? `${vv.height}px` : '';
+      app.style.top = kb > 80 ? `${vv.offsetTop}px` : '';
+      document.dispatchEvent(new CustomEvent('dt:viewport', { detail: { keyboard: kb > 80 } }));
+    };
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+  }
+
   const offline = $('#offline');
   const sync = () => { offline.hidden = navigator.onLine !== false; };
   window.addEventListener('online', () => { sync(); document.dispatchEvent(new CustomEvent('dt:online')); });

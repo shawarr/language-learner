@@ -1,5 +1,5 @@
 /* Tiny DOM helpers. No framework: `h()` builds elements, `toast()` and `sheet` are the two global
-   surfaces every screen uses. Everything is keyboard- and thumb-friendly by construction. */
+   surfaces every screen uses. Numbers and motion follow docs/DESIGN.md. */
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -29,28 +29,54 @@ export function append(el, children) {
 
 export function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); return el; }
 
+/* German text: lang="de" so screen readers and the OS pronounce it right (DESIGN.md §8). */
+export function de(text, cls = '') { return h('span', { lang: 'de', class: cls }, text); }
+
+/* Haptics: Android only, iOS ignores it. 12 ms mic press, 20 ms send, 10 ms rating — nothing else. */
+export function haptic(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch { /* not available */ } }
+
 /* ---- toast ------------------------------------------------------------- */
 let toastTimer = null;
 export function toast(message, { action, onAction, duration = 3500, kind = '' } = {}) {
   const root = $('#toast-root');
   clear(root);
+  const dismiss = () => { el.remove(); };
   const el = h('div', { class: `toast ${kind}`, role: 'status' }, h('span', {}, message));
   if (action) el.append(h('button', { class: 'toast-action', type: 'button', onClick: () => { dismiss(); onAction && onAction(); } }, action));
   root.append(el);
   clearTimeout(toastTimer);
-  const dismiss = () => { el.remove(); };
   if (duration > 0) toastTimer = setTimeout(dismiss, duration);
   return dismiss;
 }
 
-/* A friendly line for an ApiError, with a retry button when it makes sense. */
+/* A human sentence for an ApiError, with a retry button that actually retries. */
+export function errorText(err) {
+  if (!err) return 'Something went wrong.';
+  if (err.offline) return err.detail || 'You are offline.';
+  if (err.status === 429 || err.status === 503) return 'The tutor is busy — try again in a minute.';
+  return err.detail || err.message || 'Something went wrong.';
+}
 export function errorLine(err, retry) {
-  const msg = err && err.retryable && err.status === 503
-    ? 'The tutor is busy. Try again in a minute.'
-    : (err && (err.detail || err.message)) || 'Something went wrong.';
-  const el = h('div', { class: 'error-line', role: 'alert' }, h('span', {}, msg));
+  const el = h('div', { class: 'error-line', role: 'alert' }, h('span', {}, errorText(err)));
   if (retry) el.append(h('button', { class: 'btn small', type: 'button', onClick: retry }, 'Retry'));
   return el;
+}
+
+/* Loading placeholders shaped like the content, instead of a spinner as the primary content. */
+export function skeleton(rows = 3, { tall = false } = {}) {
+  const widths = ['w80', 'w60', 'w40', 'w80', 'w60'];
+  return h('div', { class: 'skeleton', 'aria-hidden': 'true' },
+    Array.from({ length: rows }, (_, i) => h('i', { class: tall ? 'tall' : widths[i % widths.length] })));
+}
+
+export function spinner(label = 'Loading…') {
+  return h('div', { class: 'spinner-row' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, label));
+}
+
+/* Category chip: one hue per mistake category, everywhere. */
+export function catChip(category) {
+  const slug = String(category || 'other');
+  return h('span', { class: 'cat', style: { '--cat-color': `var(--cat-${slug}, var(--cat-other))` } }, slug.replace(/_/g, ' '));
 }
 
 /* ---- bottom sheet ------------------------------------------------------ */
@@ -64,15 +90,38 @@ export const sheet = {
       h('div', { class: 'sheet-body' }, content));
     const back = h('div', { class: 'sheet-backdrop', onClick: () => this.close() }, panel);
     panel.addEventListener('click', (e) => e.stopPropagation());
+    this._drag(panel);
     root.append(back);
     requestAnimationFrame(() => back.classList.add('open'));
     document.body.classList.add('sheet-open');
     this._el = back;
     return panel;
   },
+  /* Drag down to dismiss, like a native sheet. Only when the sheet itself is scrolled to the top. */
+  _drag(panel) {
+    let y0 = null, dy = 0;
+    panel.addEventListener('pointerdown', (e) => { if (panel.scrollTop > 0) return; y0 = e.clientY; dy = 0; });
+    panel.addEventListener('pointermove', (e) => {
+      if (y0 == null) return;
+      dy = Math.max(0, e.clientY - y0);
+      if (dy > 6) { panel.classList.add('dragging'); panel.style.transform = `translateY(${dy}px)`; }
+    });
+    const end = () => {
+      if (y0 == null) return;
+      panel.classList.remove('dragging');
+      if (dy > 80) this.close(); else panel.style.transform = '';
+      y0 = null;
+    };
+    panel.addEventListener('pointerup', end);
+    panel.addEventListener('pointercancel', end);
+  },
   close() {
-    if (this._el) { this._el.remove(); this._el = null; }
+    const el = this._el;
+    if (!el) return;
+    this._el = null;
+    el.classList.remove('open');
     document.body.classList.remove('sheet-open');
+    setTimeout(() => el.remove(), 200);
   },
   get isOpen() { return !!this._el; },
 };
@@ -80,17 +129,21 @@ export const sheet = {
 /* ---- small formatters -------------------------------------------------- */
 export function fmtDate(ts) {
   if (!ts) return '';
-  const d = new Date(ts * 1000);
-  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  return new Date(ts * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
 export function fmtTime(ts) {
   return new Date(ts * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
-export function plural(n, one, many) { return `${n} ${n === 1 ? one : many || one + 's'}`; }
-
-export function spinner(label = 'Loading…') {
-  return h('div', { class: 'spinner-row' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, label));
+export function fmtDays(days) {
+  if (days == null) return '';
+  if (days < 0.04) return 'in 10 min';
+  if (days < 1) return 'in a day';
+  const d = Math.round(days);
+  if (d < 30) return `in ${d} day${d === 1 ? '' : 's'}`;
+  if (d < 365) return `in ${Math.round(d / 30)} mo`;
+  return `in ${(d / 365).toFixed(1)} y`;
 }
+export function plural(n, one, many) { return `${n} ${n === 1 ? one : many || one + 's'}`; }
 
 /* Persisted per-device preferences (never anything the server needs to know). */
 export const prefs = {
@@ -100,9 +153,10 @@ export const prefs = {
   set(key, value) { try { localStorage.setItem(`dt:${key}`, JSON.stringify(value)); } catch { /* private mode */ } },
 };
 
-/* Split a German sentence into tappable word spans. Tap targets are words, not letters. */
+/* Split German text into tappable word spans (lang="de"). Tap targets are whole words; punctuation
+   is stripped for the lookup but displayed as typed. */
 export function tappableWords(text, onTap) {
-  const frag = document.createDocumentFragment();
+  const frag = h('span', { lang: 'de' });
   const parts = String(text).split(/(\s+)/);
   for (const part of parts) {
     if (!part) continue;
@@ -114,4 +168,18 @@ export function tappableWords(text, onTap) {
       onKeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(core, text); } } }, part));
   }
   return frag;
+}
+
+/* Animated expand/collapse of a panel whose CSS sets height: 0 + transition. */
+export function setExpanded(toggle, panel, open) {
+  toggle.setAttribute('aria-expanded', String(open));
+  if (open) {
+    panel.hidden = false;
+    panel.style.height = panel.scrollHeight + 'px';
+    const done = () => { panel.style.height = 'auto'; panel.removeEventListener('transitionend', done); };
+    panel.addEventListener('transitionend', done);
+  } else {
+    panel.style.height = panel.scrollHeight + 'px';
+    requestAnimationFrame(() => { panel.style.height = '0px'; });
+  }
 }
