@@ -218,3 +218,39 @@ Everything in the branch's "Not verifiable offline" list that needs a real phone
 `audio/mp4` uploads, home-screen install, `visualViewport` behaviour, haptics. Also the
 audio-aware analysis path against real phone recordings — it was exercised here with an mp3 upload,
 not with a multi-clip ffmpeg concat from a real session.
+
+
+---
+
+# Learn mode (server session, 2026-10-03)
+
+Ahmad, after the first real session: *"i need it to actually teach me like a coursework then i can
+use these write and text things, i know nothing about german"*. He was right, and it was the biggest
+gap in the product.
+
+Everything built so far is **practice** — talk, write, drill, review — and practice assumes someone
+taught you. `units.json` is a syllabus: `"sein in the singular (ich bin / du bist …)"` is a note a
+teacher writes for themselves, not something a learner can use. Nothing in the app ever explained
+anything.
+
+So there is now a **Learn** tab, first in the bar, and it wins the landing screen whenever the
+current unit's lesson is unfinished.
+
+- `app/curriculum/lessons.json` — hand-written coursework per unit. Not model-generated on purpose:
+  a beginner's first contact with the language should be identical every time, correct, and free of
+  quota. A1.1 units 1–2 are written; the rest report "not ready yet" instead of 404-ing.
+- Step types: `sounds` (a pronunciation primer — five rules that make German readable), `words`
+  (each line tappable to hear), `grammar` (explained in English, with a table and examples), `check`
+  (one question, graded on the device, wrong answers explained).
+- `app/services/lessons.py` + `app/routers/lesson.py` + the `lesson_progress` table. Progress never
+  moves backwards, completion is idempotent, and the next step's audio is prefetched while he reads
+  the current one.
+- `static/js/learn.js` + the Learn styles.
+
+Two layout bugs came in with it and are fixed: `#tabs` had `repeat(5, 1fr)` hardcoded, so the sixth
+tab (Progress) fell off the right edge, and `.screen-body` had no gutter for the fixed tab bar, so a
+screen without its own sticky footer hid its last control behind it.
+
+**Still to write:** lessons for a1.1-3 through a1.1-5 and everything above A1.1 — 28 units. The
+shape is set by the two that exist; follow their density and keep every explanation shorter than it
+wants to be.

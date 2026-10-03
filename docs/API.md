@@ -113,3 +113,31 @@ A correct answer bumps `mistakes.resolved` for the item's source mistake; a wron
 ```
 `thin_data` is true under four sessions — the UI says "not enough data yet" instead of drawing a curve.
 `activity` covers the last 30 days, oldest first, one entry per day (zeros included).
+
+
+## Learn (coursework)
+
+The teaching, before any practice mode. Lessons are hand-written in `app/curriculum/lessons.json`,
+keyed by unit id — never model-generated, so a beginner's first contact with German is identical
+every time, correct, and free of quota.
+
+- `GET /lesson/current` → `{"unit_id","unit_title","lesson": {…}|null,"progress":{…},"detail"?}` —
+  `lesson: null` with a `detail` when that unit's coursework is not written yet; the tab says so
+  rather than 404-ing.
+- `GET /lesson/status` → `{"has_lesson","completed","step","steps","title","minutes"}` — what the
+  shell uses to decide the landing tab.
+- `GET /lesson/{unit_id}` → `{"unit_id","lesson","progress"}` (404 if none)
+- `POST /lesson/{unit_id}/progress` `{"step"}` → progress. Never moves backwards: re-reading an
+  earlier page is not losing progress.
+- `POST /lesson/{unit_id}/check` `{"step","correct"}` → progress (counts only; the answer is graded
+  on the device)
+- `POST /lesson/{unit_id}/complete` → progress. Idempotent; keeps the first completion time.
+
+```
+lesson = {"title","intro","outro","minutes","steps": [step…]}
+step   = {"type": "sounds"|"words"|"grammar"|"check", …}
+  sounds  {"title","body","items":[{"de","say","example","en"}],"note"}
+  words   {"title","body","items":[{"de","en","note"}],"note"}
+  grammar {"title","body","table":{"head":[…],"rows":[[…]]},"examples":[{"de","en","note"}],"note"}
+  check   {"question","options":[…],"answer": <index>,"why"}
+```

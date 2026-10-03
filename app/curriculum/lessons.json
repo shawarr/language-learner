@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "_comment": "Hand-written coursework, one lesson per unit, keyed by unit id from units.json. Deliberately not model-generated: a beginner's first contact with a language should be the same every time, correct, and free of quota. Step types: 'sounds' (pronunciation), 'words' (vocabulary, each spoken), 'grammar' (explained in English with examples and an optional table), 'check' (one question, graded on the device). Keep every explanation shorter than it wants to be.",
+
+  "a1.1-1": {
+    "title": "Hallo und Tschüss",
+    "intro": "Your first German. By the end of this lesson you can greet someone, say your name, say where you are from, and ask someone the same back. Nothing here assumes you have seen German before.",
+    "minutes": 12,
+    "steps": [
+      {
+        "type": "sounds",
+        "title": "Five sounds, then you can read almost anything",
+        "body": "German spelling is honest: a letter almost always sounds the same way. Five rules cover most of it, and you can come back to this page any time.",
+        "items": [
+          {"de": "w", "say": "like English v", "example": "wie", "en": "how"},
+          {"de": "v", "say": "like English f", "example": "vier", "en": "four"},
+          {"de": "z", "say": "like ts in cats", "example": "zehn", "en": "ten"},
+          {"de": "ei", "say": "like eye", "example": "mein", "en": "my"},
+          {"de": "ie", "say": "like ee in see", "example": "Sie", "en": "you (formal)"}
+        ],
+        "note": "So 'wie' is said 'vee', and 'Wien' is 'veen'. The two dots in ä, ö, ü change the vowel — you will pick them up by ear, and the tutor will say them for you as often as you like."
+      },
+      {
+        "type": "words",
+        "title": "Hello and goodbye",
+        "body": "German separates the time of day. Nobody will mind if you get it wrong, but these four will cover your whole day.",
+        "items": [
+          {"de": "Hallo", "en": "Hello", "note": "safe at any time, with anyone"},
+          {"de": "Guten Morgen", "en": "Good morning", "note": "until about 11"},
+          {"de": "Guten Tag", "en": "Good day", "note": "the normal daytime greeting; there is no German 'good afternoon'"},
+          {"de": "Guten Abend", "en": "Good evening", "note": "from about 6"},
+          {"de": "Tschüss", "en": "Bye", "note": "informal, very common"},
+          {"de": "Auf Wiedersehen", "en": "Goodbye", "note": "formal; in a shop or an office"}
+        ]
+      },
+      {
+        "type": "grammar",
+        "title": "du and Sie — the one choice you make constantly",
+        "body": "German has two words for 'you'. 'du' is for friends, family, children and most colleagues. 'Sie' is for strangers, officials, shopkeepers, your landlord and anyone much older. Sie is always written with a capital S. Getting it wrong is a small thing — Germans will often invite you to switch with 'Wir können uns duzen' — but using Sie first is never rude.",
+        "examples": [
+          {"de": "Wie heißt du?", "en": "What's your name?", "note": "to a colleague"},
+          {"de": "Wie heißen Sie?", "en": "What's your name?", "note": "to an official"}
+        ],
+        "note": "At work in Germany, software teams are usually du. The Ausländerbehörde is definitely Sie."
+      },
+      {
+        "type": "grammar",
+        "title": "ich bin — I am",
+        "body": "'sein' means 'to be'. It is irregular in every language and German is no exception, so learn these as whole words rather than as a rule. These four cover nearly everything you need at the start.",
+        "table": {
+          "head": ["German", "English"],
+          "rows": [
+            ["ich bin", "I am"],
+            ["du bist", "you are (informal)"],
+            ["Sie sind", "you are (formal)"],
+            ["er ist / sie ist", "he is / she is"]
+          ]
+        },
+        "examples": [
+          {"de": "Ich bin Ahmad.", "en": "I am Ahmad."},
+          {"de": "Ich bin aus Jordanien.", "en": "I am from Jordan."},
+          {"de": "Sie sind Frau Keller?", "en": "You are Mrs Keller?"}
+        ]
+      },
+      {
+        "type": "check",
+        "question": "You meet your new neighbour. How do you say 'I am Ahmad'?",
+        "options": ["Ich bin Ahmad.", "Du bist Ahmad.", "Ich ist Ahmad."],
+        "answer": 0,
+        "why": "'ich' always goes with 'bin'. 'du bist' would be telling her that she is Ahmad."
+      },
+      {
+        "type": "words",
+        "title": "Saying who you are",
+        "body": "Two ways to give your name. 'Ich heiße' is the more German-sounding one, and it is what you will hear back.",
+        "items": [
+          {"de": "Ich heiße Ahmad.", "en": "My name is Ahmad.", "note": "literally: I am called Ahmad"},
+          {"de": "Ich bin Ahmad.", "en": "I am Ahmad."},
+          {"de": "Ich komme aus Jordanien.", "en": "I come from Jordan."},
+          {"de": "Ich wohne in Amman.", "en": "I live in Amman."},
+          {"de": "Ich spreche Arabisch und Englisch.", "en": "I speak Arabic and English."},
+          {"de": "Ich lerne Deutsch.", "en": "I am learning German.", "note": "German has no separate 'am learning' — one form does both"}
+        ]
+      },
+      {
+        "type": "grammar",
+        "title": "Asking back: the W-questions",
+        "body": "German question words mostly start with W, and the verb comes straight after them. Learn the question and its answer together — that pairing is what makes a conversation possible.",
+        "table": {
+          "head": ["Question", "Means", "Answer"],
+          "rows": [
+            ["Wie heißt du?", "What's your name?", "Ich heiße Ahmad."],
+            ["Woher kommst du?", "Where are you from?", "Ich komme aus Jordanien."],
+            ["Wo wohnst du?", "Where do you live?", "Ich wohne in Amman."],
+            ["Was machst du?", "What do you do?", "Ich arbeite als DevOps-Ingenieur."]
+          ]
+        },
+        "note": "woher = where from, wo = where. One letter, and it is the difference between your country and your street."
+      },
+      {
+        "type": "check",
+        "question": "Someone asks 'Woher kommst du?'. What are they asking?",
+        "options": ["Where do you live?", "Where are you from?", "What is your name?"],
+        "answer": 1,
+        "why": "woher = where from. 'Wo wohnst du?' would be where you live."
+      },
+      {
+        "type": "words",
+        "title": "Numbers 0 to 12",
+        "body": "You need these for times, prices and your phone number. Say them out loud — the tutor will ask you for them later.",
+        "items": [
+          {"de": "null", "en": "0"}, {"de": "eins", "en": "1"}, {"de": "zwei", "en": "2"},
+          {"de": "drei", "en": "3"}, {"de": "vier", "en": "4"}, {"de": "fünf", "en": "5"},
+          {"de": "sechs", "en": "6"}, {"de": "sieben", "en": "7"}, {"de": "acht", "en": "8"},
+          {"de": "neun", "en": "9"}, {"de": "zehn", "en": "10"}, {"de": "elf", "en": "11"},
+          {"de": "zwölf", "en": "12"}
+        ],
+        "note": "On the phone Germans often say 'zwo' instead of 'zwei', so it cannot be confused with 'drei'."
+      },
+      {
+        "type": "grammar",
+        "title": "The verb comes second. Always.",
+        "body": "This is the one rule that makes German sound German. In a normal statement the verb is the second thing in the sentence — not necessarily the second word, but the second block. Whatever you put first, the verb follows it immediately, and the subject moves behind the verb.",
+        "examples": [
+          {"de": "Ich wohne in Amman.", "en": "I live in Amman.", "note": "subject first, verb second"},
+          {"de": "In Amman wohne ich.", "en": "In Amman I live.", "note": "put the place first and 'ich' moves behind the verb"},
+          {"de": "Heute arbeite ich zu Hause.", "en": "Today I work at home.", "note": "not 'Heute ich arbeite'"}
+        ],
+        "note": "This will be your most common mistake for months, and the tutor will keep catching it. That is normal and it is not a sign you are bad at this."
+      },
+      {
+        "type": "check",
+        "question": "Which one is correct German?",
+        "options": ["Heute ich arbeite zu Hause.", "Heute arbeite ich zu Hause.", "Arbeite heute ich zu Hause."],
+        "answer": 1,
+        "why": "'Heute' takes the first slot, so the verb 'arbeite' must come second and 'ich' goes after it."
+      },
+      {
+        "type": "words",
+        "title": "When you are stuck",
+        "body": "The most useful sentences in the language. Learn these before anything else and you can survive any conversation.",
+        "items": [
+          {"de": "Entschuldigung", "en": "Excuse me / sorry"},
+          {"de": "Wie bitte?", "en": "Sorry, what?", "note": "the polite 'say that again'"},
+          {"de": "Langsamer, bitte.", "en": "Slower, please."},
+          {"de": "Ich verstehe nicht.", "en": "I don't understand."},
+          {"de": "Sprechen Sie Englisch?", "en": "Do you speak English?"},
+          {"de": "Ich lerne noch Deutsch.", "en": "I'm still learning German.", "note": "this one buys you enormous patience"}
+        ]
+      }
+    ],
+    "outro": "That is everything you need to introduce yourself. Now go and use it: open Talk and pick 'Die neue Nachbarin'. You will get it wrong, and that is the entire point — the tutor collects your mistakes so the drills can target them."
+  },
+
+  "a1.1-2": {
+    "title": "Zahlen, Zeit, Termine",
+    "intro": "Numbers, the clock and arranging a time. This is the unit that makes you useful in a standup and at a counter.",
+    "minutes": 12,
+    "steps": [
+      {
+        "type": "words",
+        "title": "Numbers 13 to 100",
+        "body": "Thirteen to nineteen are just the digit plus 'zehn'. The tens are the digit plus 'zig'.",
+        "items": [
+          {"de": "dreizehn", "en": "13"}, {"de": "vierzehn", "en": "14"}, {"de": "fünfzehn", "en": "15"},
+          {"de": "sechzehn", "en": "16", "note": "sechs loses its s"}, {"de": "siebzehn", "en": "17", "note": "sieben loses its en"},
+          {"de": "zwanzig", "en": "20"}, {"de": "dreißig", "en": "30"}, {"de": "vierzig", "en": "40"},
+          {"de": "fünfzig", "en": "50"}, {"de": "hundert", "en": "100"}
+        ]
+      },
+      {
+        "type": "grammar",
+        "title": "German says numbers backwards",
+        "body": "Above twenty, the small digit comes first, joined by 'und'. 21 is 'one-and-twenty'. It feels wrong for about a week and then it stops bothering you.",
+        "examples": [
+          {"de": "einundzwanzig", "en": "21", "note": "one-and-twenty"},
+          {"de": "zweiunddreißig", "en": "32", "note": "two-and-thirty"},
+          {"de": "siebenundvierzig", "en": "47", "note": "seven-and-forty"}
+        ],
+        "note": "This is why Germans often repeat phone numbers in pairs, and why you should ask for a number twice."
+      },
+      {
+        "type": "check",
+        "question": "What is 'vierundzwanzig'?",
+        "options": ["42", "24", "44"],
+        "answer": 1,
+        "why": "vier (4) und zwanzig (20) — the small number is said first, so 24."
+      },
+      {
+        "type": "grammar",
+        "title": "haben — to have",
+        "body": "After 'sein', this is the verb you will use most. It is irregular too, so again: learn the forms as words.",
+        "table": {
+          "head": ["German", "English"],
+          "rows": [
+            ["ich habe", "I have"],
+            ["du hast", "you have (informal)"],
+            ["Sie haben", "you have (formal)"],
+            ["er / sie hat", "he / she has"],
+            ["wir haben", "we have"]
+          ]
+        },
+        "examples": [
+          {"de": "Hast du Zeit?", "en": "Do you have time?"},
+          {"de": "Ich habe einen Termin.", "en": "I have an appointment."},
+          {"de": "Wir haben ein Meeting um zehn.", "en": "We have a meeting at ten."}
+        ]
+      },
+      {
+        "type": "grammar",
+        "title": "Yes/no questions: put the verb first",
+        "body": "To turn a statement into a question that expects yes or no, move the verb to the front. That is the whole rule — no extra word, no 'do' like in English.",
+        "examples": [
+          {"de": "Du hast Zeit.", "en": "You have time.", "note": "statement"},
+          {"de": "Hast du Zeit?", "en": "Do you have time?", "note": "verb first"},
+          {"de": "Sprechen Sie Englisch?", "en": "Do you speak English?"}
+        ]
+      },
+      {
+        "type": "words",
+        "title": "Telling the time",
+        "body": "Germans use 'halb' differently from English: halb drei is half *to* three, not half past. It is 2:30.",
+        "items": [
+          {"de": "Wie spät ist es?", "en": "What time is it?"},
+          {"de": "Es ist drei Uhr.", "en": "It's three o'clock."},
+          {"de": "halb drei", "en": "2:30", "note": "literally 'half three' — halfway TO three"},
+          {"de": "Viertel nach drei", "en": "3:15"},
+          {"de": "Viertel vor drei", "en": "2:45"},
+          {"de": "um neun Uhr", "en": "at nine o'clock"},
+          {"de": "von neun bis fünf", "en": "from nine to five"}
+        ]
+      },
+      {
+        "type": "check",
+        "question": "A colleague says the call is 'um halb zehn'. When is it?",
+        "options": ["10:30", "9:30", "10:15"],
+        "answer": 1,
+        "why": "halb zehn is halfway to ten, so 9:30. This one catches everybody at least once."
+      },
+      {
+        "type": "words",
+        "title": "Days and the working week",
+        "items": [
+          {"de": "der Montag", "en": "Monday"}, {"de": "der Dienstag", "en": "Tuesday"},
+          {"de": "der Mittwoch", "en": "Wednesday", "note": "literally mid-week"},
+          {"de": "der Donnerstag", "en": "Thursday"}, {"de": "der Freitag", "en": "Friday"},
+          {"de": "am Montag", "en": "on Monday"},
+          {"de": "heute / morgen / gestern", "en": "today / tomorrow / yesterday"},
+          {"de": "der Termin", "en": "the appointment", "note": "used for anything scheduled, including a doctor or a call"}
+        ]
+      },
+      {
+        "type": "grammar",
+        "title": "Regular verbs: one ending per person",
+        "body": "Most German verbs are regular. Take the stem and add the ending. Once you have this, you have hundreds of verbs.",
+        "table": {
+          "head": ["Person", "arbeiten (to work)", "Ending"],
+          "rows": [
+            ["ich", "ich arbeite", "-e"],
+            ["du", "du arbeitest", "-st"],
+            ["er / sie", "er arbeitet", "-t"],
+            ["wir", "wir arbeiten", "-en"],
+            ["Sie / sie", "Sie arbeiten", "-en"]
+          ]
+        },
+        "examples": [
+          {"de": "Ich arbeite remote.", "en": "I work remotely."},
+          {"de": "Wann fangen wir an?", "en": "When do we start?"}
+        ]
+      },
+      {
+        "type": "check",
+        "question": "How do you ask a colleague 'do you have time on Monday?'",
+        "options": ["Du hast Zeit am Montag?", "Hast du Zeit am Montag?", "Hast du am Montag Zeit haben?"],
+        "answer": 1,
+        "why": "A yes/no question puts the verb first: Hast du …?"
+      }
+    ],
+    "outro": "Now arrange a time out loud. Open Talk and pick the standup scenario — you will need 'um … Uhr' and 'Hast du Zeit?' within the first minute."
+  }
+}

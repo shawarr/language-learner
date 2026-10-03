@@ -137,6 +137,16 @@ CREATE TABLE IF NOT EXISTS checkpoints (
   finished_at REAL
 );
 
+CREATE TABLE IF NOT EXISTS lesson_progress (
+  unit_id TEXT PRIMARY KEY,                   -- matches curriculum/units.json
+  step INTEGER NOT NULL DEFAULT 0,            -- furthest step reached, so he resumes where he stopped
+  completed INTEGER NOT NULL DEFAULT 0,
+  checks_right INTEGER NOT NULL DEFAULT 0,
+  checks_total INTEGER NOT NULL DEFAULT 0,
+  started_at REAL,
+  completed_at REAL
+);
+
 CREATE TABLE IF NOT EXISTS activity (
   day TEXT NOT NULL,                          -- YYYY-MM-DD, UTC
   kind TEXT NOT NULL,                         -- talk_turn | review | drill | write | checkpoint

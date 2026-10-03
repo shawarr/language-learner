@@ -138,3 +138,22 @@ def test_every_tutor_reply_can_be_understood():
     assert "defaultEnglishFor" in talk and "startsWith('A1')" in talk
     css = (Path(settings.static_dir) / "styles.css").read_text()
     assert ".bubble-meaning" in css
+
+
+def test_the_app_teaches_before_it_tests():
+    """Practice assumes you were taught. Learn is the first tab, is precached, and a unit with an
+    unfinished lesson wins the landing screen over whatever tab was last open."""
+    html = (Path(settings.static_dir) / "index.html").read_text()
+    tabs = re.findall(r'data-tab="(\w+)"', html)
+    assert tabs[0] == "learn", f"Learn must be the first tab, got {tabs}"
+    assert len(tabs) == 6
+
+    sw = (Path(settings.static_dir) / "sw.js").read_text()
+    assert "/js/learn.js" in sw, "the Learn screen must work offline like the rest of the shell"
+
+    app = (Path(settings.static_dir) / "app.js").read_text()
+    assert "firstTab" in app and "'learn'" in app
+
+    css = (Path(settings.static_dir) / "styles.css").read_text()
+    tabs_rule = css[css.index("#tabs {"):][:400]
+    assert "repeat(5" not in tabs_rule, "a hardcoded column count drops the last tab off-screen"

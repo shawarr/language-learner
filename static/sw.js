@@ -1,11 +1,11 @@
 /* Service worker: caches the shell for offline start-up. Never caches /api/* or itself.
    Bump CACHE_VERSION whenever a shell file changes, or phones keep the old one forever. */
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v7';
 const CACHE = `tutor-shell-${CACHE_VERSION}`;
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js',
   '/js/api.js', '/js/ui.js', '/js/audio.js', '/js/store.js', '/js/mic.js',
-  '/js/talk.js', '/js/write.js', '/js/drill.js', '/js/review.js', '/js/progress.js',
+  '/js/learn.js', '/js/talk.js', '/js/write.js', '/js/drill.js', '/js/review.js', '/js/progress.js',
   '/js/placement.js', '/js/checkpoint.js',
   '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png',
 ];

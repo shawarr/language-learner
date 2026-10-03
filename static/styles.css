@@ -122,7 +122,9 @@ s { text-decoration-thickness: 1.5px; }
 .screen-head .chip, .chip.ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 26px; }
 .screen-body {
   width: 100%; max-width: var(--col); margin: 0 auto;
-  padding: var(--s-3) var(--s-4) var(--s-5);
+  /* The bottom gutter clears the fixed tab bar: a screen without a sticky footer of its own
+     (Learn, Progress) would otherwise hide its last control behind it. */
+  padding: var(--s-3) var(--s-4) calc(var(--s-5) + var(--s-4));
   display: flex; flex-direction: column; gap: var(--s-3);
 }
 .screen-foot {
@@ -134,17 +136,20 @@ s { text-decoration-thickness: 1.5px; }
 }
 
 #tabs {
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  /* Six tabs since Learn was added. Driven by the child count rather than a hardcoded 5, so the
+     last tab can never fall off the right edge again. */
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
   height: calc(var(--tab-h) + var(--safe-b)); padding-bottom: var(--safe-b);
   background: var(--surface); border-top: 1px solid var(--line);
 }
 .tab {
-  color: var(--text-dim); min-height: var(--tab-h);
+  color: var(--text-dim); min-height: var(--tab-h); min-width: 0; padding: 0 2px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   font-size: 11px; font-weight: 500; line-height: 1; position: relative;
   transition: color var(--fast) var(--ease);
 }
-.tab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; transition: transform var(--fast) var(--ease); }
+.tab > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; transition: transform var(--fast) var(--ease); }
 .tab.active { color: var(--accent); font-weight: 600; }
 .tab.active svg { fill: currentColor; stroke: none; }
 .tab:active svg { transform: scale(.92); }
@@ -476,3 +481,72 @@ mark.better { background: var(--good-dim); }
 .session-row:first-of-type { border-top: 0; }
 .pass-card { border-color: var(--good); }
 .score-row { display: flex; flex-direction: column; gap: 4px; padding: 6px 0; }
+
+/* ===== Learn: the coursework ==========================================
+   One idea per screen. The German is the loudest thing on the page, the English sits under it in
+   the dim colour, and anything the learner does not need to read yet is smaller still. The extra
+   type sizes and the warm accent exist only here, because this is the one place that should feel
+   like a book rather than a tool. */
+.lesson-bar { height: 3px; background: var(--line); margin: 0 0 var(--s-3); border-radius: 2px; overflow: hidden; }
+.lesson-bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--good));
+  width: 0; transition: width var(--slow) var(--ease); }
+
+.head-sub { margin-left: auto; font-size: var(--t-xs); color: var(--text-dim); }
+
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: var(--s-1); }
+.lesson h2 { font-size: 23px; line-height: 1.25; letter-spacing: -.01em; margin: 0 0 var(--s-2); }
+.lesson .lead { font-size: var(--t-md); line-height: 1.55; color: var(--text); margin: 0 0 var(--s-3); }
+.lesson .card { padding: var(--s-4); }
+
+/* A line of German you can tap to hear. The whole row is the target, not just the icon. */
+.lesson-lines { display: flex; flex-direction: column; gap: 2px; margin: var(--s-3) 0; }
+.lesson-line { display: flex; align-items: center; gap: var(--s-3); padding: 10px 12px;
+  border-radius: var(--r-md); background: var(--bg); cursor: pointer;
+  transition: background var(--fast) var(--ease); }
+.lesson-line:active { background: var(--accent-dim); }
+.lesson-line-main { flex: 1; min-width: 0; }
+.lesson-de { font-size: 19px; font-weight: 600; line-height: 1.3; }
+.lesson-de.sm { font-size: var(--t-md); font-weight: 500; }
+.lesson-en { font-size: var(--t-sm); color: var(--text-dim); margin-top: 1px; }
+.lesson-note { font-size: var(--t-xs); color: var(--text-dim); opacity: .85; margin-top: 3px; font-style: italic; }
+.lesson-note.inline { font-style: normal; margin-left: var(--s-2); }
+.sound-letter { font-size: 21px; font-weight: 700; color: var(--accent); }
+.btn.say { flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+  border-radius: var(--r-full); color: var(--text-dim); }
+.btn.say .ico { width: 20px; height: 20px; }
+.btn.say:active { color: var(--accent); background: var(--accent-dim); }
+
+.lesson-table { width: 100%; border-collapse: collapse; margin: var(--s-3) 0; font-size: var(--t-sm); }
+.lesson-table th { text-align: left; font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-dim); font-weight: 600; padding: 0 10px 6px; }
+.lesson-table td { padding: 9px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+.lesson-table tr td:first-child { font-weight: 600; }
+.lesson-table .de-cell { font-size: var(--t-md); }
+
+.callout { border-left: 3px solid var(--warn); padding-left: 12px; margin-top: var(--s-3); }
+
+.check-options { display: flex; flex-direction: column; gap: var(--s-2); margin: var(--s-3) 0 0; }
+.check-option { text-align: left; padding: 15px 16px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  font-size: var(--t-md); line-height: 1.4; min-height: 52px;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease); }
+.check-option:active { border-color: var(--accent); }
+.check-option.right { border-color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.check-option.wrong { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.check-option:disabled { opacity: 1; }
+.check-feedback { margin-top: var(--s-3); font-size: var(--t-sm); line-height: 1.5; color: var(--text-dim); }
+.check-feedback .good { color: var(--good); }
+.check-feedback .warn { color: var(--warn); }
+
+.lesson-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  margin-top: var(--s-4); }
+.lesson-foot > * { flex: 0 0 auto; }
+.btn.lg { min-height: 54px; font-size: var(--t-md); }
+.btn.block.lg { margin-top: var(--s-3); }
+
+.lesson-intro .lead, .lesson-done .lead { color: var(--text-dim); }
+.lesson-done { text-align: center; }
+.big-tick { width: 64px; height: 64px; margin: var(--s-2) auto var(--s-3); border-radius: var(--r-full);
+  display: grid; place-items: center; font-size: 32px; color: var(--good);
+  background: color-mix(in srgb, var(--good) 15%, transparent); }

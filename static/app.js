@@ -3,6 +3,7 @@
 import { api, setUnauthorizedHandler } from './js/api.js';
 import { $, $$, toast, prefs } from './js/ui.js';
 import { unlockAudio } from './js/audio.js';
+import * as learn from './js/learn.js';
 import * as talk from './js/talk.js';
 import * as write from './js/write.js';
 import * as drill from './js/drill.js';
@@ -11,8 +12,18 @@ import * as progress from './js/progress.js';
 import * as placement from './js/placement.js';
 import * as checkpoint from './js/checkpoint.js';
 
-const screens = { talk, write, drill, review, progress, placement, checkpoint };
-const TABS = ['talk', 'write', 'drill', 'review', 'progress'];
+/* Where a session should start. Practice assumes you were taught, so an unfinished lesson for the
+   current unit wins over whatever tab was last open. */
+async function firstTab() {
+  try {
+    const s = await api('/api/lesson/status');
+    if (s.has_lesson && !s.completed) return 'learn';
+  } catch { /* fall through to whatever was open last */ }
+  return prefs.get('tab', 'talk');
+}
+
+const screens = { learn, talk, write, drill, review, progress, placement, checkpoint };
+const TABS = ['learn', 'talk', 'write', 'drill', 'review', 'progress'];
 let current = null;
 let mounted = false;
 let pendingAfterLogin = null;
@@ -73,13 +84,14 @@ async function showApp() {
   // First launch: the placement flow takes over until it is done or skipped.
   const gated = await placement.gate().catch(() => false);
   if (gated) { switchTo('placement'); return; }
-  if (!current || current === 'placement') switchTo(prefs.get('tab', 'talk'));
+  if (!current || current === 'placement') switchTo(await firstTab());
 }
 
 /* ---- boot ----------------------------------------------------------- */
 async function boot() {
   $('#login-form').addEventListener('submit', onLogin);
   for (const tab of $$('.tab')) tab.addEventListener('click', () => { unlockAudio(); switchTo(tab.dataset.tab); });
+  document.addEventListener('dt:go-tab', (e) => switchTo(e.detail));
   document.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
 
   // iOS keeps the layout viewport under the keyboard; size #app to the visual viewport so the
