@@ -146,7 +146,9 @@ CREATE TABLE IF NOT EXISTS activity (
 """
 
 # (table, column, definition) — applied only when the column is missing.
-MIGRATIONS: list[tuple[str, str, str]] = []
+MIGRATIONS: list[tuple[str, str, str]] = [
+    ("messages", "audio_path", "TEXT"),   # a voice turn's recording, kept until the analyzer has heard it
+]
 
 DEFAULT_SKILLS = {"speaking": 10, "listening": 10, "writing": 10, "grammar": 10, "vocab": 10}
 
