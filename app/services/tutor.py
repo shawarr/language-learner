@@ -18,6 +18,7 @@ from fastapi import HTTPException
 from ..config import settings
 from ..db import db, loads
 from ..prompts import render
+from ..providers import tts
 from ..providers.base import Message
 from ..providers.llm import LLMUnavailable, llm
 from ..providers.stt import normalize_mime
@@ -149,6 +150,13 @@ def schedule_catch_up() -> asyncio.Task:
     return asyncio.create_task(_swallow(analyzer.catch_up(), "catch-up analysis"))
 
 
+def schedule_tts(text: str) -> asyncio.Task:
+    """Render the reply's audio while the phone is still receiving the JSON, so GET /api/tts hits
+    the disk cache. Takes the ~2 s synthesis off the perceived turn; a failure only means the
+    endpoint renders it on demand."""
+    return asyncio.create_task(_swallow(tts.synthesize(text), "tts pre-warm"))
+
+
 # -- the service ----------------------------------------------------------------
 async def _load(session_id: int) -> dict:
     row = await db.fetchone("SELECT * FROM sessions WHERE id=?", (session_id,))
@@ -206,6 +214,7 @@ async def start_session(mode: str = "talk", scenario_id: str | None = None) -> d
         await db.conn.rollback()
         raise
     schedule_catch_up()
+    schedule_tts(turn["reply"])
     return {"session": session_json(await _load(session_id)), "opening_turn": turn_json(None, message_id, turn)}
 
 
@@ -277,6 +286,7 @@ async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
     turns = int(session["user_turns"] or 0) + 1
     if settings.analyze_every_turns > 0 and turns % settings.analyze_every_turns == 0:
         schedule_analysis(session_id)
+    schedule_tts(turn["reply"])
     return turn_json(user_message_id, message_id, turn,
                      transcript=transcript_raw if voice else None, transcript_provider=stt_provider if voice else None)
 

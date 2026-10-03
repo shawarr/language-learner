@@ -487,3 +487,32 @@ def test_silent_recording_is_a_400_with_no_rows(auth_client, monkeypatch):
     found = auth_client.get(f"/api/talk/session/{sid}").json()
     assert len(found["messages"]) == 1 and found["session"]["user_turns"] == 0
     assert len(FakeProvider.calls) == calls, "no tutor call without a transcript"
+
+
+async def test_turn_prewarms_the_reply_audio(fresh_db, monkeypatch):
+    """The TTS render starts in the background right after the turn, so GET /api/tts hits the cache."""
+    from app.services import tutor
+
+    spoken = []
+
+    async def fake_synth(text, speed="normal"):
+        spoken.append((text, speed))
+
+    monkeypatch.setattr(tutor.tts, "synthesize", fake_synth)
+    data = await tutor.start_session()
+    await tutor.take_turn(data["session"]["id"], "Hallo")
+    await asyncio.sleep(0)
+    assert [s for s, _ in spoken] == [data["opening_turn"]["reply"], "fake reply"]
+
+
+async def test_tts_prewarm_failure_never_touches_the_turn(fresh_db, monkeypatch):
+    from app.services import tutor
+
+    async def boom(text, speed="normal"):
+        raise RuntimeError("edge down")
+
+    monkeypatch.setattr(tutor.tts, "synthesize", boom)
+    data = await tutor.start_session()
+    turn = await tutor.take_turn(data["session"]["id"], "Hallo")
+    await asyncio.sleep(0)
+    assert turn["reply"]

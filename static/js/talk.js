@@ -94,8 +94,17 @@ function renderLoading() {
 
 function renderStart(err) {
   clear(S.chat);
+  const today = h('p', { class: 'muted xs', hidden: true });
+  api('/api/progress', { timeout: 8000 }).then((p) => {
+    const bits = [];
+    if (p.vocab && p.vocab.due) bits.push(`${p.vocab.due} words due for review`);
+    if (p.streak_days) bits.push(`${p.streak_days}-day streak`);
+    if (p.checkpoint && p.checkpoint.available) bits.push('checkpoint open');
+    if (bits.length) { today.textContent = bits.join(' · '); today.hidden = false; }
+  }).catch(() => {});
   const card = h('div', { class: 'card start-card stack' },
     h('h2', {}, S.unit ? de(S.unit.title) : 'Ready when you are'),
+    today,
     S.unit ? h('p', { class: 'muted small' }, (S.unit.can_do || []).slice(0, 2).join(' · ')) : null,
     h('p', {}, 'Pick a scenario or just talk. The tutor speaks first; you answer by holding the mic or typing. Mistakes are the point — say it anyway.'),
     scenarioChips(),
