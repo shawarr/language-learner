@@ -40,6 +40,8 @@ export function mount(el) {
     for (const b of S.chat.querySelectorAll('.msg.tutor')) b.classList.toggle('playing', !!st && b.dataset.id === String(st.id));
   });
   document.addEventListener('dt:online', () => retryQueued());
+  // Placement or a passed checkpoint changed the unit: refresh the scenarios for the next session.
+  document.addEventListener('dt:profile-changed', async () => { await loadScenarios(); if (!S.session) renderStart(); });
 }
 
 export async function show() {
