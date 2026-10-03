@@ -343,3 +343,47 @@ def test_llm_failure_is_a_retryable_503_with_no_partial_rows(auth_client, monkey
     assert len(found["messages"]) == 1 and found["session"]["user_turns"] == 0
     assert auth_client.post("/api/talk/session", json={}).status_code == 503
     assert len(auth_client.get("/api/talk/sessions").json()["sessions"]) == 1, "a failed opening leaves no session"
+
+
+def test_voice_turn_returns_the_raw_transcript(auth_client, monkeypatch):
+    from app.providers import stt as stt_mod
+
+    heard = []
+
+    async def fake_transcribe(audio, mime, filename=None):
+        heard.append((audio, mime, filename))
+        return stt_mod.Transcript("ich habe gegangen", "groq", "m")
+
+    monkeypatch.setattr(stt_mod.stt, "transcribe", fake_transcribe)
+    FakeProvider.canned = TURN
+    sid = auth_client.post("/api/talk/session", json={}).json()["session"]["id"]
+    r = auth_client.post("/api/talk/turn", data={"session_id": str(sid)},
+                         files={"file": ("clip.webm", b"\x1aE\xdf\xa3fake", "audio/webm")})
+    assert r.status_code == 200, r.text
+    turn = r.json()
+    assert turn["transcript"] == "ich habe gegangen" and turn["transcript_provider"] == "groq"
+    assert heard == [(b"\x1aE\xdf\xa3fake", "audio/webm", "clip.webm")]
+    user = auth_client.get(f"/api/talk/session/{sid}").json()["messages"][1]
+    assert user["input_kind"] == "voice" and user["stt_provider"] == "groq"
+    assert user["transcript_raw"] == "ich habe gegangen" and user["content"] == "ich habe gegangen"
+    assert FakeProvider.calls[-1].messages[-1].content == "ich habe gegangen", "the raw transcript goes to the tutor as is"
+
+
+def test_silent_recording_is_a_400_with_no_rows(auth_client, monkeypatch):
+    from app.providers import stt as stt_mod
+
+    async def silence(audio, mime, filename=None):
+        return stt_mod.Transcript("   ", "groq", "m")
+
+    monkeypatch.setattr(stt_mod.stt, "transcribe", silence)
+    FakeProvider.canned = TURN
+    sid = auth_client.post("/api/talk/session", json={}).json()["session"]["id"]
+    calls = len(FakeProvider.calls)
+    r = auth_client.post("/api/talk/turn", data={"session_id": str(sid)}, files={"file": ("clip.m4a", b"abc", "audio/mp4")})
+    assert r.status_code == 400 and "heard" in r.json()["detail"].lower()
+    r = auth_client.post("/api/talk/turn", data={"session_id": str(sid)}, files={"file": ("clip.m4a", b"", "audio/mp4")})
+    assert r.status_code == 400
+    assert auth_client.post("/api/talk/turn", data={"session_id": str(sid)}).status_code == 422
+    found = auth_client.get(f"/api/talk/session/{sid}").json()
+    assert len(found["messages"]) == 1 and found["session"]["user_turns"] == 0
+    assert len(FakeProvider.calls) == calls, "no tutor call without a transcript"

@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
+from starlette.datastructures import UploadFile
 
 from .. import auth
-from ..services import tutor
+from ..services import speech, tutor
 
 router = APIRouter(prefix="/talk", dependencies=[Depends(auth.require_auth)], tags=["talk"])
 
@@ -30,14 +31,24 @@ async def start_session(body: StartBody | None = None):
 
 @router.post("/turn")
 async def turn(request: Request):
-    """JSON {"session_id", "text"}. Parsed by hand because the voice shape (V1) shares this path and
-    FastAPI cannot mix Body and Form on one route."""
+    """One path for both shapes, so the client has one call: JSON {"session_id", "text"} for a typed
+    turn, multipart `session_id` + `file` for a recording. FastAPI cannot mix Body and Form on one
+    route, hence the manual parsing."""
+    if request.headers.get("content-type", "").startswith("multipart/form-data"):
+        form = await request.form()
+        file = form.get("file")
+        if not isinstance(file, UploadFile):
+            raise HTTPException(status_code=422, detail="file is required")
+        session_id = _session_id(form.get("session_id"))
+        t = await speech.transcribe_upload(file)  # 400 on silence, before any row is written
+        return await tutor.take_turn(session_id, t.text, input_kind="voice", transcript_raw=t.text,
+                                     stt_provider=t.provider)
     try:
         body = await request.json()
     except ValueError:
         body = None
     if not isinstance(body, dict):
-        raise HTTPException(status_code=422, detail="send JSON {session_id, text}")
+        raise HTTPException(status_code=422, detail="send JSON {session_id, text} or multipart session_id + file")
     text = body.get("text")
     if not isinstance(text, str) or not text.strip():
         raise HTTPException(status_code=422, detail="text is required")
