@@ -19,6 +19,7 @@ os.environ.update(
     LLM_PRIMARY="fake:fake",
     LLM_FALLBACK="",
     LLM_FAST="",
+    LLM_QUALITY="",
     GEMINI_API_KEY="",
     GROQ_API_KEY="",
 )
