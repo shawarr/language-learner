@@ -56,3 +56,19 @@ def reset_fake():
     FakeProvider.calls = []
     yield
     FakeProvider.canned = None
+
+
+@pytest.fixture
+async def fresh_db():
+    """A connected `app.db.db` on a brand-new file, for service-level async tests (no HTTP)."""
+    import uuid
+
+    from app.config import settings
+    from app.db import db
+
+    settings.db_path = Path(_TMP) / f"svc-{uuid.uuid4().hex}.db"
+    await db.connect()
+    try:
+        yield db
+    finally:
+        await db.close()
