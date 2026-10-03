@@ -10,12 +10,17 @@ from __future__ import annotations
 
 # slug -> what it covers, in the words used in the prompts and the UI
 CATEGORIES: dict[str, str] = {
-    "gender": "wrong grammatical gender of a noun (der/die/das)",
-    "case": "wrong case after a verb or preposition (nominative/accusative/dative/genitive)",
-    "article": "missing, extra or wrong article or determiner ending",
+    # gender/article and case/preposition each describe one error from two angles, so the boundary
+    # is drawn explicitly. Live testing had "das Termin" land in `article` and the same case slip
+    # land in `case` once and `preposition` once — which splits one recurring mistake across two
+    # rows and keeps either from ever looking recurring.
+    "gender": "the noun's gender is wrong: der/die/das picked wrong, as in 'das Termin' for 'der Termin'",
+    "case": "wrong case, whatever caused it — after a preposition, a verb, or in a bare phrase "
+            "('mit den Bus' for 'mit dem Bus'). Use this, not 'preposition', when the preposition itself was right",
+    "article": "an article is missing or should not be there, while its gender and case are right",
     "word_order": "verb position, time-manner-place order, subordinate clause order",
     "verb_conjugation": "wrong person, tense, auxiliary (haben/sein), or participle form",
-    "preposition": "wrong preposition for the meaning, or the wrong case governed by it",
+    "preposition": "the wrong preposition word for the meaning (auf/an/in, nach/zu) — not the case after it",
     "plural": "wrong plural form of a noun",
     "adjective_ending": "wrong adjective ending after an article or on its own",
     "pronoun": "wrong personal, possessive or reflexive pronoun",

@@ -146,8 +146,16 @@ def schedule_analysis(session_id: int) -> asyncio.Task:
 
 
 def schedule_catch_up() -> asyncio.Task:
-    """A session whose end-of-session analysis hit a 503 gets analysed when the next one starts."""
-    return asyncio.create_task(_swallow(analyzer.catch_up(), "catch-up analysis"))
+    """Housekeeping behind a new session: close what was abandoned, analyse what was missed."""
+    return asyncio.create_task(_swallow(_catch_up(), "catch-up housekeeping"))
+
+
+async def _catch_up() -> None:
+    # Order matters: closing a stale session analyses it, and catch_up then mops up any whose
+    # analysis failed (a 503 at the wrong moment).
+    await close_stale_sessions()
+    await analyzer.catch_up()
+    await sweep_orphan_audio()
 
 
 def schedule_tts(text: str) -> asyncio.Task:
@@ -246,6 +254,64 @@ async def _sweep_audio(session_id: int) -> None:
     await db.execute("UPDATE messages SET audio_path=NULL WHERE session_id=?", (session_id,))
     # A file whose row is gone (a discarded turn whose delete failed) is only findable by name.
     analyzer.discard_audio(turns_dir().glob(f"{session_id}-*"))
+
+
+STALE_CLOSE_LIMIT = 3          # model calls spent on abandoned sessions per new session
+ORPHAN_AUDIO_AGE_SECONDS = 48 * 3600
+
+
+async def close_stale_sessions(limit: int = STALE_CLOSE_LIMIT, now: float | None = None) -> list[int]:
+    """End talk sessions that were abandoned mid-conversation, so they get analysed and swept.
+
+    On a phone the usual way out of a conversation is switching apps, not tapping "end session", so
+    without this a session stays open forever: the turns since its last analysis boundary are never
+    analysed — their mistakes never reach the log — and their recordings are never freed.
+    `analyzer.catch_up()` cannot help, because it only considers sessions that were ended.
+
+    Reuses `end_session`, so an abandoned session takes exactly the path a tidily ended one does.
+    """
+    now = now or time.time()
+    cutoff = now - max(1, settings.session_stale_minutes) * 60
+    rows = await db.fetchall(
+        "SELECT s.id FROM sessions s WHERE s.ended_at IS NULL AND s.mode = 'talk' "
+        "AND COALESCE((SELECT MAX(m.created_at) FROM messages m WHERE m.session_id = s.id), s.started_at) < ? "
+        "ORDER BY s.started_at, s.id LIMIT ?", (cutoff, max(0, int(limit))))
+    closed: list[int] = []
+    for row in rows:
+        try:
+            await end_session(row["id"])
+            closed.append(int(row["id"]))
+            log.info("closed abandoned session %s", row["id"])
+        except Exception:
+            log.exception("could not close abandoned session %s", row["id"])
+    return closed
+
+
+async def sweep_orphan_audio(now: float | None = None) -> int:
+    """Delete recordings on disk that no message row points at any more.
+
+    Belt and braces for the paths that bypass the per-session sweep: a crash between writing the
+    file and the UPDATE that records its path, or a failed delete. Only touches files older than
+    two days, so a recording mid-flight is never pulled out from under a live turn.
+    """
+    now = now or time.time()
+    directory = turns_dir()
+    if not directory.is_dir():
+        return 0
+    known = {r["audio_path"] for r in
+             await db.fetchall("SELECT audio_path FROM messages WHERE audio_path IS NOT NULL")}
+    removed = 0
+    for path in directory.iterdir():
+        try:
+            if str(path) in known or not path.is_file() or now - path.stat().st_mtime < ORPHAN_AUDIO_AGE_SECONDS:
+                continue
+            path.unlink()
+            removed += 1
+        except OSError:
+            log.warning("could not remove orphaned recording %s", path)
+    if removed:
+        log.info("removed %d orphaned recording(s)", removed)
+    return removed
 
 
 async def take_turn(session_id: int, text: str, *, input_kind: str = "text",

@@ -97,6 +97,9 @@ class Settings:
     # New (never reviewed) cards per review queue, so a chatty day doesn't create a 60-card backlog.
     new_cards_per_review: int = field(default_factory=lambda: int(_env("NEW_CARDS_PER_REVIEW", "10")))
     drill_items: int = field(default_factory=lambda: int(_env("DRILL_ITEMS", "8")))
+    # A talk session with no new turn for this long counts as abandoned and is closed, analysed and
+    # swept. On a phone the usual way out of a conversation is switching apps, not tapping "end".
+    session_stale_minutes: int = field(default_factory=lambda: int(_env("SESSION_STALE_MINUTES", "45")))
 
 
 settings = Settings()

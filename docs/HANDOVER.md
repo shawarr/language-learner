@@ -147,3 +147,74 @@ frontend treats a missing key as `false`, so no handler was needed.
 
 Listed in `README.md` under "Ideas not built yet". The one most worth doing next: streaming the
 tutor's text so the first sentence is spoken while the rest is still being written.
+
+
+---
+
+# Review notes (server session, 2026-10-03)
+
+Merged into `main` and deployed to https://german.shawar.xyz. What the review checked, what it
+found, and what it changed on top.
+
+## Verified before merging
+
+- 189 offline tests green; 195 after the additions below.
+- **Every one of the 35 documented `/api` operations returns 401 without a cookie** — checked by
+  calling each one anonymously, not by introspecting dependencies (FastAPI 0.142 nests included
+  routers, so introspection quietly reported zero routes).
+- No key material and no external URL anywhere in the tracked tree.
+- The four foundation files touched are each minimal and justified.
+- `services/srs.py` matches the SM-2 spec exactly, jitter and ease bounds included.
+- One merge path for the mistake log, and `analyzer.md` is fed the open patterns and told to reuse
+  their wording verbatim — the thing that stops semantic drift from making nothing look recurring.
+
+## Verified live, with real keys
+
+A real conversation, a real voice turn and every other mode, against Groq and Gemini:
+
+- Voice turn end to end over HTTPS in **1.1 s** (upload → Whisper → tutor → stored recording).
+- The memory loop genuinely closes: two sessions produced the log rows
+  `verb_conjugation / perfekt with sein for movement verbs` and `preposition / dative after in for
+  location`, each `count=1` — **no double-counting**, because the analyzer is the single writer.
+  Skills moved 10→11/9, facts came out as "Works remotely for a German company", and the drill then
+  built a `reorder` item from his own sentence.
+- Write produced a landlord/broken-heating task with `must_include` and word bounds, and graded a
+  real message correctly (`zu das Meeting → zum Meeting`, `weil ich bin krank → weil ich krank bin`).
+
+## Fixed on top of the branch
+
+1. **Abandoned sessions were never analysed and leaked their recordings.** A session is only ended
+   by an explicit tap, and `analyzer.catch_up()` filters on `ended_at IS NOT NULL` — but on a phone
+   the normal exit is switching apps. Reproduced: a week-old open session with three voice turns,
+   `catch_up()` returned 0 and all three clips were still on disk. Added
+   `tutor.close_stale_sessions()` (reusing `end_session`, so an abandoned session takes the tidy
+   path) and `tutor.sweep_orphan_audio()`, both behind the existing new-session hook, plus
+   `SESSION_STALE_MINUTES` (45). Six tests in `tests/test_abandoned_sessions.py`.
+2. **The tutor re-corrected earlier turns.** An English question came back with corrections for the
+   *previous* message. Display-only (the analyzer owns the log) but it reads as not listening.
+   `tutor_talk.md` now scopes corrections to the latest message. Verified: the same turn now returns
+   zero corrections.
+3. **The English escape hatch bypassed `english_help`.** The tutor answered inside `reply`, so the
+   "say it like this" card never rendered and the phrase was spoken instead of shown. The prompt now
+   says `reply` is spoken aloud and the phrase belongs in `english_help`. Verified: it now returns
+   `english_help` with the German and a literal gloss.
+4. **Two category pairs in `taxonomy.py` overlapped** (`gender`/`article`, `case`/`preposition`), so
+   one recurring error could split across two rows and never look recurring — my own bug in the
+   foundation. The boundaries are now explicit, and `tutor_talk.md` carries the one-line
+   disambiguation, since the tutor only ever saw the slug names.
+5. **`test_no_secret_in_the_repo_tree` scanned the working tree**, so it failed on the real `.env` —
+   a test that always fails on the server gets disabled and then protects nothing. Rescoped to
+   `git ls-files`, which is where the actual risk lives.
+6. The placeholder shell was replaced by the real one, as intended; the transcription lab moved to
+   **`/lab.html`** (a dev tool, not precached, not linked from the UI).
+
+The database was reset after testing: the conversations above had written real sessions, mistakes,
+vocab and personal facts into the learner profile, and Ahmad has to start from a genuine placement.
+The pre-reset state is in `backups/`.
+
+## Still unverified
+
+Everything in the branch's "Not verifiable offline" list that needs a real phone: iOS autoplay,
+`audio/mp4` uploads, home-screen install, `visualViewport` behaviour, haptics. Also the
+audio-aware analysis path against real phone recordings — it was exercised here with an mp3 upload,
+not with a multi-clip ffmpeg concat from a real session.
