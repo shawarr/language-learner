@@ -1,0 +1,127 @@
+<!doctype html>
+<!--
+  Transcription lab — a dev tool at /lab.html, deliberately not part of the app.
+  It answers one question: does the transcriber write down the German I actually said, or does it
+  quietly fix it? Type the sentence, hold to record, read it aloud; the server keeps the clip and
+  both engines' output under DATA_DIR/stt-lab/ and `scripts/stt_lab_report.py` prints the diff.
+  Sign in through the app first — this page uses the same session cookie.
+  Not precached by the service worker, not linked from the UI.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Transcription lab</title>
+<style>
+  :root { --bg:#0e1014; --surface:#171a21; --text:#e9ecf2; --dim:#98a1b2; --line:#2a2f3a;
+          --accent:#6b8cff; --good:#3ddc97; --bad:#ff6b6b; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f5f6f9; --surface:#fff; --text:#161922; --dim:#5b6475; --line:#dce0e8; --accent:#2f5fe0; }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; padding:16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+         background:var(--bg); color:var(--text); font:17px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  h1 { font-size:19px; margin:0 0 4px; } p.sub { color:var(--dim); font-size:14px; margin:0 0 16px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
+  label { display:block; font-size:13px; color:var(--dim); margin-bottom:6px; }
+  input { font:inherit; width:100%; border-radius:12px; border:1px solid var(--line); padding:13px;
+          background:var(--bg); color:var(--text); }
+  button { font:inherit; width:100%; border:0; border-radius:14px; background:var(--accent); color:#fff;
+           font-weight:600; min-height:60px; margin-top:10px; touch-action:manipulation; }
+  button.on { background:var(--bad); }
+  pre { white-space:pre-wrap; word-break:break-word; font-size:14px; margin:10px 0 0; }
+  .dim { color:var(--dim); } .good { color:var(--good); } .bad { color:var(--bad); }
+  ol { margin:0; padding-left:20px; color:var(--dim); font-size:14px; } ol li { margin-bottom:6px; }
+  code { background:var(--bg); padding:1px 5px; border-radius:5px; font-size:13px; }
+</style>
+</head>
+<body>
+<h1>Transcription lab</h1>
+<p class="sub">Does the transcriber keep my mistakes, or fix them?</p>
+
+<div class="card">
+  <label for="said">What you are about to say — exactly, mistakes included</label>
+  <input id="said" placeholder="Ich fahre mit den Bus zur Arbeit." autocapitalize="sentences" enterkeyhint="done">
+  <button id="rec">Hold to record</button>
+  <pre id="out" class="dim">Hold the button, read the sentence aloud, release.</pre>
+</div>
+
+<div class="card">
+  <label>Sentences worth recording</label>
+  <ol>
+    <li>Ich habe gestern in die Stadt gegangen. <span class="dim">(habe/bin)</span></li>
+    <li>Ich fahre mit den Bus zur Arbeit. <span class="dim">(den/dem)</span></li>
+    <li>Das Termin ist am Montag. <span class="dim">(das/der)</span></li>
+    <li>Ich habe ein Problem mit die Heizung. <span class="dim">(die/der)</span></li>
+    <li>Gestern ich habe viel gearbeitet. <span class="dim">(word order)</span></li>
+    <li>Ich muss nach Hause gehen, weil ich bin müde. <span class="dim">(subclause)</span></li>
+    <li>Ich wohne in eine klein Wohnung in Amman. <span class="dim">(endings)</span></li>
+    <li>Ich arbeite als DevOps-Ingenieur für eine deutsche Firma. <span class="dim">(correct — control)</span></li>
+  </ol>
+  <p class="sub" style="margin:12px 0 0">Then on the server: <code>scripts/stt_lab_report.py data/stt-lab</code></p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const out = $('#out'), btn = $('#rec');
+const show = (msg, cls='dim') => { out.className = cls; out.textContent = msg; };
+
+let rec, chunks = [];
+async function start() {
+  if (!$('#said').value.trim()) return show('Type what you are about to say first.', 'bad');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // No mimeType: iOS Safari gives audio/mp4, Chrome audio/webm. The server handles both.
+    rec = new MediaRecorder(stream);
+    chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: rec.mimeType });
+      const said = $('#said').value.trim();
+      show(`sent ${Math.round(blob.size / 1024)} KB as ${rec.mimeType}, transcribing…`);
+      const fd = new FormData();
+      fd.append('file', blob, 'clip.' + (rec.mimeType.includes('mp4') ? 'm4a' : 'webm'));
+      fd.append('compare', 'true');
+      fd.append('said', said);
+      try {
+        const r = await fetch('/api/voice/transcribe', { method: 'POST', body: fd, credentials: 'same-origin' });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.detail || r.status);
+        const lines = ['said   : ' + said];
+        let fixed = false;
+        for (const engine of ['groq', 'gemini']) {
+          if (!res[engine]) continue;
+          const same = norm(res[engine]) === norm(said);
+          if (!same && !res[engine].startsWith('ERROR:')) fixed = true;
+          lines.push(`${engine.padEnd(7)}: ${res[engine]}   ${same ? '✓ verbatim' : '✗ differs'}`);
+        }
+        show(lines.join('\n') + (res.saved ? '\n\nsaved — record the next one' : ''), fixed ? 'bad' : 'good');
+      } catch (e) {
+        show('Failed: ' + e.message + '\nThe recording was not saved — try again.', 'bad');
+      }
+    };
+    rec.start();
+    btn.classList.add('on'); btn.textContent = 'Release to send';
+    navigator.vibrate?.(12);
+  } catch (e) {
+    show('Mic blocked: ' + e.message, 'bad');
+  }
+}
+// Compare the way the report script does, so the page and the tally agree.
+const norm = s => s.toLowerCase().replace(/[^\wäöüß ]/g, '').split(/\s+/).join(' ').trim();
+
+function stop() {
+  btn.classList.remove('on'); btn.textContent = 'Hold to record';
+  if (rec && rec.state === 'recording') { rec.stop(); navigator.vibrate?.(20); }
+}
+btn.addEventListener('pointerdown', e => { e.preventDefault(); start(); });
+btn.addEventListener('pointerup', stop);
+btn.addEventListener('pointercancel', stop);
+
+fetch('/api/auth/me', { credentials: 'same-origin' })
+  .then(r => { if (!r.ok) show('Not signed in — open the app and log in first, then come back.', 'bad'); });
+</script>
+</body>
+</html>

@@ -9,4 +9,6 @@ __pycache__/
 *.db-shm
 backups/
 scratch/
+.claude/
 .cache-probe/
+.venv

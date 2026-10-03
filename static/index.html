@@ -1,158 +1,71 @@
 <!doctype html>
-<!--
-  PLACEHOLDER SHELL — replaced wholesale by the real PWA (see docs/TASKS.md, task F1).
-  It exists so the StaticFiles mount has something to serve and so the server
-  foundation (login, TTS, STT, the Whisper pitfall test) can be verified from a phone
-  before any of the app is built. Keep it dependency-free.
--->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="color-scheme" content="dark light">
-<title>Deutsch Tutor — foundation check</title>
-<style>
-  :root { --bg:#12141a; --card:#1b1e27; --fg:#e8eaf0; --muted:#9aa3b2; --accent:#4f7cff; --ok:#3ddc97; --err:#ff6b6b; }
-  @media (prefers-color-scheme: light) {
-    :root { --bg:#f6f7fa; --card:#fff; --fg:#161922; --muted:#5b6475; --accent:#2f5fe0; }
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin:0; padding:16px; padding-bottom:max(16px, env(safe-area-inset-bottom)); background:var(--bg); color:var(--fg);
-         font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  h1 { font-size:19px; margin:4px 0 16px; }
-  .card { background:var(--card); border-radius:14px; padding:14px; margin-bottom:12px; }
-  label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
-  input, button, textarea { font:inherit; width:100%; border-radius:12px; border:1px solid #3a4154; padding:13px;
-                            background:var(--bg); color:var(--fg); }
-  button { background:var(--accent); color:#fff; border:0; font-weight:600; min-height:52px; margin-top:8px; }
-  button.ghost { background:transparent; color:var(--fg); border:1px solid #3a4154; }
-  button:disabled { opacity:.5; }
-  pre { white-space:pre-wrap; word-break:break-word; font-size:13px; color:var(--muted); margin:8px 0 0; }
-  .ok { color:var(--ok); } .err { color:var(--err); }
-  .row { display:flex; gap:8px; } .row > * { flex:1; }
-  #rec.on { background:var(--err); }
-</style>
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f9" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Deutsch">
+<meta name="format-detection" content="telephone=no">
+<title>Deutsch Tutor</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css">
+<script type="module" src="/app.js"></script>
 </head>
 <body>
-<h1>Deutsch Tutor — foundation check</h1>
 
-<div class="card" id="login-card">
-  <label for="pw">Password</label>
-  <input id="pw" type="password" autocomplete="current-password" enterkeyhint="go">
-  <button id="login">Log in</button>
-  <pre id="login-out"></pre>
+<div id="login" class="gate" hidden>
+  <form id="login-form" class="gate-card" autocomplete="on">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">DE</span><h1>Deutsch Tutor</h1></div>
+    <label class="label" for="pw">Password</label>
+    <input id="pw" class="input" name="password" type="password" autocomplete="current-password" enterkeyhint="go" required>
+    <button class="btn primary block" type="submit">Log in</button>
+    <p id="login-error" class="error" role="alert" hidden></p>
+  </form>
 </div>
 
-<div class="card" id="app-card" hidden>
-  <label>Server status</label>
-  <pre id="status">…</pre>
+<div id="app" hidden>
+  <main id="screens">
+    <section id="screen-talk" class="screen" hidden></section>
+    <section id="screen-write" class="screen" hidden></section>
+    <section id="screen-drill" class="screen" hidden></section>
+    <section id="screen-review" class="screen" hidden></section>
+    <section id="screen-progress" class="screen" hidden></section>
+    <section id="screen-placement" class="screen" hidden></section>
+    <section id="screen-checkpoint" class="screen" hidden></section>
+  </main>
+  <nav id="tabs" aria-label="Main">
+    <button class="tab" data-tab="talk" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.4 3.3A.7.7 0 0 1 4.5 18.7V16A2.5 2.5 0 0 1 4 13.5z"/></svg>
+      <span>Talk</span>
+    </button>
+    <button class="tab" data-tab="write" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.3V20h2.7L17.8 8.9l-2.7-2.7zm13.6-9.9 1.4-1.4a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0l-1.4 1.4z"/></svg>
+      <span>Write</span>
+    </button>
+    <button class="tab" data-tab="drill" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5h6L10 22l8.5-11.5h-6z"/></svg>
+      <span>Drill</span>
+    </button>
+    <button class="tab" data-tab="review" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h11a2 2 0 0 1 2 2v11h-2V6H7zM4 8h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/></svg>
+      <span>Review</span>
+    </button>
+    <button class="tab" data-tab="progress" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16v-2H4zm1-4h3V9H5zm5.5 0h3V4h-3zm5.5 0h3v-5h-3z"/></svg>
+      <span>Progress</span>
+    </button>
+  </nav>
 </div>
 
-<div class="card" id="tts-card" hidden>
-  <label for="tts-text">Text to speech</label>
-  <textarea id="tts-text" rows="2">Guten Morgen Ahmad! Wie geht es dir heute?</textarea>
-  <div class="row">
-    <button id="speak">Speak</button>
-    <button id="speak-slow" class="ghost">Slow</button>
-  </div>
-  <pre id="tts-out"></pre>
-</div>
-
-<div class="card" id="stt-card" hidden>
-  <label for="said">Transcription lab — type what you are about to say, then hold to record</label>
-  <input id="said" placeholder="Ich fahre mit den Bus zur Arbeit." enterkeyhint="done">
-  <button id="rec">Hold to talk</button>
-  <pre id="stt-out"></pre>
-</div>
-
-<script>
-const $ = s => document.querySelector(s);
-const show = (el, msg, cls='') => { el.className = cls; el.textContent = msg; };
-
-async function api(path, opts={}) {
-  const r = await fetch(path, { credentials:'same-origin', ...opts });
-  const type = r.headers.get('content-type') || '';
-  const body = type.includes('json') ? await r.json() : await r.blob();
-  if (!r.ok) throw new Error(body.detail || r.status);
-  return body;
-}
-
-function unlockAudio() {
-  // iOS only allows playback that started from a user gesture. Playing a silent
-  // clip on the first tap buys the page permission for later programmatic plays.
-  const a = new Audio('data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA');
-  a.play().catch(() => {});
-}
-
-$('#login').onclick = async () => {
-  unlockAudio();
-  try {
-    await api('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'},
-                                   body: JSON.stringify({ password: $('#pw').value }) });
-    await boot();
-  } catch (e) { show($('#login-out'), 'Login failed: ' + e.message, 'err'); }
-};
-$('#pw').onkeydown = e => { if (e.key === 'Enter') $('#login').click(); };
-
-async function boot() {
-  const st = await api('/api/system/status');
-  $('#login-card').hidden = true;
-  for (const id of ['#app-card','#tts-card','#stt-card']) $(id).hidden = false;
-  show($('#status'), JSON.stringify(st, null, 2));
-}
-
-async function speak(speed) {
-  const out = $('#tts-out');
-  show(out, 'synthesising…');
-  try {
-    const blob = await api('/api/tts?speed=' + speed + '&text=' + encodeURIComponent($('#tts-text').value));
-    const a = new Audio(URL.createObjectURL(blob));
-    await a.play();
-    show(out, 'playing (' + Math.round(blob.size/1024) + ' KB, ' + speed + ')', 'ok');
-  } catch (e) { show(out, 'TTS failed: ' + e.message, 'err'); }
-}
-$('#speak').onclick = () => speak('normal');
-$('#speak-slow').onclick = () => speak('slow');
-
-let rec, chunks = [];
-const btn = $('#rec'), sttOut = $('#stt-out');
-async function start() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-    // iOS Safari produces audio/mp4; Chrome audio/webm. Let the browser choose.
-    rec = new MediaRecorder(stream);
-    chunks = [];
-    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
-    rec.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      const blob = new Blob(chunks, { type: rec.mimeType });
-      show(sttOut, 'sent ' + rec.mimeType + ' (' + Math.round(blob.size/1024) + ' KB), transcribing…');
-      const fd = new FormData();
-      fd.append('file', blob, 'clip.' + (rec.mimeType.includes('mp4') ? 'm4a' : 'webm'));
-      fd.append('compare', 'true');
-      // What he meant to say: without it the saved sample cannot be diffed later.
-      fd.append('said', $('#said').value);
-      try {
-        const res = await api('/api/voice/transcribe', { method:'POST', body: fd });
-        const said = $('#said').value.trim();
-        show(sttOut, 'mime: ' + rec.mimeType + (said ? '\nsaid: ' + said : '') + '\n\n'
-          + ['groq','gemini'].filter(k => res[k]).map(k => k + ':\n  ' + res[k]).join('\n\n')
-          + (res.saved ? '\n\nsaved as ' + res.saved : ''), 'ok');
-      } catch (e) { show(sttOut, 'STT failed: ' + e.message, 'err'); }
-    };
-    rec.start();
-    btn.classList.add('on'); btn.textContent = 'Release to send';
-  } catch (e) { show(sttOut, 'Mic blocked: ' + e.message, 'err'); }
-}
-function stop() {
-  btn.classList.remove('on'); btn.textContent = 'Hold to talk';
-  if (rec && rec.state === 'recording') rec.stop();
-}
-btn.addEventListener('pointerdown', e => { e.preventDefault(); start(); });
-btn.addEventListener('pointerup', stop);
-btn.addEventListener('pointercancel', stop);
-
-api('/api/auth/me').then(boot).catch(() => {});
-</script>
+<div id="offline" class="banner" hidden>Offline — the tutor needs a connection. Recordings and ratings are kept.</div>
+<div id="sheet-root"></div>
+<div id="toast-root" aria-live="polite"></div>
 </body>
 </html>

@@ -91,6 +91,12 @@ class Settings:
         self.prompts_dir = self.base_dir / "prompts"
         self.static_dir = self.base_dir.parent / "static"
         self.curriculum_path = self.base_dir / "curriculum" / "units.json"
+    # --- app layer (added at the bottom, per docs/TASKS.md rule 1) --------------
+    # A checkpoint is offered after this many talk sessions in a unit, even without a "ready" verdict.
+    checkpoint_min_sessions: int = field(default_factory=lambda: int(_env("CHECKPOINT_MIN_SESSIONS", "3")))
+    # New (never reviewed) cards per review queue, so a chatty day doesn't create a 60-card backlog.
+    new_cards_per_review: int = field(default_factory=lambda: int(_env("NEW_CARDS_PER_REVIEW", "10")))
+    drill_items: int = field(default_factory=lambda: int(_env("DRILL_ITEMS", "8")))
 
 
 settings = Settings()

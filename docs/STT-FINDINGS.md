@@ -34,9 +34,10 @@ diffed word-by-word against the exact text spoken.
 
 ### Re-running it with a real voice (3 minutes, from the phone)
 
-The app has a transcription lab so this does not require recording voice memos and moving files to
-the server. Open the app, type the sentence you are about to say into the lab box, hold to record,
-read it aloud. Each sample is saved with both transcripts to `DATA_DIR/stt-lab/`, then:
+The app has a transcription lab at **`/lab.html`** so this does not require recording voice memos
+and moving files to the server. Log in to the app, open `/lab.html`, type the sentence you are about
+to say, hold to record, read it aloud — it tells you per engine whether the transcript came back
+verbatim. The eight sentences are listed on the page. Each sample is saved with both transcripts to `DATA_DIR/stt-lab/`, then:
 
 ```bash
 .venv/bin/python scripts/stt_lab_report.py data/stt-lab
