@@ -194,8 +194,10 @@ async def _analyze(session_id: int) -> dict | None:
         # The question his first new line answers; without it a short reply reads as a fragment.
         lines.insert(0, _line(rows[seen - 1]))
     system = await _system_prompt("\n".join(lines))
+    # The quality tier: this runs once every eight turns, so it can afford the stronger model and
+    # a few seconds, and that model is the one that catches recurring patterns.
     data = await llm.complete_json(system, [Message("user", "Analyse the session now. Reply with JSON only.")],
-                                   ANALYSIS_SCHEMA)
+                                   ANALYSIS_SCHEMA, tier="quality")
     result = validate(data)
 
     now = time.time()
