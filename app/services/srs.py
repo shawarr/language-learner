@@ -57,6 +57,15 @@ def _round(x: float) -> float:
     return round(x, 3)
 
 
+def preview(card: dict, now: float) -> dict[str, float]:
+    """Days until the next review for each rating, jitter-free, for the "in 4 days" label under the buttons."""
+    out = {}
+    for name, rating in (("again", AGAIN), ("hard", HARD), ("good", GOOD), ("easy", EASY)):
+        new = schedule(card, rating, now, rng=lambda: 0.5)
+        out[name] = AGAIN_DELAY_SECONDS / 86400 if rating == AGAIN else new["interval_days"]
+    return out
+
+
 async def review(vocab_id: int, rating: int, now: float | None = None) -> dict:
     """Apply one rating: update the row, log it in vocab_reviews, count it as activity. Returns the card."""
     rating = int(rating)
@@ -103,4 +112,4 @@ async def due_queue(limit: int = 20, new_cap: int | None = None, now: float | No
         else:
             queue.append(in_rotation[ri])
             ri += 1
-    return {"cards": [vocab_svc.card(r) for r in queue], "due_count": int(total)}
+    return {"cards": [{**vocab_svc.card(r), "preview": preview(r, now)} for r in queue], "due_count": int(total)}

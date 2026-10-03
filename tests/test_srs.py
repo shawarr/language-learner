@@ -73,6 +73,14 @@ def test_jitter_applies_only_above_seven_days():
     assert lo["due"] == pytest.approx(NOW + 67.5 * DAY)
 
 
+def test_preview_shows_each_rating_without_jitter():
+    again = 600 / DAY
+    assert srs.preview(NEW, NOW) == {"again": again, "hard": 1, "good": 1, "easy": 1.3}
+    mature = srs.preview(MATURE, NOW)
+    assert mature["again"] == again and mature["hard"] == 36 and mature["good"] == 75
+    assert mature["easy"] == pytest.approx(97.5), "no jitter, so the label matches what good/easy will do at rng 0.5"
+
+
 def test_invalid_rating_raises():
     for bad in (0, 5, "3"):
         with pytest.raises(ValueError):
@@ -127,6 +135,9 @@ async def test_due_queue_orders_oldest_first_and_interleaves_new(fresh_db):
     assert words == ["rev3", "rev2", "new1", "rev1", "rev0", "new0"], "every third slot is a new card, oldest due first"
     assert q["due_count"] == 6, "future cards are not due"
     assert [c["is_new"] for c in q["cards"]] == [False, False, True, False, False, True]
+    # Every card carries the interval each button would schedule (rev cards: interval 6, reps 2, ease 2.5).
+    assert q["cards"][0]["preview"] == {"again": 600 / DAY, "hard": pytest.approx(7.2), "good": 15, "easy": 19.5}
+    assert q["cards"][2]["preview"] == {"again": 600 / DAY, "hard": 1, "good": 1, "easy": 1.3}
 
 
 async def test_due_queue_caps_new_cards_and_counts_them(fresh_db, monkeypatch):
@@ -153,6 +164,7 @@ def test_review_routes(auth_client):
     vid = auth_client.post("/api/vocab", json={"word": "der Bus (die Busse)", "translation": "bus"}).json()["id"]
     due = auth_client.get("/api/vocab/due", params={"limit": 5}).json()
     assert due["due_count"] == 1 and due["cards"][0]["id"] == vid and due["cards"][0]["is_new"] is True
+    assert due["cards"][0]["preview"] == {"again": 600 / DAY, "hard": 1, "good": 1, "easy": 1.3}
     r = auth_client.post(f"/api/vocab/{vid}/review", json={"rating": 3})
     assert r.status_code == 200, r.text
     card = r.json()
