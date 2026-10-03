@@ -1,0 +1,21 @@
+services:
+  tutor:
+    build: .
+    image: german-tutor:latest
+    container_name: german-tutor
+    restart: unless-stopped
+    # Loopback only: nginx terminates TLS and proxies to this port.
+    ports:
+      - "127.0.0.1:9003:8000"
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      # The container runs as uid 1000. Keep the host dir chown 1000:1000 or every
+      # write fails with "attempt to write a readonly database" while reads still work.
+      - ./data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

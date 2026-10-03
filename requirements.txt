@@ -1,0 +1,6 @@
+fastapi>=0.142,<1
+uvicorn[standard]>=0.54,<1
+httpx>=0.28,<1
+aiosqlite>=0.22,<1
+python-multipart>=0.0.20
+edge-tts>=7.2,<8
