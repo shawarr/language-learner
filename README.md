@@ -5,14 +5,18 @@ remembers your level, your recurring mistakes and your vocabulary across session
 practice, targeted drills and spaced-repetition review. Mobile-first PWA, installable to the home
 screen, free to run on free-tier model providers.
 
-**Status: server foundation complete and deployed; the app layer is being built** — see
-`docs/TASKS.md` for the build plan and `docs/FOUNDATION.md` for what exists today.
+**Status: foundation and app layer built** — `docs/FOUNDATION.md` describes the server layer,
+`docs/TASKS.md` the app-layer spec, `docs/DESIGN.md` the frontend spec, `docs/API.md` the endpoint
+contract, and `docs/HANDOVER.md` what was built, what changed and what still needs a real phone.
 
-- Working now: auth, database, provider layer (Gemini + any OpenAI-compatible endpoint + an offline
-  fake), tiered model routing with retry and failover, speech-to-text with automatic failover,
-  text-to-speech with disk cache, prompt loader, Docker deploy, nginx config, backups, 39 tests.
-- Being built: the talk/write/drill/review screens, the curriculum, placement, checkpoints,
-  the analyzer and the progress page.
+- Talk (voice or text) with a tutor that remembers your level, recurring mistakes and due
+  vocabulary; raw transcripts you can dispute; corrections as collapsible cards; replay and slow audio.
+- Write with inline corrections and a one-level-up rewrite; Review with SM-2 spaced repetition and
+  audio on every card; Drill built from your own mistakes; Progress with the CEFR path.
+- A placement flow on first launch, a checkpoint at the end of each unit, and an analyzer that runs
+  in the background every few turns — and listens to the recordings, because the transcriber
+  quietly fixes endings.
+- Installable PWA, offline-tolerant (the shell starts without network; recordings and ratings queue).
 
 ---
 
@@ -210,6 +214,13 @@ Run this first when the tutor feels slow or keeps falling back — it distinguis
 ## Ideas not built yet
 
 Deliberately left out for now; revisit once the core is in daily use.
+
+- A "that's not what I said" that re-transcribes with the other engine instead of discarding — the
+  discard exists; a one-tap second opinion would cost one STT call.
+- A 5-minute "daily" flow as a screen of its own: the Talk start card already shows what is due and
+  the streak, but a guided review → scenario → drill loop would suit tired evenings better.
+- Keeping the tutor's corrections (not only the analyzer's) in the mistake log — they overlap
+  today, and double counting was worse than missing a few.
 
 - Streaming the tutor's reply, and synthesising the first sentence while the rest is still being
   written, to cut the perceived turn latency.
