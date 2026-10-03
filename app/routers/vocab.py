@@ -1,9 +1,9 @@
 """/api/vocab — tap-to-translate, the vocabulary list, and the SRS review queue (docs/API.md)."""
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .. import auth
-from ..services import vocab
+from ..services import srs, vocab
 
 router = APIRouter(prefix="/vocab", dependencies=[Depends(auth.require_auth)], tags=["vocab"])
 
@@ -18,6 +18,25 @@ class AddBody(BaseModel):
     translation: str
     example: str = ""
     source: str = "manual"
+
+
+class ReviewBody(BaseModel):
+    rating: int = Field(ge=1, le=4)
+
+
+@router.get("/due")
+async def due(limit: int = Query(20, ge=1, le=200)):
+    return await srs.due_queue(limit)
+
+
+@router.post("/{vocab_id}/review")
+async def review(vocab_id: int, body: ReviewBody):
+    try:
+        return await srs.review(vocab_id, body.rating)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="no such word")
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @router.post("/translate")
