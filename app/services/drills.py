@@ -94,18 +94,24 @@ async def _grade(item: dict, given: str) -> tuple[bool, str]:
     return correct, " ".join(x for x in (item["explanation"], note) if x)
 
 
-async def _touch_mistake(item: dict, correct: bool) -> None:
-    """Right → one step towards retiring the source mistake; wrong → it is still live."""
+async def _touch_mistake(item: dict, correct: bool) -> bool:
+    """Right → one step towards retiring the source mistake; wrong → it is still live.
+
+    Returns True when this answer is the one that beat the mistake (resolved reached count), so the
+    UI can acknowledge the moment; False when it was already beaten or there is no row at all.
+    """
     mid = item.get("mistake_id")
     if mid is None:
         row = await mistakes.by_category(item["category"])
         mid = row["id"] if row else None
     if mid is None:
-        return
-    if correct:
-        await mistakes.resolve(int(mid))
-    else:
+        return False
+    if not correct:
         await mistakes.fail(int(mid))
+        return False
+    before = await db.fetchone("SELECT count, resolved FROM mistakes WHERE id=?", (int(mid),))
+    await mistakes.resolve(int(mid))
+    return bool(before) and int(before["resolved"]) < int(before["count"]) <= int(before["resolved"]) + 1
 
 
 # -- generation -------------------------------------------------------------------------
@@ -223,6 +229,9 @@ async def _load(drill_id: int) -> dict:
         answers = [None] * len(items)
     if not isinstance(results, list) or len(results) != len(items):
         results = [None] * len(items)
+    for r in results:
+        if isinstance(r, dict):
+            r.setdefault("beaten", False)  # results stored before the flag existed
     return {**row, "items": items, "answers": answers, "results": results}
 
 
@@ -230,8 +239,9 @@ async def _grade_one(drill: dict, index: int, given: str) -> dict:
     """Grade one unanswered item, persist it, touch its mistake, and close the drill when it was the last."""
     item = drill["items"][index]
     correct, explanation = await _grade(item, given)
+    beaten = await _touch_mistake(item, correct)
     result = {"index": index, "correct": correct, "answer": item["answer"], "your_answer": given,
-              "explanation": explanation}
+              "explanation": explanation, "beaten": beaten}
     drill["answers"][index] = given
     drill["results"][index] = result
     finished = all(r is not None for r in drill["results"])
@@ -242,7 +252,6 @@ async def _grade_one(drill: dict, index: int, given: str) -> dict:
         "UPDATE drills SET answers=?, results=?, score=?, finished_at=? WHERE id=?",
         (json.dumps(drill["answers"], ensure_ascii=False), json.dumps(drill["results"], ensure_ascii=False),
          drill["score"], drill["finished_at"], drill["id"]))
-    await _touch_mistake(item, correct)
     if finished:
         await db.bump_activity("drill")
     return result
