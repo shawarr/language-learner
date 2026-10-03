@@ -177,6 +177,21 @@ docker compose up -d
 
 Copy a backup off the box now and then — a gzipped DB is small enough to keep anywhere.
 
+The restore path above is **tested, not assumed**: a backup was gunzipped into a throwaway
+container on a spare port, which booted, logged in, reported all 13 tables and passed
+`PRAGMA integrity_check`. Worth repeating occasionally — an untested backup is a guess:
+
+```bash
+# drill: restore the newest backup into a scratch container, leaving the live one alone
+S=$(mktemp -d) && mkdir -p "$S/data"
+gunzip -c "$(ls -1t backups/tutor-*.db.gz | head -1)" > "$S/data/tutor.db"
+chown -R 1000:1000 "$S/data"
+docker run --rm -d --name tutor-drill -p 127.0.0.1:9099:8000 -v "$S/data:/data" \
+  -e DATA_DIR=/data -e APP_PASSWORD=drill -e COOKIE_SECURE=0 -e LLM_PRIMARY=fake:fake \
+  german-tutor:latest
+sleep 6 && curl -s localhost:9099/api/health && docker stop tutor-drill
+```
+
 ## Project layout
 
 ```
