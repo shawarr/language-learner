@@ -1,10 +1,32 @@
 # The foundation you are building on
 
-Everything in this file already exists, is tested (`pytest -q`, 26 tests green) and has been
-verified running in Docker on the server. Treat it as the given: use these APIs, don't rebuild
+Everything in this file already exists, is tested (`pytest -q`, 39 tests green) and has been
+verified running against live keys in Docker on the server at https://german.shawar.xyz. Treat it as the given: use these APIs, don't rebuild
 them, and don't change their shape without saying so in your handover notes.
 
 ---
+
+## 0. Read this before you pick a model
+
+Four things cost real time to discover. They are now handled in the foundation, but you need to
+know them:
+
+1. **Gemini's free per-day quota is per model, is not published anywhere, and can be tiny.**
+   `gemini-3.8-flash` allows **20 requests per day** on the free tier — confirmed from a 429 body
+   (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`, `quotaValue: "20"`, `retryDelay: 75941s`).
+   An afternoon of testing exhausted it. The configured models avoid it; don't "upgrade" a model
+   string to a newer flagship without checking.
+2. **Gemini counts thinking tokens against `maxOutputTokens`.** A bare "Sag Hallo" spent 115 tokens
+   thinking. A 16-token budget returns *no text* and `finishReason: MAX_TOKENS`, which looks like an
+   outage. `GeminiProvider` adds `THINKING_HEADROOM` (768) on top of whatever `max_tokens` you ask
+   for, so `max_tokens` keeps meaning "how long may the answer be".
+3. **Free Gemini returns 503 "high demand" often** — 3 of 5 turns in one measured run, reproduced
+   with a minimal body, so it is not something a different request shape avoids. The router retries
+   any 5xx once before failing over.
+4. **Providers are config, not code.** Every OpenAI-compatible endpoint (Groq, OpenRouter, Cerebras,
+   Mistral, Together, a local vLLM/Ollama) is the same `OpenAICompatProvider` with a different base
+   URL. Registry in `config.OPENAI_COMPAT_PROVIDERS`; adding one is a key in the environment plus a
+   model string. Use `scripts/check_providers.py` to see what is actually alive right now.
 
 ## 1. Provider research (October 2026) — why these models
 
@@ -35,21 +57,36 @@ Numbers, not guesses. Identical prompt and JSON schema (an A1 correction task) t
 | Reliability | no failures observed | **503 "high demand" on 3 of 5 turns**, then 429 after 4 rapid calls |
 | Free limits | 30 RPM / 1 000 RPD | ~10 RPM / ~1 500 RPD |
 
-Both models handle A1–B1 German correction correctly, so **latency and reliability decide the
-conversation path**, and there Groq wins outright. Gemini's 503s are genuine upstream capacity
-("This model is currently experiencing high demand"), reproduced with a minimal request body — not
-something a different request shape avoids.
+Both models handle a single sentence's correction equally well, so **latency decides the
+conversation path** — and there Groq wins outright.
 
-**Hence three tiers instead of one primary/fallback pair** (all overridable in `.env`):
+### But Groq is not better at everything
+
+On the analyzer's actual job — spotting *recurring patterns* across a seven-turn transcript, which
+is what the whole memory system depends on — the same prompt and schema gave:
+
+| Model | Time | Patterns found |
+|---|---|---|
+| `groq:openai/gpt-oss-120b` | 1.2 s | case after prepositions **only — missed the word-order error entirely** |
+| `gemini:gemini-3.5-flash` | 8.1 s | case **and** word order (correctly explained as a V2 violation) |
+| `gemini:gemini-3.5-flash-lite` | 1.3 s | case and word order, slightly muddled wording |
+
+Groq missing "gestern ich habe viel gearbeitet" matters: a pattern the analyzer never sees never
+enters the mistake log, never surfaces in a drill, and is never taught. The analyzer runs once every
+eight turns in a background task, so 8 s there is invisible — it should use the better model.
+
+**Hence four tiers instead of one primary/fallback pair** (all overridable in `.env`):
 
 | Role | Setting | Default | Why |
 |---|---|---|---|
-| Conversation | `LLM_PRIMARY` | `groq:openai/gpt-oss-120b` | ~1 s is the difference between a conversation and a form; 30 RPM absorbs a talkative session |
-| Fallback | `LLM_FALLBACK` | `gemini:gemini-3.8-flash` | separate quota and separate outages from Groq |
-| Judgement calls | `LLM_QUALITY` | `gemini:gemini-3.8-flash` | analyzer, placement, checkpoint grading: rare, latency-tolerant, worth the stronger model. Chain: quality → primary → fallback |
+| Conversation | `LLM_PRIMARY` | `groq:openai/gpt-oss-120b` | ~1 s is the difference between a conversation and a form; 30 RPM / 1 000 RPD absorbs a talkative session |
+| Fallback | `LLM_FALLBACK` | `gemini:gemini-3.5-flash-lite` | ~0.9 s, separate quota and separate outages from Groq |
+| Judgement calls | `LLM_QUALITY` | `gemini:gemini-3.5-flash` | analyzer, placement, checkpoint grading — catches patterns Groq misses, and latency doesn't matter there. Chain: quality → primary → fallback |
 | Cheap, frequent | `LLM_FAST` | `groq:openai/gpt-oss-20b` | word translation, drill grading; its own 1 000 RPD so tapping words all evening can't eat the conversation budget |
 | Speech → text | `STT_PROVIDER` | `groq` (`whisper-large-v3`) | **0.35 s average**, and it preserves learner mistakes; see `STT-FINDINGS.md` |
 | Text → speech | `TTS_PROVIDER` | `edge` | free, no key, no quota, ~2 s a sentence, real German neural voices |
+
+None of these is `gemini-3.8-flash`: 20 requests per day (§0).
 
 Use the tiers from the app layer: `tier="quality"` for the analyzer, placement and checkpoint
 grading; `tier="fast"` for translation and drill grading; the default for talk turns.
@@ -66,19 +103,24 @@ turn would double the wait and halve the daily budget.
 
 ---
 
-## 2. Architecture decisions (and the two places I changed the brief)
+## 2. Architecture decisions (and the three places I changed the brief)
 
-The brief's architecture was followed, with two deliberate changes:
+The brief's architecture was followed, with three deliberate changes:
 
-1. **Groq Llama → `openai/gpt-oss-120b`** as the fallback, because Llama is no longer on the free
-   tier (above).
-2. **No SDKs: plain REST via `httpx`** for both Gemini and Groq. The `google-genai` SDK has churned
-   through three incompatible call shapes in a year (`generate_content` → `interactions.create`);
-   the REST `generateContent` endpoint has stayed stable, and one `httpx.AsyncClient` per provider is
-   less code than the SDK wrapper would be. `GeminiProvider._body` already has a compatibility retry:
-   on a 400 it re-sends without the newer optional fields (`thinkingConfig`, `responseJsonSchema`) and
-   puts the JSON schema in the system prompt instead, so a field being renamed upstream degrades
-   instead of breaking.
+1. **Groq Llama → `openai/gpt-oss-120b`**, because Llama left the free tier in August 2026 (above).
+2. **No SDKs: plain REST via `httpx`.** The `google-genai` SDK has churned through incompatible call
+   shapes in a year (`generate_content` → `interactions.create`); the REST `generateContent` endpoint
+   has stayed stable, and one `httpx.AsyncClient` per provider is less code than the SDK wrapper.
+   `GeminiProvider._body` has a compatibility retry: on a 400 it re-sends without the newer optional
+   fields (`thinkingConfig`, `responseJsonSchema`) and puts the JSON schema in the system prompt
+   instead, so a field being renamed upstream degrades instead of breaking.
+3. **Provider choice is configuration.** Ahmad's instruction was "I don't care about providers, even
+   if you use other companies — the important thing is they're good and free". So there is one
+   `OpenAICompatProvider` class and a registry of base URLs (`config.OPENAI_COMPAT_PROVIDERS`):
+   Groq, OpenRouter, Cerebras, Mistral, Together, plus `custom:` for anything else including a local
+   vLLM or Ollama. Switching to whatever is good and free next month is a key in `.env` and a model
+   string — no code. Only Gemini keeps its own module, because its REST shape genuinely differs and
+   it is the only one here that accepts audio straight into the chat model.
 
 Everything else is as the brief specified: FastAPI async + SQLite in a mounted volume, vanilla-JS
 PWA with no build step, single-password cookie auth, Docker + compose, keys server-side only.
@@ -132,6 +174,16 @@ Verified live: an `enum` in the JSON schema is respected by both providers, so
 `taxonomy.normalize()` on it, but it will rarely have to do anything.
 `complete_json` returns a `dict`. **Validate it before you trust it** — a free-tier model will
 occasionally return a field as a string where you asked for a list.
+
+### Adding or swapping a provider
+```python
+# config.OPENAI_COMPAT_PROVIDERS — name -> (base url, env var with the key)
+"openrouter": ("https://openrouter.ai/api/v1", "OPENROUTER_API_KEY"),
+```
+Set the key in `.env`, then point any tier at it: `LLM_PRIMARY=openrouter:some-model:free`.
+`custom:` uses `CUSTOM_LLM_BASE_URL`. A provider with no key still resolves, so a typo gives
+"api key not set" rather than "unknown provider". `scripts/check_providers.py` probes every
+configured model, the STT engine and TTS, and prints what is alive.
 
 ### `app.providers.stt.stt` — speech to text
 ```python
@@ -218,7 +270,7 @@ You do not need a server, a key or a network:
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
-.venv/bin/python -m pytest -q                      # 26 tests, all offline
+.venv/bin/python -m pytest -q                      # 39 tests, all offline
 
 # run the app with no API keys at all — the `fake` provider answers every LLM call
 DATA_DIR=./data APP_PASSWORD=dev COOKIE_SECURE=0 LLM_PRIMARY=fake:fake LLM_FALLBACK= \

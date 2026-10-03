@@ -19,7 +19,8 @@ async def health():
 @router.get("/system/status", dependencies=[Depends(auth.require_auth)])
 async def status():
     return {
-        "llm": {"primary": settings.llm_primary, "fallback": settings.llm_fallback, "fast": settings.llm_fast},
+        "llm": {"primary": settings.llm_primary, "fallback": settings.llm_fallback,
+                "quality": settings.llm_quality, "fast": settings.llm_fast},
         "stt": {"provider": settings.stt_provider, "groq_model": settings.groq_stt_model,
                 "gemini_model": settings.gemini_stt_model},
         "tts": {"provider": settings.tts_provider, "voice": settings.tts_voice,

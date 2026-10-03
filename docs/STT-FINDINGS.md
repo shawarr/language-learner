@@ -1,7 +1,8 @@
 # Does the transcriber silently fix my German?
 
-**Status: method ready, verdict pending real keys and real audio of Ahmad's voice.**
-Run on the server (the only place with the keys), then fill in §3 and set `STT_PROVIDER` in `.env`.
+**Run on the server with live keys, 2026-10-03. Verdict: `STT_PROVIDER=groq`.**
+The pitfall is real, but much narrower than feared — and the part that does leak through has a
+mitigation that costs nothing.
 
 ## 1. Why this matters
 
@@ -14,70 +15,114 @@ corrected sentence and concludes he said it correctly.
 
 Two things in the foundation hedge against it:
 
-- `WHISPER_PROMPT` is **empty by default** and a test asserts it (`test_whisper_prompt_is_empty_by_default`).
-  A Whisper `prompt` is a style example: a prompt written in clean German is an instruction to
-  produce clean German. Leave it empty.
+- `WHISPER_PROMPT` is **empty by default** and a test asserts it
+  (`test_whisper_prompt_is_empty_by_default`). A Whisper `prompt` is a style example: a prompt
+  written in clean German is an instruction to produce clean German. Leave it empty.
 - `temperature=0`, `language="de"`, `response_format=json` — no creative latitude, no language
-  guessing (language auto-detection on broken German sometimes lands on Dutch).
+  guessing (auto-detection on broken German sometimes lands on Dutch).
 
-## 2. The method
+## 2. Method
+
+11 clips of German, each containing one deliberate, unambiguous error (plus one correct control),
+synthesised with four different edge-tts voices at `-15%` rate, then put through both engines and
+diffed word-by-word against the exact text spoken.
 
 ```bash
-# on the server, with GROQ_API_KEY and GEMINI_API_KEY in .env
-.venv/bin/python scripts/stt_compare.py clip.m4a --expect "ich habe gestern in die stadt gegangen"
-.venv/bin/python scripts/stt_compare.py samples/      # a directory, with a sidecar clip.txt per clip
+.venv/bin/python scripts/make_stt_clips.py     # -> samples/*.mp3 + .txt + .category sidecars
+.venv/bin/python scripts/stt_compare.py samples/
 ```
 
-It runs both engines on the same audio and prints a word-level diff against what you actually said:
-`-expected  +what the engine produced`. Anything the engine "improved" shows up as a diff pair.
+**Caveat, stated plainly:** synthesised speech is not Ahmad's accent. What this design *does* test
+cleanly is the thing we actually fear — the words are unambiguous in the audio, so any difference in
+the transcript is the engine editing rather than mishearing. Accent robustness still needs real
+recordings; re-run `stt_compare.py` against his own voice once there are a few sessions' worth, and
+append the results here.
 
-Record **at least 8 clips in Ahmad's own voice**, each containing a deliberate, specific error, and
-write the exact words said into the sidecar `.txt`. Suggested set — one per common category, because
-engines fix some error types far more eagerly than others:
+## 3. Results — Groq `whisper-large-v3`, no prompt, `language=de`
 
-| # | Say (deliberately wrong) | Error type | What a "fixing" engine would write |
-|---|---|---|---|
-| 1 | ich habe gestern in die Stadt gegangen | verb_conjugation (haben/sein) | ich **bin** gestern … |
-| 2 | ich fahre mit den Bus zur Arbeit | case after `mit` | mit **dem** Bus |
-| 3 | das Termin ist am Montag | gender | **der** Termin |
-| 4 | ich habe ein Problem mit die Heizung | case/article | mit **der** Heizung |
-| 5 | gestern ich habe viel gearbeitet | word_order | gestern **habe ich** … |
-| 6 | ich muss nach Hause gehen weil ich bin müde | subordinate word order | … weil ich müde **bin** |
-| 7 | ich spreche nicht gut Deutsch, ähm, ich lerne noch | fillers | (ähm dropped) |
-| 8 | ich habe das Deployment gemacht, es war ein outage | English word mid-sentence | translated or dropped |
+**8 of 11 clips transcribed exactly as spoken. Average latency 0.35 s.**
 
-Also record one clip at normal conversational speed with a mild accent and no deliberate error, to
-check the engines aren't inventing errors (a false positive is just as damaging: the app would drill
-a mistake he never made).
-
-Judge on: **mistakes preserved** (the main criterion), fillers preserved, English words left as
-English, no invented errors, latency, and quota cost.
-
-## 3. Results
-
-_To fill in after the run:_
-
-| Clip | Error type | Groq `whisper-large-v3` | Gemini verbatim | Preserved? |
+| Clip | Category | Said | Transcribed | Preserved? |
 |---|---|---|---|---|
-| 1 | | | | |
+| 01 | verb_conjugation | Ich **habe** gestern in die Stadt gegangen. | identical | ✅ |
+| 02 | case | Ich fahre mit **den** Bus zur Arbeit. | mit **dem** Bus | ❌ **fixed** |
+| 03 | gender | **Das** Termin ist am Montag. | identical | ✅ |
+| 04 | case | Ich habe ein Problem mit **die** Heizung. | identical | ✅ |
+| 05 | word_order | **Gestern ich habe** viel gearbeitet. | identical | ✅ |
+| 06 | word_order | …weil **ich bin müde**. | identical | ✅ |
+| 07 | fillers | …Deutsch, **ähm**, ich lerne noch. | identical | ✅ |
+| 08 | vocabulary | …es war ein **outage**. | ein "**Autage**" | ⚠️ misheard, not corrected |
+| 09 | adjective_ending | in **eine klein** Wohnung | in **einer Klein**wohnung | ❌ **fixed** |
+| 10 | negation | Ich habe **nicht** Zeit heute Abend. | identical | ✅ |
+| 11 | *control: correct German* | Ich arbeite als DevOps-Ingenieur… | identical | ✅ no invented error |
 
-**Verdict:** _which engine preserves mistakes better, and the `STT_PROVIDER` value set as a result._
+### The pattern, and it is a sharp one
 
-**Latency:** _measured seconds per 10 s clip, both engines._
+Whisper **does not restructure sentences**. Every structural error survived: the wrong auxiliary
+(`habe gegangen`), wrong gender (`das Termin`), inverted word order (`Gestern ich habe`), the
+un-inverted subordinate clause (`weil ich bin müde`), wrong negation, and the filler `ähm`. It also
+invented nothing on the correct control.
 
-**Notes:** _anything surprising — e.g. one engine strong on word order but keen to fix articles._
+What it *does* repair is **unstressed inflection where the wrong and right forms are nearly
+homophonous**: `den`→`dem`, `eine klein`→`einer Klein`. In fast speech those differ by a single
+reduced vowel, so the model resolves the acoustic ambiguity using its prior — which is correct
+German. It is not "fixing grammar"; it is guessing a mumbled syllable and guessing it right.
 
-## 4. If both engines turn out to fix grammar
+That is a narrow leak, but an awkward one: case and adjective endings are exactly where a beginner
+lives. Hence the mitigation in §5.
 
-Fallbacks, in order of preference:
+Clip 08 is worth noting separately: the English word "outage" came back as "Autage". Not a
+correction — a genuine mishearing of English inside German audio, with `language=de` set. Expect
+English technical words in Ahmad's speech (he's a DevOps engineer) to come back mangled. That is a
+transcription artefact and must never be logged as a vocabulary mistake; the prompt in
+`app/prompts/tutor_talk.md` already says to ignore obvious speech-to-text noise.
 
-1. Keep the better engine and let the **analyzer judge the audio**, not the transcript: Gemini Flash
-   accepts inline audio (already wired — `LLMRequest.audio`), so the analysis call can hear the
-   original. Costs no extra request; the transcript stays what the learner sees.
-2. Ask the transcriber for both: a verbatim transcript *and* its own corrected version, and keep the
-   divergence as a mistake signal.
-3. Accept the loss on pronunciation/endings and rely on the Write and Drill modes for the grammar
-   signal — the weakest option, and the one to argue against.
+## 4. Results — Gemini verbatim transcription
 
-Whatever the outcome: **the app always shows the raw transcript**, so a transcription artefact is
-visible as such and never silently becomes "Ahmad's German".
+Where it ran, the strict verbatim instruction worked **perfectly**: clips 01, 05 and a later
+re-probe of 01 came back exactly as spoken, including `habe … gegangen` and `Gestern ich habe`.
+On faithfulness alone Gemini looks at least as good as Whisper, possibly better — it has no
+acoustic guess to make, because it is reading the words rather than decoding phonemes.
+
+It is nonetheless **unusable as the primary engine**, for two measured reasons:
+
+- **4.5 – 8.6 s per clip** against Groq's 0.35 s. That is more than ten times slower, on the one
+  call sitting directly between the learner releasing the mic and the tutor answering.
+- **Free-tier quota makes it unreliable at conversation rate.** A full 11-clip pass could not
+  complete: every clip returned 429 even with 20-second backoffs between attempts, because
+  `gemini-3.8-flash`'s free allowance turns out to be **20 requests per day** (confirmed from the
+  429 body: `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, `quotaValue: "20"`,
+  `retryDelay: 75941s`). `GEMINI_STT_MODEL` was moved to `gemini-3.5-flash-lite`, which has a
+  usable allowance and transcribed clip 01 verbatim and correctly.
+
+So Gemini stays where its strengths pay and its weaknesses don't: the automatic STT fallback, and
+the audio-aware analysis path in §5 — a call that happens once every eight turns, not once a turn.
+
+## 5. The mitigation — audio-aware analysis, at no extra cost
+
+Since the leak is confined to endings that Whisper can't hear reliably, the fix is to let the
+analyzer hear the original audio rather than only the transcript:
+
+- `LLMRequest(audio=..., audio_mime=...)` is already wired, and `complete_json` accepts
+  `audio`/`audio_mime`. The Gemini path re-encodes browser recordings to 16 kHz mono mp3 with ffmpeg
+  automatically.
+- The analyzer runs once every 8 turns, not per turn, so attaching audio costs **no extra request** —
+  it is the same call, and latency there is invisible to the conversation.
+- The transcript stays what the learner sees; the audio is the ground truth for endings and
+  pronunciation.
+
+Specified as a requirement for the analyzer in `docs/TASKS.md` task A3.
+
+## 6. Settings this produced
+
+```bash
+STT_PROVIDER=groq              # 0.35s, preserves structural errors, invents nothing
+GROQ_STT_MODEL=whisper-large-v3
+WHISPER_PROMPT=                # must stay empty
+GEMINI_STT_MODEL=gemini-3.5-flash-lite   # fallback + audio-aware analysis (NOT 3.8-flash: 20/day)
+```
+
+And one product rule that follows from clip 02 and clip 08 together: **the app always shows the raw
+transcript**, so when the transcriber is the one at fault it is visible as such and never silently
+becomes "Ahmad's German". The Talk screen also gives him a way to say "that's not what I said" and
+discard the turn (`docs/DESIGN.md` §4).

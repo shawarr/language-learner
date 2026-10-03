@@ -266,6 +266,20 @@ async def test_compare_reports_errors_instead_of_raising(monkeypatch):
     assert out["groq"].startswith("ERROR:") and out["gemini"].startswith("ERROR:")
 
 
+@pytest.mark.asyncio
+async def test_tts_reports_an_unusable_cache_dir_as_a_provider_error(monkeypatch, tmp_path):
+    """A missing or unwritable audio dir must be a retryable 503, not a FileNotFoundError 500."""
+    from app.config import settings
+    from app.providers import tts as tts_mod
+
+    # A path under a regular file can never be created.
+    blocker = tmp_path / "not-a-dir"
+    blocker.write_text("x")
+    monkeypatch.setattr(settings, "audio_dir", blocker / "audio")
+    with pytest.raises(ProviderError, match="not usable"):
+        await tts_mod.synthesize("Hallo")
+
+
 def test_pcm_to_wav_header():
     from app.providers.tts import _pcm_to_wav
 
@@ -335,3 +349,113 @@ def test_provider_error_becomes_a_retryable_503(auth_client, monkeypatch):
     monkeypatch.setattr(tts_mod, "synthesize", fails)
     r = auth_client.get("/api/tts", params={"text": "Hallo"})
     assert r.status_code == 503 and r.json()["retryable"] is True
+
+
+def test_gemini_adds_thinking_headroom_to_the_token_budget():
+    """Gemini counts thinking tokens against maxOutputTokens; a caller's max_tokens means
+    'how long may the answer be', so the provider tops the budget up."""
+    from app.providers.gemini import THINKING_HEADROOM, GeminiProvider
+
+    p = GeminiProvider("k", 10)
+    req = LLMRequest(system="s", messages=[Message("user", "hi")], max_tokens=200)
+    assert p._body(req, full=True)["generationConfig"]["maxOutputTokens"] == 200 + THINKING_HEADROOM
+    # The compat body drops thinkingConfig, so it must not pay for headroom either.
+    assert p._body(req, full=False)["generationConfig"]["maxOutputTokens"] == 200
+
+
+def test_gemini_compat_body_moves_the_schema_into_the_prompt():
+    """The retry path has to keep asking for JSON, or a 400 on responseJsonSchema turns into prose."""
+    from app.providers.gemini import GeminiProvider
+
+    p = GeminiProvider("k", 10)
+    schema = {"type": "object", "properties": {"reply": {"type": "string"}}}
+    req = LLMRequest(system="s", messages=[Message("user", "hi")], json_schema=schema)
+
+    full = p._body(req, full=True)
+    assert full["generationConfig"]["responseJsonSchema"] == schema
+    assert full["generationConfig"]["responseMimeType"] == "application/json"
+
+    compat = p._body(req, full=False)
+    assert "responseJsonSchema" not in compat["generationConfig"]
+    assert compat["generationConfig"]["responseMimeType"] == "application/json"
+    assert "JSON Schema" in compat["systemInstruction"]["parts"][0]["text"]
+
+
+def test_gemini_attaches_audio_to_the_last_user_message_only():
+    from app.providers.gemini import GeminiProvider
+
+    p = GeminiProvider("k", 10)
+    req = LLMRequest(system="", messages=[Message("user", "a"), Message("assistant", "b"),
+                                          Message("user", "c")],
+                     audio=b"xx", audio_mime="audio/mp4")
+    contents = p._body(req, full=True)["contents"]
+    assert len(contents[0]["parts"]) == 1
+    assert len(contents[2]["parts"]) == 2
+    assert contents[2]["parts"][1]["inlineData"]["mimeType"] == "audio/mp4"
+    assert contents[1]["role"] == "model", "assistant must be mapped to gemini's 'model' role"
+
+
+def test_quota_detail_extracts_the_per_model_day_limit():
+    """The 20-requests-per-day wall on some models is only visible in this body."""
+    import httpx
+
+    from app.providers.gemini import _quota_detail
+
+    r = httpx.Response(429, json={"error": {"details": [
+        {"@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": [
+            {"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+             "quotaDimensions": {"model": "gemini-3.8-flash"}, "quotaValue": "20"}]},
+        {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "75941s"}]}})
+    detail = _quota_detail(r)
+    assert "limit=20" in detail and "gemini-3.8-flash" in detail and "75941s" in detail
+    assert _quota_detail(httpx.Response(429, text="not json")) == ""
+
+
+# --- provider registry ------------------------------------------------------
+def test_any_openai_compatible_endpoint_is_config_only():
+    """Swapping to whatever is good and free today should need a key and a model string, no code."""
+    from app.config import OPENAI_COMPAT_PROVIDERS
+
+    router = LLMRouter()
+    for name in ("groq", "openrouter", "cerebras", "mistral", "together"):
+        assert name in OPENAI_COMPAT_PROVIDERS
+        provider, model = router._parse(f"{name}:some-model")
+        assert provider.name == name and model == "some-model"
+    assert router._parse("gemini:x")[0].name == "gemini"
+
+
+def test_unknown_provider_names_the_known_ones(monkeypatch):
+    router = LLMRouter()
+    with pytest.raises(ValueError, match="not configured"):
+        router._parse("nope:model")
+
+
+def test_custom_provider_needs_a_base_url(monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "custom_llm_base_url", "")
+    assert "custom" not in LLMRouter()._providers
+
+    monkeypatch.setattr(settings, "custom_llm_base_url", "http://localhost:11434/v1")
+    provider, model = LLMRouter()._parse("custom:qwen3")
+    assert provider.base_url == "http://localhost:11434/v1" and model == "qwen3"
+
+
+@pytest.mark.asyncio
+async def test_missing_key_is_a_clear_retryable_error():
+    from app.providers.openai_compat import OpenAICompatProvider
+
+    p = OpenAICompatProvider("openrouter", "https://x/v1", "", 10)
+    with pytest.raises(ProviderError, match="api key not set"):
+        await p.complete("m", LLMRequest(system="", messages=[Message("user", "hi")]))
+
+
+@pytest.mark.asyncio
+async def test_openai_compat_rejects_audio_with_a_permanent_error():
+    """Only Gemini takes audio into the chat model; failing over on this would be pointless."""
+    from app.providers.openai_compat import OpenAICompatProvider
+
+    p = OpenAICompatProvider("groq", "https://x/v1", "k", 10)
+    with pytest.raises(ProviderError) as e:
+        await p.complete("m", LLMRequest(system="", messages=[Message("user", "hi")], audio=b"x"))
+    assert e.value.retryable is False

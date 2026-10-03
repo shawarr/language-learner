@@ -10,14 +10,15 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 from typing import Any
 
-from ..config import settings
+from ..config import OPENAI_COMPAT_PROVIDERS, settings
 from .base import LLMProvider, LLMRequest, LLMResponse, Message, ProviderError, RateLimited
 from .fake import FakeProvider
 from .gemini import GeminiProvider
-from .groq import GroqProvider
+from .openai_compat import OpenAICompatProvider
 
 log = logging.getLogger(__name__)
 
@@ -29,15 +30,30 @@ class LLMUnavailable(Exception):
 class LLMRouter:
     def __init__(self) -> None:
         self.gemini = GeminiProvider(settings.gemini_api_key, settings.llm_timeout)
-        self.groq = GroqProvider(settings.groq_api_key, settings.llm_timeout)
         self.fake = FakeProvider()
-        self._providers: dict[str, LLMProvider] = {"gemini": self.gemini, "groq": self.groq, "fake": self.fake}
+        self._providers: dict[str, LLMProvider] = {"gemini": self.gemini, "fake": self.fake}
+        for name, (base_url, key_env) in OPENAI_COMPAT_PROVIDERS.items():
+            url = settings.custom_llm_base_url if name == "custom" else base_url
+            key = os.environ.get(key_env, "").strip()
+            # Registered even without a key so a misconfigured model string still produces a clear
+            # "api key not set" instead of "unknown provider"; `custom` needs its URL to mean anything.
+            if url:
+                self._providers[name] = OpenAICompatProvider(name, url, key, settings.llm_timeout)
+
+    @property
+    def groq(self) -> OpenAICompatProvider:
+        """Groq by name: STT and the health check reach for whisper specifically."""
+        return self._providers["groq"]  # type: ignore[return-value]
+
+    def provider(self, name: str) -> LLMProvider:
+        if name not in self._providers:
+            raise ValueError(f"provider '{name}' is not configured "
+                             f"(known: {', '.join(sorted(self._providers))})")
+        return self._providers[name]
 
     def _parse(self, spec: str) -> tuple[LLMProvider, str]:
         provider, _, model = spec.partition(":")
-        if provider not in self._providers:
-            raise ValueError(f"unknown LLM provider in '{spec}'")
-        return self._providers[provider], model or "fake"
+        return self.provider(provider), model or "fake"
 
     def _chain(self, tier: str) -> list[str]:
         """Which models to try, in order. Unknown tiers fall back to the conversation chain."""

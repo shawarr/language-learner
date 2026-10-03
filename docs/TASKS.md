@@ -236,6 +236,25 @@ ANALYSIS_SCHEMA = {
 - The prompt must include `taxonomy.describe_for_prompt()` so the slugs match the DB, and must say:
   judge the learner's German from the **raw transcript**, ignoring transcription noise, and never
   invent a mistake to fill the list.
+- Use `tier="quality"` for this call — it runs once every 8 turns, so it can afford the stronger
+  model and a few seconds.
+
+**Audio-aware analysis (do this, it is not optional).** The transcription test
+(`docs/STT-FINDINGS.md`) found that Whisper reliably preserves structural errors but silently
+repairs *unstressed inflection* — it turned "mit **den** Bus" into "mit **dem** Bus" and
+"in **eine klein** Wohnung" into "in **einer Klein**wohnung". Those are case and adjective-ending
+errors: precisely a beginner's most common mistakes. Judging them from the transcript alone would
+miss them systematically.
+
+So when the slice being analysed contains voice turns, attach the audio to the analyzer call:
+`LLMRequest(audio=..., audio_mime=...)` is already wired (`complete_json` takes `audio`/`audio_mime`),
+and the Gemini path re-encodes to mp3 with ffmpeg automatically. Store the recordings for the session
+under `DATA_DIR/audio/turns/` (add a column via `db.MIGRATIONS` for the path) and delete them once
+the session has been analysed — they are only needed until then, and keeping every recording forever
+would grow the volume without a reason. The prompt should say that the audio is the ground truth for
+pronunciation and endings, and the transcript is what the learner saw.
+
+This costs **no extra request** — it is the same analyzer call, with audio attached.
 
 **Tests:** two sessions with the same pattern produce one `mistakes` row with `count=2`; examples
 capped at 5; deltas clamped; `analyzed_count` advances and a second run re-analyses nothing; a model
