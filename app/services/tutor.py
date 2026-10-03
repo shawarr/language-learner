@@ -11,6 +11,7 @@ import asyncio
 import json
 import logging
 import time
+from pathlib import Path
 
 from fastapi import HTTPException
 
@@ -19,6 +20,7 @@ from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
 from ..providers.llm import LLMUnavailable, llm
+from ..providers.stt import normalize_mime
 from ..taxonomy import CATEGORY_SLUGS, normalize
 from . import analyzer, curriculum, profile, vocab
 
@@ -207,8 +209,39 @@ async def start_session(mode: str = "talk", scenario_id: str | None = None) -> d
     return {"session": session_json(await _load(session_id)), "opening_turn": turn_json(None, message_id, turn)}
 
 
+def turns_dir() -> Path:
+    return settings.audio_dir / "turns"
+
+
+def _write_file(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+
+
+async def _keep_recording(session_id: int, message_id: int, audio: bytes, ext: str) -> None:
+    """The analyzer listens to the recording later, because the transcript hides the endings he got
+    wrong. A failed save only means that analysis runs text-only, so it never fails the turn."""
+    path = turns_dir() / f"{session_id}-{message_id}.{ext}"
+    try:
+        await asyncio.to_thread(_write_file, path, audio)
+        await db.execute("UPDATE messages SET audio_path=? WHERE id=?", (str(path), message_id))
+    except OSError:
+        log.exception("could not keep the recording of message %s", message_id)
+
+
+async def _sweep_audio(session_id: int) -> None:
+    """Nothing in a session is ever listened to again once its final analysis is done."""
+    rows = await db.fetchall("SELECT audio_path FROM messages WHERE session_id=? AND audio_path IS NOT NULL",
+                             (session_id,))
+    analyzer.discard_audio([r["audio_path"] for r in rows])
+    await db.execute("UPDATE messages SET audio_path=NULL WHERE session_id=?", (session_id,))
+    # A file whose row is gone (a discarded turn whose delete failed) is only findable by name.
+    analyzer.discard_audio(turns_dir().glob(f"{session_id}-*"))
+
+
 async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
-                    transcript_raw: str | None = None, stt_provider: str | None = None) -> dict:
+                    transcript_raw: str | None = None, stt_provider: str | None = None,
+                    audio: bytes | None = None, audio_mime: str | None = None, audio_ext: str | None = None) -> dict:
     session = await _load(session_id)
     if session["ended_at"] is not None:
         raise HTTPException(status_code=409, detail="session has ended")
@@ -237,11 +270,13 @@ async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
         await db.conn.rollback()
         raise
     await db.bump_activity("talk_turn")
+    voice = input_kind == "voice"
+    if voice and audio:
+        await _keep_recording(session_id, user_message_id, audio, audio_ext or normalize_mime(audio_mime)[0])
     # One learner, one conversation at a time: the count read above plus this turn is the real one.
     turns = int(session["user_turns"] or 0) + 1
     if settings.analyze_every_turns > 0 and turns % settings.analyze_every_turns == 0:
         schedule_analysis(session_id)
-    voice = input_kind == "voice"
     return turn_json(user_message_id, message_id, turn,
                      transcript=transcript_raw if voice else None, transcript_provider=stt_provider if voice else None)
 
@@ -254,9 +289,11 @@ async def end_session(session_id: int) -> dict:
     try:
         await analyzer.analyze_session(session_id)
     except Exception:
-        # The session stays closed; catch_up() picks it up when the next session starts.
+        # The session stays closed, its recordings too: catch_up() picks it up when the next
+        # session starts.
         log.exception("analysis at the end of session %s failed", session_id)
         return {"summary": session["summary"] or "", "analyzed": False}
+    await _sweep_audio(session_id)
     row = await _load(session_id)
     return {"summary": row["summary"] or "", "analyzed": True}
 

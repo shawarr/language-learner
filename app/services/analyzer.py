@@ -11,12 +11,16 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shutil
+import tempfile
 import time
+from collections.abc import Iterable
+from pathlib import Path
 
 from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
-from ..providers.llm import llm
+from ..providers.llm import LLMUnavailable, llm
 from ..taxonomy import CATEGORY_SLUGS, describe_for_prompt, normalize
 from . import curriculum, mistakes, profile, vocab
 
@@ -28,6 +32,9 @@ ROLLING_SUMMARY_WORDS = 120
 SESSION_SUMMARY_WORDS = 80
 KNOWN_MISTAKES = 20
 NONE_YET = "(none yet)"
+# Gemini takes the recording inline in the request body; a few minutes of 48 kbps mono mp3 is far
+# below this, so hitting it means something is wrong and text-only is the safe answer.
+MAX_AUDIO_BYTES = 15 * 1024 * 1024
 
 ANALYSIS_SCHEMA = {
     "type": "object",
@@ -154,7 +161,16 @@ def _line(row: dict) -> str:
     return f"Ahmad: {spoken or row['content']}"
 
 
-async def _system_prompt(transcript: str) -> str:
+def _audio_note(attached: int, spoken: int) -> str:
+    """What the model is told about the recording; the rules for using it live in the prompt file."""
+    if not attached:
+        return "Not attached."
+    if attached < spoken:
+        return f"Attached: {attached} of his {spoken} spoken turns, in order (the others were not kept)."
+    return f"Attached: his {attached} spoken turns, in order."
+
+
+async def _system_prompt(transcript: str, audio_note: str) -> str:
     unit = await curriculum.current_unit()
     p = await profile.get_profile()
     known = await mistakes.all_open(KNOWN_MISTAKES)
@@ -167,7 +183,50 @@ async def _system_prompt(transcript: str) -> str:
         known_mistakes="\n".join(f"{m['category']}: {m['pattern']}" for m in known) or NONE_YET,
         rolling_summary=" ".join(p["rolling_summary"].split()) or NONE_YET,
         transcript=transcript,
+        audio=audio_note,
     )
+
+
+# -- the recordings ---------------------------------------------------------------
+def discard_audio(paths: Iterable[str | Path | None]) -> None:
+    """Best effort: a recording that outlives its analysis is a leak, never an error."""
+    for p in paths:
+        if not p:
+            continue
+        try:
+            Path(p).unlink(missing_ok=True)
+        except OSError:
+            log.warning("could not delete %s", p)
+
+
+async def _ffmpeg(*args: str) -> bool:
+    proc = await asyncio.create_subprocess_exec("ffmpeg", "-nostdin", "-loglevel", "error", "-y", *args)
+    await proc.wait()
+    return proc.returncode == 0
+
+
+async def build_audio(clips: list[Path]) -> bytes | None:
+    """The clips as one 16 kHz mono mp3, in order. None when ffmpeg is missing or fails: the analysis
+    then runs text-only, which is still worth doing. Each clip is re-encoded first because the
+    concat demuxer needs identical streams, and the phone sends whatever MediaRecorder picked."""
+    if not clips or not shutil.which("ffmpeg"):
+        return None
+    with tempfile.TemporaryDirectory() as d:
+        parts: list[Path] = []
+        for i, src in enumerate(clips):
+            dst = Path(d) / f"part{i}.mp3"
+            if not await _ffmpeg("-i", str(src), "-ac", "1", "-ar", "16000", "-b:a", "48k", str(dst)):
+                log.warning("ffmpeg could not convert %s", src)
+                return None
+            parts.append(dst)
+        listing = Path(d) / "list.txt"
+        listing.write_text("".join(f"file '{p}'\n" for p in parts), encoding="utf-8")
+        out = Path(d) / "out.mp3"
+        if not await _ffmpeg("-f", "concat", "-safe", "0", "-i", str(listing), "-ac", "1", "-ar", "16000",
+                             "-b:a", "48k", str(out)) or not out.exists():
+            log.warning("ffmpeg could not concatenate %d clips", len(parts))
+            return None
+        return out.read_bytes()
 
 
 async def analyze_session(session_id: int) -> dict | None:
@@ -193,11 +252,30 @@ async def _analyze(session_id: int) -> dict | None:
     if seen and rows[seen - 1]["role"] == "assistant":
         # The question his first new line answers; without it a short reply reads as a fragment.
         lines.insert(0, _line(rows[seen - 1]))
-    system = await _system_prompt("\n".join(lines))
+    transcript = "\n".join(lines)
+    # The transcript hides what Whisper repaired ("mit den Bus" came out as "mit dem Bus"), so the
+    # model also hears the recordings. Same call, nothing extra on the quota.
+    spoken = [r for r in new if r.get("input_kind") == "voice" and r.get("audio_path")]
+    clips = [Path(r["audio_path"]) for r in spoken if Path(r["audio_path"]).is_file()]
+    audio = await build_audio(clips) if clips else None
+    if audio and len(audio) > MAX_AUDIO_BYTES:
+        log.warning("session %s: %d bytes of audio is over the inline limit, analysing text-only", session_id, len(audio))
+        audio = None
+    system = await _system_prompt(transcript, _audio_note(len(clips) if audio else 0, len(spoken)))
+    ask = [Message("user", "Analyse the session now. Reply with JSON only.")]
     # The quality tier: this runs once every eight turns, so it can afford the stronger model and
     # a few seconds, and that model is the one that catches recurring patterns.
-    data = await llm.complete_json(system, [Message("user", "Analyse the session now. Reply with JSON only.")],
-                                   ANALYSIS_SCHEMA, tier="quality")
+    try:
+        data = await llm.complete_json(system, ask, ANALYSIS_SCHEMA, tier="quality",
+                                       audio=audio, audio_mime="audio/mpeg" if audio else None)
+    except LLMUnavailable:
+        if audio is None:
+            raise
+        # Only text-only providers answered (OpenAI-compatible chat models reject audio). A
+        # text-only analysis still beats none.
+        log.warning("session %s: analysis with audio failed, retrying text-only", session_id)
+        system = await _system_prompt(transcript, _audio_note(0, len(spoken)))
+        data = await llm.complete_json(system, ask, ANALYSIS_SCHEMA, tier="quality")
     result = validate(data)
 
     now = time.time()
@@ -212,10 +290,15 @@ async def _analyze(session_id: int) -> dict | None:
         await db.conn.execute(
             "UPDATE sessions SET summary=?, meta=?, analyzed_count=? WHERE id=?",
             (result["session_summary"] or session["summary"], json.dumps(meta, ensure_ascii=False), len(rows), session_id))
+        if spoken:
+            # Heard once, never again: the recordings go with the analysis that consumed them.
+            await db.conn.execute(f"UPDATE messages SET audio_path=NULL WHERE id IN ({','.join('?' * len(spoken))})",
+                                  tuple(r["id"] for r in spoken))
         await db.conn.commit()
     except Exception:
         await db.conn.rollback()
         raise
+    discard_audio(r["audio_path"] for r in spoken)
     await profile.apply_skill_deltas(result["skill_deltas"])
     await profile.add_facts(result["facts"])
     if result["rolling_summary"]:

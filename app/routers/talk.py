@@ -40,9 +40,12 @@ async def turn(request: Request):
         if not isinstance(file, UploadFile):
             raise HTTPException(status_code=422, detail="file is required")
         session_id = _session_id(form.get("session_id"))
-        t = await speech.transcribe_upload(file)  # 400 on silence, before any row is written
+        audio, mime, ext = await speech.read_upload(file)
+        t = await speech.transcribe_audio(audio, mime, f"clip.{ext}")  # 400 on silence, before any row is written
+        # The bytes ride along: the analyzer listens to them later, because the transcript alone
+        # hides the endings he got wrong.
         return await tutor.take_turn(session_id, t.text, input_kind="voice", transcript_raw=t.text,
-                                     stt_provider=t.provider)
+                                     stt_provider=t.provider, audio=audio, audio_mime=mime, audio_ext=ext)
     try:
         body = await request.json()
     except ValueError:

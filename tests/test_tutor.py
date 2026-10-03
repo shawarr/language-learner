@@ -268,6 +268,46 @@ async def test_start_session_catches_up_a_session_left_unanalysed(fresh_db, monk
     assert row["analyzed_count"] == 3 and row["summary"] == ANALYSIS["session_summary"]
 
 
+async def _voice_turn(sid: int, text: str, audio: bytes = b"\x1aE\xdf\xa3", **kw) -> dict:
+    return await tutor.take_turn(sid, text, input_kind="voice", transcript_raw=text, stt_provider="groq",
+                                 audio=audio, **kw)
+
+
+async def test_voice_turn_keeps_the_recording_for_the_analyzer(fresh_db):
+    FakeProvider.canned = TURN
+    sid = (await tutor.start_session())["session"]["id"]
+    spoken = await _voice_turn(sid, "ich habe gegangen", b"\x00\x01", audio_mime="audio/mp4")
+    row = await fresh_db.fetchone("SELECT audio_path FROM messages WHERE id=?", (spoken["user_message_id"],))
+    expected = tutor.turns_dir() / f"{sid}-{spoken['user_message_id']}.m4a"
+    assert row["audio_path"] == str(expected) and expected.read_bytes() == b"\x00\x01", "extension from the mime when none is given"
+    typed = await tutor.take_turn(sid, "Hallo")
+    assert (await fresh_db.fetchone("SELECT audio_path FROM messages WHERE id=?", (typed["user_message_id"],)))["audio_path"] is None
+
+
+async def test_end_session_sweeps_the_recordings_after_a_successful_analysis(fresh_db, monkeypatch):
+    FakeProvider.canned = TURN
+    sid = (await tutor.start_session())["session"]["id"]
+    spoken = await _voice_turn(sid, "ich habe gegangen", audio_ext="webm")
+    kept = tutor.turns_dir() / f"{sid}-{spoken['user_message_id']}.webm"
+    stray = tutor.turns_dir() / f"{sid}-999.webm"
+    stray.write_bytes(b"orphan")
+
+    async def boom(session_id):
+        raise LLMUnavailable("down")
+
+    monkeypatch.setattr(analyzer, "analyze_session", boom)
+    assert (await tutor.end_session(sid))["analyzed"] is False
+    assert kept.exists(), "a failed analysis keeps the recording for catch_up()"
+
+    async def nothing_new(session_id):
+        return None
+
+    monkeypatch.setattr(analyzer, "analyze_session", nothing_new)
+    assert (await tutor.end_session(sid))["analyzed"] is True
+    assert not kept.exists() and not stray.exists()
+    assert (await fresh_db.fetchone("SELECT audio_path FROM messages WHERE id=?", (spoken["user_message_id"],)))["audio_path"] is None
+
+
 async def test_get_session_and_recent_sessions(fresh_db):
     FakeProvider.canned = TURN
     assert await tutor.get_session(1) is None
@@ -367,6 +407,8 @@ def test_voice_turn_returns_the_raw_transcript(auth_client, monkeypatch):
     assert user["input_kind"] == "voice" and user["stt_provider"] == "groq"
     assert user["transcript_raw"] == "ich habe gegangen" and user["content"] == "ich habe gegangen"
     assert FakeProvider.calls[-1].messages[-1].content == "ich habe gegangen", "the raw transcript goes to the tutor as is"
+    kept = tutor.turns_dir() / f"{sid}-{turn['user_message_id']}.webm"
+    assert kept.read_bytes() == b"\x1aE\xdf\xa3fake", "the recording waits for the analyzer"
 
 
 def test_silent_recording_is_a_400_with_no_rows(auth_client, monkeypatch):

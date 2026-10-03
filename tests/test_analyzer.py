@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import time
+from pathlib import Path
 
 import pytest
 
 from app.db import loads
 from app.prompts import placeholders
 from app.providers.fake import FakeProvider
+from app.providers.llm import LLMUnavailable
 from app.services import analyzer, mistakes, profile
 
 ANALYSIS = {
@@ -35,6 +37,30 @@ async def seed(db, lines=LINES, *, ended=True, voice=False):
         await db.execute("INSERT INTO messages (session_id, role, content, transcript_raw, input_kind, created_at) "
                          "VALUES (?, ?, ?, ?, ?, ?)", (sid, role, content, content if kind == "voice" else None, kind, now))
     return sid
+
+
+async def attach(db, sid: int, tmp_path: Path) -> list[str]:
+    """A recording file per user message of the session, as the talk turn would have kept it."""
+    paths = []
+    for r in await db.fetchall("SELECT id FROM messages WHERE session_id=? AND role='user' ORDER BY id", (sid,)):
+        p = tmp_path / f"{sid}-{r['id']}.webm"
+        p.write_bytes(b"\x1aE\xdf\xa3")
+        await db.execute("UPDATE messages SET audio_path=? WHERE id=?", (str(p), r["id"]))
+        paths.append(str(p))
+    return paths
+
+
+@pytest.fixture
+def fake_build(monkeypatch):
+    """Stands in for ffmpeg: records which clips it was handed and returns a stub mp3."""
+    given = []
+
+    async def build(clips):
+        given.append([Path(c) for c in clips])
+        return b"ID3"
+
+    monkeypatch.setattr(analyzer, "build_audio", build)
+    return given
 
 
 # --- validate: pure ----------------------------------------------------------
@@ -83,7 +109,126 @@ def test_validate_tolerates_missing_optional_fields():
 
 def test_prompt_placeholders_match_the_service():
     assert placeholders("analyzer") == {"level", "unit_title", "grammar_targets", "categories", "known_mistakes",
-                                        "rolling_summary", "transcript"}
+                                        "rolling_summary", "transcript", "audio"}
+
+
+# --- the recordings -------------------------------------------------------------
+async def test_audio_is_attached_for_spoken_turns_and_deleted_afterwards(fresh_db, fake_build, tmp_path):
+    FakeProvider.canned = ANALYSIS
+    sid = await seed(fresh_db, voice=True)
+    paths = await attach(fresh_db, sid, tmp_path)
+    assert await analyzer.analyze_session(sid) is not None
+    req = FakeProvider.calls[-1]
+    assert req.audio == b"ID3" and req.audio_mime == "audio/mpeg"
+    assert fake_build == [[Path(p) for p in paths]], "every clip, in message order"
+    assert "Attached: his 2 spoken turns, in order." in req.system
+    assert not any(Path(p).exists() for p in paths), "heard once, then gone"
+    rows = await fresh_db.fetchall("SELECT audio_path FROM messages WHERE session_id=?", (sid,))
+    assert all(r["audio_path"] is None for r in rows)
+
+
+async def test_typed_turns_attach_nothing(fresh_db, fake_build):
+    FakeProvider.canned = ANALYSIS
+    await analyzer.analyze_session(await seed(fresh_db))
+    req = FakeProvider.calls[-1]
+    assert req.audio is None and req.audio_mime is None and "Not attached." in req.system
+    assert fake_build == [], "ffmpeg is not even started without a recording"
+
+
+async def test_a_missing_recording_is_skipped_not_fatal(fresh_db, fake_build, tmp_path):
+    FakeProvider.canned = ANALYSIS
+    sid = await seed(fresh_db, voice=True)
+    paths = await attach(fresh_db, sid, tmp_path)
+    Path(paths[0]).unlink()
+    assert await analyzer.analyze_session(sid) is not None
+    assert fake_build == [[Path(paths[1])]]
+    assert "Attached: 1 of his 2 spoken turns, in order" in FakeProvider.calls[-1].system
+    rows = await fresh_db.fetchall("SELECT audio_path FROM messages WHERE session_id=?", (sid,))
+    assert all(r["audio_path"] is None for r in rows) and not Path(paths[1]).exists()
+    # Every file gone: text-only, no ffmpeg, no crash.
+    sid = await seed(fresh_db, voice=True)
+    for p in await attach(fresh_db, sid, tmp_path):
+        Path(p).unlink()
+    assert await analyzer.analyze_session(sid) is not None
+    assert len(fake_build) == 1 and FakeProvider.calls[-1].audio is None
+
+
+async def test_audio_over_the_inline_limit_is_dropped(fresh_db, fake_build, tmp_path, monkeypatch):
+    monkeypatch.setattr(analyzer, "MAX_AUDIO_BYTES", 2)
+    FakeProvider.canned = ANALYSIS
+    sid = await seed(fresh_db, voice=True)
+    await attach(fresh_db, sid, tmp_path)
+    await analyzer.analyze_session(sid)
+    assert FakeProvider.calls[-1].audio is None and "Not attached." in FakeProvider.calls[-1].system
+
+
+async def test_text_only_retry_when_the_audio_call_fails(fresh_db, fake_build, tmp_path, monkeypatch):
+    from app.providers import llm as llm_mod
+
+    sid = await seed(fresh_db, voice=True)
+    paths = await attach(fresh_db, sid, tmp_path)
+    calls = []
+
+    async def no_ears(system, messages, schema, **kw):
+        calls.append((system, kw))
+        if kw.get("audio"):
+            raise LLMUnavailable("groq chat models do not take audio")
+        return {**ANALYSIS, "_model": "fake:fake"}
+
+    monkeypatch.setattr(llm_mod.llm, "complete_json", no_ears)
+    assert (await analyzer.analyze_session(sid))["session_summary"] == ANALYSIS["session_summary"]
+    assert [kw.get("audio") for _, kw in calls] == [b"ID3", None] and all(kw["tier"] == "quality" for _, kw in calls)
+    assert "Attached:" in calls[0][0] and "Not attached." in calls[1][0], "the retry does not promise audio it has not got"
+    assert not any(Path(p).exists() for p in paths)
+
+    async def dead(system, messages, schema, **kw):
+        calls.append((system, kw))
+        raise LLMUnavailable("down")
+
+    monkeypatch.setattr(llm_mod.llm, "complete_json", dead)
+    before = len(calls)
+    with pytest.raises(LLMUnavailable):
+        await analyzer.analyze_session(await seed(fresh_db))
+    assert len(calls) == before + 1, "a text-only failure is not retried"
+
+
+async def test_build_audio_needs_ffmpeg(monkeypatch, tmp_path):
+    monkeypatch.setattr(analyzer.shutil, "which", lambda name: None)
+    assert await analyzer.build_audio([tmp_path / "a.webm"]) is None
+    analyzer.discard_audio([None, str(tmp_path / "never-there.webm")])  # tolerant
+
+
+async def test_build_audio_converts_each_clip_then_concatenates(monkeypatch, tmp_path):
+    monkeypatch.setattr(analyzer.shutil, "which", lambda name: "/usr/bin/ffmpeg")
+    cmds, listings = [], []
+
+    class Proc:
+        returncode = 0
+
+        async def wait(self):
+            return self.returncode
+
+    async def fake_exec(*args):
+        cmds.append(args)
+        if "concat" in args:
+            listings.append(Path(args[args.index("-i") + 1]).read_text())
+        Path(args[-1]).write_bytes(b"ID3")
+        return Proc()
+
+    monkeypatch.setattr(analyzer.asyncio, "create_subprocess_exec", fake_exec)
+    a, b = tmp_path / "1.webm", tmp_path / "2.m4a"
+    a.write_bytes(b"x")
+    b.write_bytes(b"y")
+    assert await analyzer.build_audio([a, b]) == b"ID3"
+    assert len(cmds) == 3 and all(c[:5] == ("ffmpeg", "-nostdin", "-loglevel", "error", "-y") for c in cmds)
+    assert cmds[0][5:7] == ("-i", str(a)) and cmds[1][5:7] == ("-i", str(b))
+    assert all(("-ac", "1", "-ar", "16000", "-b:a", "48k") == c[-7:-1] for c in cmds), "16 kHz mono mp3 throughout"
+    assert cmds[2][5:9] == ("-f", "concat", "-safe", "0") and cmds[2][-1].endswith("out.mp3")
+    assert len(listings) == 1 and "part0.mp3" in listings[0] and "part1.mp3" in listings[0]
+    assert listings[0].index("part0.mp3") < listings[0].index("part1.mp3"), "the list file keeps message order"
+
+    Proc.returncode = 1
+    assert await analyzer.build_audio([a]) is None, "a failing ffmpeg means text-only, not an exception"
 
 
 # --- analyze_session -----------------------------------------------------------

@@ -28,10 +28,20 @@ engine heard them. Lines marked "Tutor:" are the tutor and carry no mistakes of 
 
 {{transcript}}
 
+## Audio
+{{audio}}
+
+When audio is attached, it is his spoken turns from this transcript, in order, as one recording. It
+is the ground truth for endings, articles and pronunciation; the transcript is what the speech-to-text
+engine made of it and what he saw on screen. The engine quietly repairs unstressed endings ("mit den
+Bus" comes out as "mit dem Bus", "in eine klein Wohnung" as "in einer Kleinwohnung"), so where the
+audio and the transcript differ, trust your ears, and quote in `wrong` what he actually said. Without
+audio, judge from the transcript alone and report no pronunciation mistakes.
+
 ## How to judge
-- Judge his German from the raw transcript. Ignore transcription noise: odd capitalisation, missing
-  punctuation, a word the engine clearly misheard, fillers like "ähm" and "also", restarts. When you
-  cannot tell whether it was him or the microphone, it was the microphone.
+- Judge his German from what he actually said. Ignore transcription noise: odd capitalisation,
+  missing punctuation, a word the engine clearly misheard, fillers like "ähm" and "also", restarts.
+  When you cannot tell whether it was him or the microphone, it was the microphone.
 - Never invent a mistake to fill the list. A clean session has an empty `mistakes` list.
 - `pattern` names the recurring error in a few words, "dative after mit", "Perfekt with sein for
   movement verbs", never this one instance. `wrong` and `right` carry the instance: his words and the
