@@ -61,8 +61,10 @@ touches `/api/*`.
   targets so a failed checkpoint actually changes the next sessions.
 - `mistakes.py` — the single merge path (category + normalised pattern) used by the analyzer, the
   writing feedback and the drills. `examples` capped at 5, `resolve`/`fail` for drills.
-- `curriculum.py` + `curriculum/units.json` — six phases A1.1→B1.2, validated at load; a stale
-  `unit_id` falls back to the first unit of the level instead of crashing.
+- `curriculum.py` + `curriculum/units.json` — six phases A1.1→B1.2, 30 units, 90 scenarios written
+  to Ahmad's life (standup, broken deploy, Ausländerbehörde, flat viewing, landlord, doctor,
+  Packstation, delayed train, team dinner…), each unit with authored checkpoint tasks; validated at
+  load; a stale `unit_id` falls back to the first unit of the level instead of crashing.
 - `tutor.py` + `routers/talk.py` — sessions, turns (JSON or multipart), one LLM call per turn, all
   rows written after the model answered (a 503 leaves nothing behind), model output sanitised
   (categories normalised, caps of 3, bools coerced), analyzer every N turns in a background task,
@@ -79,13 +81,16 @@ touches `/api/*`.
   SRS state, SM-2 exactly as specified with ±10 % jitter over 7 days, due queue with new cards
   interleaved and capped, interval preview per card.
 - `writing.py`, `drills.py`, `progress.py`, `placement.py`, `checkpoint.py` — as in the spec; the
-  drill grades locally and only calls the fast tier for free-text transforms that differ; the
-  checkpoint's `passed` is enforced by code from the scores, and never half-writes.
+  drill grades locally and only calls the fast tier for free-text transforms that differ; placement
+  grades on the quality tier, caps the level at A1.2 when fewer than two tasks were answered, and
+  `finish` is idempotent; the checkpoint's `passed` is enforced by code from the scores (every
+  dimension ≥ 3), never half-writes, refuses (409) a stale row whose unit is no longer current, and
+  a provider failure leaves the row reusable.
 
 Prompts: `analyzer.md`, `placement.md`, `checkpoint_grade.md`, `translate.md`, `write_prompt.md`,
 `write_feedback.md`, `drill_generate.md`, `drill_grade.md` (plus the foundation's `tutor_talk.md`).
 
-Tests: `.venv/bin/python -m pytest -q` — all offline, fake provider, STT/TTS/ffmpeg mocked.
+Tests: `.venv/bin/python -m pytest -q` — 189 tests, all offline, fake provider, STT/TTS/ffmpeg mocked.
 `tests/test_static.py` additionally asserts every `/api` route carries `auth.require_auth`, every
 module the shell imports is in the service worker's precache list, nothing in `static/` references
 an external URL, and no API key pattern is in the tree.
