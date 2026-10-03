@@ -36,13 +36,16 @@ tasks are stripped). `scenario = {"id","title","setup","goal"}`.
 - `GET /talk/sessions?limit=20` → `{"sessions": [session…]}` (newest first)
 
 ```json
-turn = {"user_message_id": 41, "message_id": 42, "reply": "…", "corrections": [{"wrong","right","category","explanation"}],
+turn = {"user_message_id": 41, "message_id": 42, "reply": "…", "meaning_en": "what the reply means, in English",
+        "corrections": [{"wrong","right","category","explanation"}],
         "praise": null, "english_help": {"english","german","literal"}|null,
         "new_vocab": [{"word","translation","example"}], "scenario_done": false,
         "transcript": null|"raw STT text", "transcript_provider": null|"groq"}
 ```
 `opening_turn` has `user_message_id: null`. `session = {"id","mode","scenario_id","scenario_title","unit_id","started_at","ended_at","summary","user_turns","meta"}`.
-`message = {"id","role","content","transcript_raw","input_kind","correction":[…]|null,"english_help":{…}|null,"stt_provider","llm_model","created_at"}`
+`message = {"id","role","content","meaning_en","transcript_raw","input_kind","correction":[…]|null,"english_help":{…}|null,"stt_provider","llm_model","created_at"}`
+(`meaning_en` is the English meaning of a tutor reply, rendered under the bubble and never spoken.
+It is null on user rows and on replies stored before it existed, so treat it as optional.)
 (`correction` on an assistant row holds the corrections of the user message before it; the client
 renders them under that user message). The client shows `transcript` **verbatim**, never a cleaned
 version. An empty transcript → `400`, no rows written.

@@ -69,8 +69,8 @@ def test_sanitize_handles_wrong_types_and_unknown_category():
     out = tutor.sanitize_turn({"reply": "Ja.", "corrections": "none", "new_vocab": None, "scenario_done": None,
                                "english_help": {"english": "a", "german": "b", "literal": "c"},
                                "praise": "Sehr gut!"})
-    assert out == {"reply": "Ja.", "corrections": [], "praise": "Sehr gut!", "new_vocab": [], "scenario_done": False,
-                   "english_help": {"english": "a", "german": "b", "literal": "c"}}
+    assert out == {"reply": "Ja.", "meaning_en": None, "corrections": [], "praise": "Sehr gut!", "new_vocab": [],
+                   "scenario_done": False, "english_help": {"english": "a", "german": "b", "literal": "c"}}
     out = tutor.sanitize_turn({"reply": "Ja.", "corrections": [{"wrong": "a", "right": "b", "category": "made-up"}]})
     assert out["corrections"] == [{"wrong": "a", "right": "b", "category": "other", "explanation": ""}]
 
@@ -117,8 +117,8 @@ async def test_turn_persists_both_rows_with_the_right_columns(fresh_db):
     FakeProvider.canned = TURN
     sid = (await tutor.start_session())["session"]["id"]
     out = await tutor.take_turn(sid, "Gestern ich habe gegangen.")
-    assert set(out) == {"user_message_id", "message_id", "reply", "corrections", "praise", "english_help",
-                        "new_vocab", "scenario_done", "transcript", "transcript_provider"}
+    assert set(out) == {"user_message_id", "message_id", "reply", "meaning_en", "corrections", "praise",
+                        "english_help", "new_vocab", "scenario_done", "transcript", "transcript_provider"}
     assert out["transcript"] is None and out["transcript_provider"] is None
     user = await fresh_db.fetchone("SELECT * FROM messages WHERE id=?", (out["user_message_id"],))
     assistant = await fresh_db.fetchone("SELECT * FROM messages WHERE id=?", (out["message_id"],))
@@ -396,8 +396,8 @@ def test_talk_routes_end_to_end(auth_client):
     r = auth_client.get(f"/api/talk/session/{sid}")
     assert r.status_code == 200
     msgs = r.json()["messages"]
-    assert len(msgs) == 3 and set(msgs[1]) == {"id", "role", "content", "transcript_raw", "input_kind", "correction",
-                                               "english_help", "stt_provider", "llm_model", "created_at"}
+    assert len(msgs) == 3 and set(msgs[1]) == {"id", "role", "content", "meaning_en", "transcript_raw", "input_kind",
+                                               "correction", "english_help", "stt_provider", "llm_model", "created_at"}
     assert auth_client.get(f"/api/talk/session/{sid + 50}").status_code == 404
 
     FakeProvider.canned = ANALYSIS

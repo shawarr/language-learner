@@ -323,6 +323,11 @@ textarea.input { resize: none; line-height: 1.5; }
 .msg.user .bubble { background: var(--accent-dim); border-bottom-right-radius: var(--r-sm); }
 .msg.pending .bubble { opacity: .65; }
 .bubble-text { font-size: var(--t-md); line-height: 1.5; overflow-wrap: anywhere; }
+/* What the German means. Quiet and clearly secondary — the German stays the loudest thing in the
+   bubble — but always legible, because at A1 this is the line that makes the reply usable at all. */
+.bubble-meaning { margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--line);
+  font-size: var(--t-sm); line-height: 1.45; color: var(--text-dim); }
+.btn.small.ghost.active { color: var(--accent); border-color: var(--accent); }
 .audio-line { position: absolute; left: 14px; right: 14px; bottom: 4px; height: 2px; border-radius: 1px; background: color-mix(in srgb, var(--accent) 25%, transparent); overflow: hidden; opacity: 0; transition: opacity var(--fast); }
 .audio-line > i { display: block; height: 100%; width: 0; background: var(--accent); }
 .msg.playing .audio-line { opacity: 1; }

@@ -38,6 +38,7 @@ TUTOR_TURN_SCHEMA = {
     "type": "object",
     "properties": {
         "reply": {"type": "string", "description": "German only. 1-3 short sentences, ends with one question. Spoken aloud verbatim."},
+        "meaning_en": {"type": "string", "description": "What `reply` means, in natural English. Never spoken, never a word-by-word gloss."},
         "corrections": {
             "type": "array",
             "items": {
@@ -67,12 +68,13 @@ TUTOR_TURN_SCHEMA = {
         },
         "scenario_done": {"type": "boolean", "description": "True when the scenario's goal has been reached."},
     },
-    "required": ["reply", "corrections", "new_vocab", "scenario_done"],
+    "required": ["reply", "meaning_en", "corrections", "new_vocab", "scenario_done"],
 }
 
 SESSION_FIELDS = ("id", "mode", "scenario_id", "scenario_title", "unit_id", "started_at", "ended_at", "summary",
                   "user_turns")
-MESSAGE_FIELDS = ("id", "role", "content", "transcript_raw", "input_kind", "stt_provider", "llm_model", "created_at")
+MESSAGE_FIELDS = ("id", "role", "content", "meaning_en", "transcript_raw", "input_kind", "stt_provider",
+                  "llm_model", "created_at")
 
 
 # -- API shapes (docs/API.md) -------------------------------------------------
@@ -90,7 +92,7 @@ def message_json(row: dict) -> dict:
 def turn_json(user_message_id: int | None, message_id: int, turn: dict, *,
               transcript: str | None = None, transcript_provider: str | None = None) -> dict:
     return {"user_message_id": user_message_id, "message_id": message_id, "reply": turn["reply"],
-            "corrections": turn["corrections"], "praise": turn["praise"], "english_help": turn["english_help"],
+            "meaning_en": turn["meaning_en"], "corrections": turn["corrections"], "praise": turn["praise"], "english_help": turn["english_help"],
             "new_vocab": turn["new_vocab"], "scenario_done": turn["scenario_done"],
             "transcript": transcript, "transcript_provider": transcript_provider}
 
@@ -128,7 +130,8 @@ def sanitize_turn(data: dict) -> dict:
     done = data.get("scenario_done", False)
     if isinstance(done, str):
         done = done.strip().lower() in ("true", "yes", "1")
-    return {"reply": reply, "corrections": corrections[:MAX_CORRECTIONS], "praise": _text(data.get("praise")) or None,
+    return {"reply": reply, "meaning_en": _text(data.get("meaning_en")) or None,
+            "corrections": corrections[:MAX_CORRECTIONS], "praise": _text(data.get("praise")) or None,
             "english_help": english_help, "new_vocab": new_vocab[:MAX_NEW_VOCAB], "scenario_done": bool(done)}
 
 
@@ -189,9 +192,9 @@ async def _history(session_id: int) -> list[Message]:
 async def _write_assistant(session_id: int, turn: dict, model: str | None, now: float) -> int:
     """The assistant row plus its vocab, uncommitted: the caller owns the transaction."""
     cur = await db.conn.execute(
-        "INSERT INTO messages (session_id, role, content, correction, english_help, llm_model, created_at) "
-        "VALUES (?, 'assistant', ?, ?, ?, ?, ?)",
-        (session_id, turn["reply"], json.dumps(turn["corrections"], ensure_ascii=False),
+        "INSERT INTO messages (session_id, role, content, meaning_en, correction, english_help, llm_model, created_at) "
+        "VALUES (?, 'assistant', ?, ?, ?, ?, ?, ?)",
+        (session_id, turn["reply"], turn["meaning_en"], json.dumps(turn["corrections"], ensure_ascii=False),
          json.dumps(turn["english_help"], ensure_ascii=False) if turn["english_help"] else None, model, now))
     for v in turn["new_vocab"]:
         await vocab.upsert(v["word"], v["translation"], v["example"], source="tutor", now=now, commit=False)

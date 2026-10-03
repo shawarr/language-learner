@@ -15,9 +15,12 @@ import { store } from './store.js';
 
 const S = {
   screen: null, chat: null, foot: null, input: null, sendBtn: null, mic: null, composerText: null, composerMic: null,
-  headScenario: null, hideBtn: null,
+  headScenario: null, hideBtn: null, enBtn: null,
   session: null, scenario: null, scenarios: [], unit: null, loaded: false,
   pending: false, abort: null, hideGerman: prefs.get('hideGerman', false), mode: prefs.get('composer', 'mic'),
+  // Default decided by level once the profile loads, then remembered: a beginner needs the English
+  // under every reply, and someone at B1 does not want it in the way.
+  showEnglish: prefs.get('showEnglish', null),
   playing: null,
 };
 
@@ -27,6 +30,7 @@ export function mount(el) {
   const head = h('header', { class: 'screen-head' },
     h('h1', {}, 'Talk'),
     S.headScenario = h('button', { class: 'chip', type: 'button', onClick: openScenarioPicker }, 'Free conversation'),
+    S.enBtn = h('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'Show English meaning', 'aria-pressed': 'false', onClick: toggleEnglish }, 'EN'),
     S.hideBtn = h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Hide German text', 'aria-pressed': 'false', onClick: toggleHide }, eyeIcon()),
     h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'End session', onClick: confirmEnd }, stopIcon()));
   S.chat = h('div', { class: 'chat', id: 'chat', 'aria-live': 'polite' });
@@ -34,6 +38,7 @@ export function mount(el) {
   buildComposer();
   clear(el).append(head, S.chat, S.foot);
   syncHideButton();
+  syncEnglishButton();
   setPlaybackListener(onPlayback);
   document.addEventListener('dt:online', () => retryQueued());
   document.addEventListener('dt:viewport', (e) => { if (e.detail.keyboard) scrollToEnd(true); });
@@ -77,6 +82,7 @@ async function loadScenarios() {
     const cur = await api('/api/curriculum/current');
     S.scenarios = cur.scenarios || [];
     S.unit = cur.unit;
+    defaultEnglishFor(cur.level || (cur.phase && cur.phase.level));
   } catch { S.scenarios = []; }
 }
 
@@ -170,14 +176,20 @@ function renderHistory(messages) {
       S.chat.append(lastUser.el);
     } else {
       if (lastUser) { lastUser.attach({ corrections: m.correction || [], english_help: m.english_help }); lastUser.link(m.id); lastUser = null; }
-      S.chat.append(tutorBubble({ id: m.id, text: m.content }));
+      S.chat.append(tutorBubble({ id: m.id, text: m.content, meaning: m.meaning_en }));
     }
   }
   scrollToEnd(true, 'auto');
 }
 
-function tutorBubble({ id, text, newVocab = [] }) {
+function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
   const sentence = h('p', { class: `bubble-text ${S.hideGerman ? 'hidden-text' : ''}` }, tappableWords(text, translateWord));
+  // What it means, in English. Shown by default while he is a beginner: German-only is not
+  // comprehensible input when you know no German, it is noise. Older messages have no meaning
+  // stored, so this is always optional.
+  const meaningEl = meaning
+    ? h('p', { class: 'bubble-meaning', lang: 'en', hidden: !S.showEnglish }, meaning)
+    : null;
   const reveal = h('button', { class: 'btn small ghost reveal', type: 'button', hidden: !S.hideGerman, onClick: () => {
     sentence.classList.add('revealed'); reveal.hidden = true;
   } }, 'Show text');
@@ -190,7 +202,8 @@ function tutorBubble({ id, text, newVocab = [] }) {
     h('button', { class: 'chip small', type: 'button', lang: 'de', onClick: () => translateWord(v.word.split(' (')[0].replace(/^(der|die|das)\s+/i, ''), v.example || text, v) },
       h('b', {}, v.word), ' ', h('span', { class: 'muted', lang: 'en' }, v.translation)))) : null;
   return h('div', { class: 'msg tutor', dataset: { id: String(id) } },
-    h('div', { class: 'bubble' }, sentence, h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))), tools, vocab);
+    h('div', { class: 'bubble' }, sentence, meaningEl,
+      h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))), tools, vocab);
 }
 
 function userBubble({ id, text, transcript, provider, pending = false, duration = null }) {
@@ -368,7 +381,8 @@ function renderTurn(turn, userHandle, wasNear) {
     userHandle.link(turn.message_id);
     userHandle.attach({ corrections: turn.corrections || [], praise: turn.praise, english_help: turn.english_help });
   }
-  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, newVocab: turn.new_vocab || [] });
+  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, meaning: turn.meaning_en,
+    newVocab: turn.new_vocab || [] });
   S.chat.append(bubble);
   if (turn.scenario_done) S.chat.append(scenarioDoneCard());
   scrollToEnd(wasNear);
@@ -540,6 +554,27 @@ async function retryQueued() {
     if (el) el.remove();
     await uploadRecording({ ...rec, sessionId: S.session.id });
   }
+}
+
+/* ---- English meaning ------------------------------------------------ */
+function toggleEnglish() {
+  S.showEnglish = !S.showEnglish;
+  prefs.set('showEnglish', S.showEnglish);
+  syncEnglishButton();
+  for (const m of S.chat.querySelectorAll('.msg.tutor .bubble-meaning')) m.hidden = !S.showEnglish;
+  toast(S.showEnglish ? 'English meaning shown under each reply.' : 'English hidden.');
+}
+function syncEnglishButton() {
+  if (!S.enBtn) return;
+  S.enBtn.classList.toggle('active', !!S.showEnglish);
+  S.enBtn.setAttribute('aria-pressed', String(!!S.showEnglish));
+}
+/* Until he decides for himself, follow the level: on at A1, off above it. */
+function defaultEnglishFor(level) {
+  if (prefs.get('showEnglish', null) !== null) return;
+  S.showEnglish = String(level || '').startsWith('A1');
+  syncEnglishButton();
+  for (const m of S.chat.querySelectorAll('.msg.tutor .bubble-meaning')) m.hidden = !S.showEnglish;
 }
 
 /* ---- hide German ---------------------------------------------------- */

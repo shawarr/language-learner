@@ -116,3 +116,25 @@ def test_the_hold_gesture_cannot_select_text():
     mic = (Path(settings.static_dir) / "js" / "mic.js").read_text()
     assert mic.count("setRecordingGesture(false)") >= 3, "the clamp must be released on every exit path"
     assert "selectstart" in mic
+
+
+def test_every_tutor_reply_can_be_understood():
+    """The tutor speaks German; a beginner needs to know what it means without a second call.
+
+    `meaning_en` is required by the turn schema, stored on the message, returned by the API and
+    rendered under the bubble — defaulting to visible at A1, where German-only is not comprehensible
+    input but noise.
+    """
+    from app.services.tutor import TUTOR_TURN_SCHEMA, MESSAGE_FIELDS
+
+    assert "meaning_en" in TUTOR_TURN_SCHEMA["required"]
+    assert "meaning_en" in MESSAGE_FIELDS
+
+    from app.db import MIGRATIONS
+    assert ("messages", "meaning_en", "TEXT") in MIGRATIONS
+
+    talk = (Path(settings.static_dir) / "js" / "talk.js").read_text()
+    assert "bubble-meaning" in talk
+    assert "defaultEnglishFor" in talk and "startsWith('A1')" in talk
+    css = (Path(settings.static_dir) / "styles.css").read_text()
+    assert ".bubble-meaning" in css
