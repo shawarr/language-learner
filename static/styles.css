@@ -550,3 +550,53 @@ mark.better { background: var(--good-dim); }
 .big-tick { width: 64px; height: 64px; margin: var(--s-2) auto var(--s-3); border-radius: var(--r-full);
   display: grid; place-items: center; font-size: 32px; color: var(--good);
   background: color-mix(in srgb, var(--good) 15%, transparent); }
+
+/* ===== Learn: the interactive exercises ===============================
+   Every practice type shares one shape: a prompt, big tap targets, instant verdict. Nothing here
+   needs the keyboard, and every target clears 48px so it works with a thumb. */
+.verdict { display: block; font-size: var(--t-sm); line-height: 1.5; }
+.verdict.ok { color: var(--good); }
+.verdict.no { color: var(--warn); }
+.verdict strong { display: inline-block; margin-right: 4px; }
+
+.listen-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-2); }
+.listen-head h2 { margin: 0; }
+.btn.play-big { flex: none; width: 60px; height: 60px; border-radius: var(--r-full);
+  background: var(--accent); color: #fff; display: grid; place-items: center; }
+.btn.play-big .ico { width: 28px; height: 28px; }
+.btn.play-big:active { transform: scale(.94); }
+
+/* Match: two columns of tiles, tap one then its pair. */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); margin-top: var(--s-3); }
+.match-col { display: flex; flex-direction: column; gap: var(--s-2); }
+.match-tile { min-height: 52px; padding: 10px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  font-size: var(--t-sm); font-weight: 600; line-height: 1.3; text-align: center;
+  transition: transform var(--fast) var(--ease), border-color var(--fast) var(--ease), opacity var(--base) var(--ease); }
+.match-tile.en { font-weight: 500; color: var(--text-dim); }
+.match-tile.sel { border-color: var(--accent); background: var(--accent-dim); color: var(--text); }
+.match-tile.done { opacity: .25; border-style: dashed; }
+.match-tile.miss { border-color: var(--warn); animation: shake .35s var(--ease); }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* Build: tap tiles from the bank into the slot, in order. */
+.build-slot { min-height: 64px; margin: var(--s-3) 0; padding: 8px; display: flex; flex-wrap: wrap;
+  gap: 6px; align-content: flex-start; border-bottom: 2px solid var(--line); border-radius: var(--r-sm);
+  transition: border-color var(--base) var(--ease); }
+.build-slot.right { border-color: var(--good); }
+.build-slot.wrong { border-color: var(--warn); }
+.build-bank { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--s-3); min-height: 48px; }
+.tile { padding: 11px 14px; border-radius: var(--r-md); border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--text); font-size: var(--t-md); font-weight: 500;
+  min-height: 44px; transition: transform var(--fast) var(--ease); }
+.tile:active { transform: scale(.95); }
+.tile.placed { background: var(--accent-dim); border-color: var(--accent); }
+.tile:disabled { opacity: .5; }
+
+.speak-card .mic-wrap { margin-top: var(--s-3); }
+.speak-line { display: flex; align-items: center; gap: var(--s-3); padding: 14px;
+  background: var(--bg); border-radius: var(--r-md); margin: var(--s-3) 0; }
+.speak-line .lesson-de.big { font-size: 22px; }
+.speak-line > div:first-child { flex: 1; min-width: 0; }
+.heard { font-size: var(--t-sm); color: var(--text-dim); font-style: italic; margin: var(--s-2) 0 0; }
+.lesson-done .score { font-size: 20px; font-weight: 600; color: var(--good); margin: 0 0 var(--s-2); }

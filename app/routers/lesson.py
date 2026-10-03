@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from .. import auth
-from ..services import curriculum, lessons
+from ..services import curriculum, exercises, lessons
 
 router = APIRouter(prefix="/lesson", dependencies=[Depends(auth.require_auth)], tags=["lesson"])
 
@@ -17,15 +17,18 @@ class CheckBody(BaseModel):
     correct: bool
 
 
-async def _lesson_payload(unit_id: str) -> dict:
+async def _lesson_payload(unit_id: str, seed: int = 0) -> dict:
     lesson = lessons.for_unit(unit_id)
     if lesson is None:
         raise HTTPException(status_code=404, detail="No lesson for this unit yet.")
-    return {"unit_id": unit_id, "lesson": lesson, "progress": await lessons.progress(unit_id)}
+    # The client walks `exercises`: the authored teaching with generated practice interleaved.
+    # `steps` stays in the payload so the lesson can still be read straight through.
+    return {"unit_id": unit_id, "lesson": lesson, "exercises": exercises.build(lesson, seed),
+            "progress": await lessons.progress(unit_id)}
 
 
 @router.get("/current")
-async def current():
+async def current(seed: int = 0):
     """The lesson for the unit he is on, with where he stopped."""
     cur = await curriculum.current()
     unit_id = cur["unit"]["id"]
@@ -35,7 +38,7 @@ async def current():
         return {"unit_id": unit_id, "unit_title": cur["unit"]["title"], "lesson": None,
                 "progress": await lessons.progress(unit_id),
                 "detail": "The written lesson for this unit is not ready yet — the practice modes still work."}
-    return {**await _lesson_payload(unit_id), "unit_title": cur["unit"]["title"]}
+    return {**await _lesson_payload(unit_id, seed), "unit_title": cur["unit"]["title"]}
 
 
 @router.get("/status")
@@ -59,6 +62,13 @@ async def save(unit_id: str, body: StepBody):
 async def check(unit_id: str, body: CheckBody):
     await _lesson_payload(unit_id)
     return await lessons.record_check(unit_id, body.correct)
+
+
+@router.post("/{unit_id}/restart")
+async def restart(unit_id: str):
+    """Back to step one, keeping the completion. Progress itself never moves backwards."""
+    await _lesson_payload(unit_id)
+    return await lessons.restart(unit_id)
 
 
 @router.post("/{unit_id}/complete")

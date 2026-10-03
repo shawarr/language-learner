@@ -126,6 +126,19 @@ async def complete(unit_id: str) -> dict[str, Any]:
     return await progress(unit_id)
 
 
+async def restart(unit_id: str) -> dict[str, Any]:
+    """Send him back to the first step without losing the credit for having finished it.
+
+    `save_step` deliberately never moves backwards, so going round again needs its own door —
+    otherwise "do the lesson again" reloads straight back onto the finished card.
+    """
+    await db.execute(
+        "INSERT INTO lesson_progress (unit_id, step, started_at) VALUES (?, 0, ?) "
+        "ON CONFLICT(unit_id) DO UPDATE SET step = 0",
+        (unit_id, time.time()))
+    return await progress(unit_id)
+
+
 async def status_for(unit_id: str) -> dict[str, Any]:
     """What the Talk screen and the tab badge need: is there a lesson, and has he done it?"""
     lesson = for_unit(unit_id)

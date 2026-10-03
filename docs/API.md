@@ -121,7 +121,10 @@ The teaching, before any practice mode. Lessons are hand-written in `app/curricu
 keyed by unit id — never model-generated, so a beginner's first contact with German is identical
 every time, correct, and free of quota.
 
-- `GET /lesson/current` → `{"unit_id","unit_title","lesson": {…}|null,"progress":{…},"detail"?}` —
+- `GET /lesson/current?seed=0` → `{"unit_id","unit_title","lesson",{…}|null,"exercises":[…],"progress","detail"?}` —
+  `exercises` is what the client walks: the authored teaching with generated practice interleaved.
+  Same `seed` gives the same sequence (a refresh must not reshuffle mid-exercise); a different seed
+  is a different run. —
   `lesson: null` with a `detail` when that unit's coursework is not written yet; the tab says so
   rather than 404-ing.
 - `GET /lesson/status` → `{"has_lesson","completed","step","steps","title","minutes"}` — what the
@@ -131,7 +134,18 @@ every time, correct, and free of quota.
   earlier page is not losing progress.
 - `POST /lesson/{unit_id}/check` `{"step","correct"}` → progress (counts only; the answer is graded
   on the device)
+- `POST /lesson/{unit_id}/restart` → progress with `step: 0`, keeping `completed`. Needed because
+  `progress` never moves backwards, so "do the lesson again" would otherwise reload onto the
+  finished card.
 - `POST /lesson/{unit_id}/complete` → progress. Idempotent; keeps the first completion time.
+
+```
+exercise = teaching step (mode "teach") or one of, all mode "practise":
+  match   {"pairs":[{"de","en"}],"left":[de…],"right":[en…]}   columns deranged: no row holds its own answer
+  listen  {"audio","options":[de…],"answer": <index>,"en"}      plays on arrival
+  build   {"en","hint","answer":[word…],"tiles":[word…]}        tiles = the sentence plus one decoy
+  speak   {"de","en"}                                           graded via /voice/transcribe, 70% of words
+```
 
 ```
 lesson = {"title","intro","outro","minutes","steps": [step…]}
