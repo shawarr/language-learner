@@ -99,12 +99,13 @@ async def test_start_session_persists_only_the_opening_turn(fresh_db, quiet_catc
 
 async def test_scenario_is_stored_and_reaches_the_prompt(fresh_db):
     FakeProvider.canned = TURN
-    _, sc = curriculum.scenario("a1.1-1-a")
+    first_scenario = curriculum.all_units()[0]["scenarios"][0]["id"]
+    _, sc = curriculum.scenario(first_scenario)
     s = (await tutor.start_session(scenario_id=sc["id"]))["session"]
     assert s["scenario_id"] == sc["id"] and s["scenario_title"] == sc["title"] and s["unit_id"] == "a1.1-1"
     assert sc["setup"] in FakeProvider.calls[0].system
     # A scenario from a later unit is played, but the context keeps the profile's unit.
-    _, later = curriculum.scenario("a2.1-1-a")
+    _, later = curriculum.scenario(curriculum.unit("a2.1-1")["scenarios"][0]["id"])
     s2 = (await tutor.start_session(scenario_id=later["id"]))["session"]
     assert s2["unit_id"] == "a1.1-1" and s2["scenario_title"] == later["title"]
     with pytest.raises(HTTPException) as e:
@@ -374,7 +375,8 @@ def test_routes_need_auth(client):
 
 def test_talk_routes_end_to_end(auth_client):
     FakeProvider.canned = TURN
-    r = auth_client.post("/api/talk/session", json={"scenario_id": "a1.1-1-a"})
+    first_scenario = curriculum.all_units()[0]["scenarios"][0]["id"]
+    r = auth_client.post("/api/talk/session", json={"scenario_id": first_scenario})
     assert r.status_code == 200, r.text
     body = r.json()
     assert set(body) == {"session", "opening_turn"}

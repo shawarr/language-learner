@@ -11,3 +11,4 @@ backups/
 scratch/
 .claude/
 .cache-probe/
+.venv

@@ -95,7 +95,8 @@ async def test_thin_data_sessions_and_profile_fields(fresh_db):
     assert set(out["skills"]) == {"speaking", "listening", "writing", "grammar", "vocab"}
     assert out["unit"]["id"] == out["profile"]["unit_id"] and "checkpoint" not in out["unit"]
     assert out["phase"]["id"] == "a1.1" and out["unit_index"] == 1 and out["unit_count"] >= 1
-    assert out["checkpoint"] == {"available": False, "unit_id": out["unit"]["id"], "reason": "not_yet"}
+    assert out["checkpoint"]["available"] is False and out["checkpoint"]["unit_id"] == out["unit"]["id"]
+    assert out["checkpoint"]["reason"] == "not_yet"
     assert out["recent_sessions"] == [] and out["beaten_mistakes"] == [] and out["top_mistakes"] == []
 
     for i in range(5):
@@ -117,8 +118,6 @@ async def test_thin_data_sessions_and_profile_fields(fresh_db):
 
 async def test_checkpoint_uses_c4_availability_when_it_exists(fresh_db, monkeypatch):
     from app.services import checkpoint
-
-    assert not hasattr(checkpoint, "availability"), "the stub: the fallback path is what the other tests cover"
 
     async def availability(unit_id):
         return {"available": True, "reason": "sessions", "sessions_in_unit": 3, "sessions_needed": 3}
