@@ -47,7 +47,9 @@ async function onLogin(e) {
 
 setUnauthorizedHandler(() => {
   // The login overlay sits on top of the current screen, so nothing typed or recorded is lost.
-  if ($('#login').hidden) { toast('Session expired. Log in again.'); showLogin(); }
+  if (!$('#login').hidden) return;
+  if (mounted) toast('Session expired. Log in again.');
+  showLogin();
 });
 
 /* ---- screens -------------------------------------------------------- */
