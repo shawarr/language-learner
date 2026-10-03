@@ -40,27 +40,35 @@ class LLMRouter:
         return self._providers[provider], model or "fake"
 
     def _chain(self, tier: str) -> list[str]:
-        if tier == "fast":
-            return [s for s in (settings.llm_fast, settings.llm_primary, settings.llm_fallback) if s]
-        return [s for s in (settings.llm_primary, settings.llm_fallback) if s]
+        """Which models to try, in order. Unknown tiers fall back to the conversation chain."""
+        head = {"fast": settings.llm_fast, "quality": settings.llm_quality}.get(tier)
+        specs = ([head] if head else []) + [settings.llm_primary, settings.llm_fallback]
+        seen: set[str] = set()
+        return [s for s in specs if s and not (s in seen or seen.add(s))]
+
+    # Retries before failing over, per provider. Free-tier Gemini Flash hands out 503
+    # "high demand" often enough that giving up on the first one would send most turns to
+    # the weaker fallback; 429 and 5xx both clear on their own within a second or two.
+    ATTEMPTS = 2
 
     async def complete(self, req: LLMRequest, *, tier: str = "primary") -> LLMResponse:
         errors: list[str] = []
         for spec in self._chain(tier):
             provider, model = self._parse(spec)
-            for attempt in range(2):
+            for attempt in range(self.ATTEMPTS):
                 try:
                     return await provider.complete(model, req)
-                except RateLimited as e:
-                    wait = min(e.retry_after or 2.0, 8.0)
-                    log.warning("%s rate limited (attempt %d), waiting %.1fs", spec, attempt + 1, wait)
-                    errors.append(f"{spec}: rate limited")
-                    if attempt == 0:
-                        await asyncio.sleep(wait)
                 except ProviderError as e:
-                    log.warning("%s failed: %s", spec, e)
+                    transient = isinstance(e, RateLimited) or (e.status or 0) >= 500
                     errors.append(f"{spec}: {e}")
-                    break  # non-rate-limit error: go to the next provider
+                    if not transient or attempt == self.ATTEMPTS - 1:
+                        log.warning("%s failed (%s), moving on: %s",
+                                    spec, "giving up" if transient else "permanent", e)
+                        break
+                    wait = min(getattr(e, "retry_after", None) or 1.5, 8.0)
+                    log.warning("%s transient failure (attempt %d), waiting %.1fs: %s",
+                                spec, attempt + 1, wait, e)
+                    await asyncio.sleep(wait)
                 except (asyncio.TimeoutError, OSError) as e:
                     errors.append(f"{spec}: {e}")
                     break

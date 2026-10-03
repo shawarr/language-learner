@@ -88,6 +88,24 @@ async def test_fake_provider_satisfies_a_schema():
     assert isinstance(data["reply"], str) and isinstance(data["score"], int) and isinstance(data["tags"], list)
 
 
+def test_tier_chains(monkeypatch):
+    from app.config import settings
+
+    router = LLMRouter()
+    monkeypatch.setattr(settings, "llm_primary", "groq:fast-model")
+    monkeypatch.setattr(settings, "llm_fallback", "gemini:flash")
+    monkeypatch.setattr(settings, "llm_quality", "gemini:flash")
+    monkeypatch.setattr(settings, "llm_fast", "groq:tiny")
+
+    assert router._chain("primary") == ["groq:fast-model", "gemini:flash"]
+    assert router._chain("fast") == ["groq:tiny", "groq:fast-model", "gemini:flash"]
+    # quality == fallback here, and a model must not be tried twice in one chain
+    assert router._chain("quality") == ["gemini:flash", "groq:fast-model"]
+
+    monkeypatch.setattr(settings, "llm_fallback", "")
+    assert router._chain("primary") == ["groq:fast-model"]
+
+
 @pytest.mark.asyncio
 async def test_router_falls_back_to_the_second_provider(monkeypatch):
     from app.config import settings
@@ -121,6 +139,46 @@ async def test_router_retries_a_rate_limit_then_falls_back(monkeypatch):
     res = await router.complete(LLMRequest(system="", messages=[Message("user", "hi")]))
     assert len(calls) == 2, "a rate limit should be retried once before failing over"
     assert res.provider == "fake"
+
+
+@pytest.mark.asyncio
+async def test_router_retries_a_503_before_failing_over(monkeypatch):
+    """Free-tier Gemini Flash hands out transient 503s; giving up on the first one would
+    send most turns to the weaker fallback model."""
+    from app.config import settings
+
+    router = LLMRouter()
+    monkeypatch.setattr(settings, "llm_primary", "gemini:x")
+    monkeypatch.setattr(settings, "llm_fallback", "fake:fake")
+    calls = []
+
+    async def unavailable(model, req):
+        calls.append(1)
+        raise ProviderError("gemini server error 503", status=503)
+
+    monkeypatch.setattr(router.gemini, "complete", unavailable)
+    monkeypatch.setattr(LLMRouter, "ATTEMPTS", 2)
+    res = await router.complete(LLMRequest(system="", messages=[Message("user", "hi")]))
+    assert len(calls) == 2 and res.provider == "fake"
+
+
+@pytest.mark.asyncio
+async def test_router_does_not_retry_a_permanent_error(monkeypatch):
+    """A 400 or a missing key will not fix itself — retrying just adds latency."""
+    from app.config import settings
+
+    router = LLMRouter()
+    monkeypatch.setattr(settings, "llm_primary", "gemini:x")
+    monkeypatch.setattr(settings, "llm_fallback", "fake:fake")
+    calls = []
+
+    async def bad_request(model, req):
+        calls.append(1)
+        raise ProviderError("gemini error 400: bad field", retryable=False, status=400)
+
+    monkeypatch.setattr(router.gemini, "complete", bad_request)
+    res = await router.complete(LLMRequest(system="", messages=[Message("user", "hi")]))
+    assert len(calls) == 1 and res.provider == "fake"
 
 
 @pytest.mark.asyncio

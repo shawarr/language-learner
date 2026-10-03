@@ -5,6 +5,12 @@ You are building the application on top of a finished, tested server foundation.
 `app/prompts/tutor_talk.md`. You need no server, no API keys and no network: the `fake` LLM
 provider answers every call offline (`LLM_PRIMARY=fake:fake`).
 
+> **`docs/DESIGN.md` is not optional.** Ahmad's requirement is that the frontend be genuinely
+> polished — native-app quality, not "functional". DESIGN.md is the binding spec for the visual
+> system, the Talk screen's interactions, motion, states and accessibility, with concrete numbers.
+> Read it before writing a line of CSS, and treat its final checklist as part of the definition of
+> done for every screen.
+
 ## Rules of engagement
 
 1. **Do not modify these files** — they are deployed and verified, and changing them makes the

@@ -29,7 +29,7 @@ class GroqProvider:
             v = r.headers.get("retry-after")
             raise RateLimited(f"groq {what} rate limited", retry_after=float(v) if v else None)
         if r.status_code >= 500:
-            raise ProviderError(f"groq {what} server error {r.status_code}")
+            raise ProviderError(f"groq {what} server error {r.status_code}", status=r.status_code)
         if r.status_code != 200:
             raise ProviderError(f"groq {what} error {r.status_code}: {r.text[:300]}", retryable=False, status=r.status_code)
 

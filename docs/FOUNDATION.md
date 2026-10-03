@@ -23,19 +23,41 @@ AI Studio per project and change without notice); the figures seen in the wild a
 pricing page: `gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.6-flash`, `gemini-3.5-flash`,
 `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, the TTS models and `gemini-3.5-transcribe`.
 
-**Chosen defaults** (all overridable in `.env`, nothing hardcoded):
+### Measured on the server with the real keys, 2026-10-03
+
+Numbers, not guesses. Identical prompt and JSON schema (an A1 correction task) through both providers:
+
+| | `groq:openai/gpt-oss-120b` | `gemini:gemini-3.8-flash` |
+|---|---|---|
+| Latency, JSON turn | **1.0 s** (4 runs: 1.1 / 1.0 / 1.0 / 0.8) | 2.1 – 3.2 s |
+| `enum` adherence in the schema | all slugs valid | all slugs valid |
+| German correction quality | correct on gender, case, aux verb, word order | same |
+| Reliability | no failures observed | **503 "high demand" on 3 of 5 turns**, then 429 after 4 rapid calls |
+| Free limits | 30 RPM / 1 000 RPD | ~10 RPM / ~1 500 RPD |
+
+Both models handle A1–B1 German correction correctly, so **latency and reliability decide the
+conversation path**, and there Groq wins outright. Gemini's 503s are genuine upstream capacity
+("This model is currently experiencing high demand"), reproduced with a minimal request body — not
+something a different request shape avoids.
+
+**Hence three tiers instead of one primary/fallback pair** (all overridable in `.env`):
 
 | Role | Setting | Default | Why |
 |---|---|---|---|
-| Tutor + analyzer | `LLM_PRIMARY` | `gemini:gemini-3.8-flash` | best free Flash; strong German, structured output, `thinking_level=low` keeps latency down |
-| Fallback | `LLM_FALLBACK` | `groq:openai/gpt-oss-120b` | Groq's replacement for Llama 70B; very fast, separate quota from Gemini |
-| Cheap calls | `LLM_FAST` | `gemini:gemini-3.5-flash-lite` | word translation, drill grading — a Flash call there would burn the RPD |
-| Speech → text | `STT_PROVIDER` | `groq` (`whisper-large-v3`) | with Gemini audio as automatic fallback; see `STT-FINDINGS.md` |
-| Text → speech | `TTS_PROVIDER` | `edge` | free, no key, no quota, 2 s for a sentence, real German neural voices |
+| Conversation | `LLM_PRIMARY` | `groq:openai/gpt-oss-120b` | ~1 s is the difference between a conversation and a form; 30 RPM absorbs a talkative session |
+| Fallback | `LLM_FALLBACK` | `gemini:gemini-3.8-flash` | separate quota and separate outages from Groq |
+| Judgement calls | `LLM_QUALITY` | `gemini:gemini-3.8-flash` | analyzer, placement, checkpoint grading: rare, latency-tolerant, worth the stronger model. Chain: quality → primary → fallback |
+| Cheap, frequent | `LLM_FAST` | `groq:openai/gpt-oss-20b` | word translation, drill grading; its own 1 000 RPD so tapping words all evening can't eat the conversation budget |
+| Speech → text | `STT_PROVIDER` | `groq` (`whisper-large-v3`) | **0.35 s average**, and it preserves learner mistakes; see `STT-FINDINGS.md` |
+| Text → speech | `TTS_PROVIDER` | `edge` | free, no key, no quota, ~2 s a sentence, real German neural voices |
 
-**Note on latency budget:** a talk turn is one LLM call (tutor) plus one TTS call. The analyzer runs
-every `ANALYZE_EVERY_TURNS` turns (default 8) and at session end — *not* every turn. At 10 RPM on
-Gemini Flash that leaves comfortable headroom; keep it that way.
+Use the tiers from the app layer: `tier="quality"` for the analyzer, placement and checkpoint
+grading; `tier="fast"` for translation and drill grading; the default for talk turns.
+
+**Latency budget:** a talk turn is STT (0.35 s) + one LLM call (~1 s) + TTS (~2 s, cached on replay).
+The analyzer runs every `ANALYZE_EVERY_TURNS` turns (default 8) and at session end — *not* every
+turn, and in a background task so it never delays a reply. Keep it that way: a second LLM call per
+turn would double the wait and halve the daily budget.
 
 **German edge-tts voices available** (verified from the server):
 `de-DE-SeraphinaMultilingualNeural` (f, default — the most natural), `de-DE-FlorianMultilingualNeural`
@@ -90,18 +112,24 @@ The `vocab` table already carries SM-2 state: `due`, `interval_days`, `ease`, `r
 `last_review`.
 
 ### `app.providers.llm.llm` — the LLM router
-Primary → fallback, one retry on a 429 (honouring `retry-after`), then `LLMUnavailable`. Handles
-code fences, prose around the JSON, and does one self-repair round trip if the JSON is unparseable.
+Walks the tier's chain, retrying once per provider on a transient failure (429 honouring
+`retry-after`, or any 5xx — free-tier Gemini hands out 503s often enough that giving up on the first
+one would send most turns to the fallback), then raises `LLMUnavailable`. Handles code fences, prose
+around the JSON, and does one self-repair round trip if the JSON is unparseable.
 
 ```python
 from .providers.base import Message
 from .providers.llm import llm
 
-data = await llm.complete_json(system_prompt, [Message("user", text)], SCHEMA)
-data["_model"]                      # "gemini:gemini-3.8-flash" — store it on the message row
+data = await llm.complete_json(system_prompt, [Message("user", text)], SCHEMA)   # talk turns
+data["_model"]                      # "groq:openai/gpt-oss-120b" — store it on the message row
 text = await llm.complete_text(system_prompt, msgs)
-cheap = await llm.complete_json(sys, msgs, SCHEMA, tier="fast")   # uses LLM_FAST first
+judged = await llm.complete_json(sys, msgs, SCHEMA, tier="quality")  # analyzer, grading, placement
+cheap  = await llm.complete_json(sys, msgs, SCHEMA, tier="fast")     # translation, drill grading
 ```
+Verified live: an `enum` in the JSON schema is respected by both providers, so
+`"category": {"enum": CATEGORY_SLUGS}` genuinely constrains the output — still run
+`taxonomy.normalize()` on it, but it will rarely have to do anything.
 `complete_json` returns a `dict`. **Validate it before you trust it** — a free-tier model will
 occasionally return a field as a string where you asked for a list.
 

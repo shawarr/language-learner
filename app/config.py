@@ -30,11 +30,18 @@ class Settings:
     gemini_api_key: str = field(default_factory=lambda: _env("GEMINI_API_KEY"))
     groq_api_key: str = field(default_factory=lambda: _env("GROQ_API_KEY"))
 
-    # "provider:model" strings. Providers: gemini, groq, fake.
-    llm_primary: str = field(default_factory=lambda: _env("LLM_PRIMARY", "gemini:gemini-3.8-flash"))
-    llm_fallback: str = field(default_factory=lambda: _env("LLM_FALLBACK", "groq:openai/gpt-oss-120b"))
-    # Cheap/fast model for low-stakes calls (word translation). Falls back to llm_primary.
-    llm_fast: str = field(default_factory=lambda: _env("LLM_FAST", "gemini:gemini-3.5-flash-lite"))
+    # "provider:model" strings. Providers: gemini, groq, fake. Three tiers, because the two
+    # free providers have opposite strengths — measured numbers are in docs/FOUNDATION.md.
+    # Conversation: latency is the whole experience. Groq answers in ~1s, Gemini in 2-3s and
+    # 503s under load.
+    llm_primary: str = field(default_factory=lambda: _env("LLM_PRIMARY", "groq:openai/gpt-oss-120b"))
+    llm_fallback: str = field(default_factory=lambda: _env("LLM_FALLBACK", "gemini:gemini-3.8-flash"))
+    # Judgement calls that run rarely and can take a few seconds: analyzer, placement, checkpoint
+    # grading. Worth the stronger model; chain is quality -> primary -> fallback.
+    llm_quality: str = field(default_factory=lambda: _env("LLM_QUALITY", "gemini:gemini-3.8-flash"))
+    # High-frequency, low-stakes calls (word translation, drill grading). Its own daily quota,
+    # so tapping words all evening cannot eat the conversation budget.
+    llm_fast: str = field(default_factory=lambda: _env("LLM_FAST", "groq:openai/gpt-oss-20b"))
     gemini_thinking_level: str = field(default_factory=lambda: _env("GEMINI_THINKING_LEVEL", "low"))
     groq_reasoning_effort: str = field(default_factory=lambda: _env("GROQ_REASONING_EFFORT", "low"))
     llm_timeout: float = field(default_factory=lambda: float(_env("LLM_TIMEOUT", "60")))

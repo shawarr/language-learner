@@ -63,7 +63,9 @@ class GeminiProvider:
         if r.status_code == 429:
             raise RateLimited("gemini rate limited", retry_after=_retry_after(r))
         if r.status_code >= 500:
-            raise ProviderError(f"gemini server error {r.status_code}")
+            # Free-tier Flash returns 503 UNAVAILABLE ("high demand") intermittently; the router
+            # retries on the status, so pass it through rather than flattening it to a bare error.
+            raise ProviderError(f"gemini server error {r.status_code}", status=r.status_code)
         if r.status_code != 200:
             raise ProviderError(f"gemini error {r.status_code}: {r.text[:300]}", retryable=False, status=r.status_code)
         data = r.json()
