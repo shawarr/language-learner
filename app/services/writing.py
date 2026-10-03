@@ -155,8 +155,10 @@ async def submit(prompt: str, text: str) -> dict:
         prompt=prompt,
         text=text,
     )
+    # Feedback is the one place a weak model does real damage (a wrong "correction" gets logged as his
+    # mistake), so it takes the quality tier; the task prompt above is fine on the fast one.
     data = await llm.complete_json(system, [Message("user", "Give your feedback as JSON.")], FEEDBACK_SCHEMA,
-                                   temperature=0.3, max_tokens=1536)
+                                   tier="quality", temperature=0.3, max_tokens=1536)
     feedback = validate_feedback(data, text)
     now = time.time()
     # One transaction: the writing row and its corrections land together or not at all.

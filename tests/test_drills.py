@@ -127,11 +127,12 @@ async def test_answering_moves_the_mistake_log_and_finishes_the_drill(fresh_db):
 
     right = await drills.answer(d["id"], 0, "MIT DEM")
     assert right == {"index": 0, "correct": True, "answer": "mit dem", "your_answer": "MIT DEM",
-                     "explanation": "'mit' takes the dative.", "finished": False, "score": None, "total": 4}
+                     "explanation": "'mit' takes the dative.", "beaten": False, "finished": False, "score": None,
+                     "total": 4}, "one of four resolved: right, but not beaten yet"
     assert (await fresh_db.fetchone("SELECT resolved, count FROM mistakes WHERE id=?", (ids["case"],)))["resolved"] == 1
 
     wrong = await drills.answer(d["id"], 1, "Gestern ich habe gearbeitet.")
-    assert wrong["correct"] is False and wrong["answer"] == "Gestern habe ich gearbeitet."
+    assert wrong["correct"] is False and wrong["beaten"] is False and wrong["answer"] == "Gestern habe ich gearbeitet."
     wo = await fresh_db.fetchone("SELECT resolved, count FROM mistakes WHERE id=?", (ids["word_order"],))
     assert (wo["count"], wo["resolved"]) == (3, 0)
 
@@ -151,8 +152,11 @@ async def test_answering_moves_the_mistake_log_and_finishes_the_drill(fresh_db):
     # The last item closes the drill: score, finished_at, activity.
     last = await drills.answer(d["id"], 3, "ich bin ins büro gegangen")
     assert last["finished"] is True and last["score"] == 3 and last["total"] == 4
+    assert last["beaten"] is True, "the gender row had count 1: this answer retired it"
+    assert (await drills.answer(d["id"], 3, "whatever"))["beaten"] is True, "the stored result keeps the flag"
     row = await fresh_db.fetchone("SELECT * FROM drills WHERE id=?", (d["id"],))
     assert row["score"] == 3 and row["finished_at"] is not None
+    assert [r["beaten"] for r in loads(row["results"], [])] == [False, False, False, True]
     assert loads(row["answers"], []) == ["MIT DEM", "Gestern ich habe gearbeitet.", "gestern habe ich gearbeitet",
                                          "ich bin ins büro gegangen"]
     assert [r["correct"] for r in loads(row["results"], [])] == [True, False, True, True]
@@ -179,6 +183,7 @@ async def test_transform_calls_the_model_only_when_the_answer_differs(fresh_db):
     # The first drill beat the gender row (resolved >= count), so the second drill targeted
     # verb_conjugation instead and ref 3 now points at that row.
     assert d2["categories"] == ["case", "word_order", "verb_conjugation"]
+    assert res["beaten"] is True, "the verb row had count 1 and this model-graded answer retired it"
     assert (await fresh_db.fetchone("SELECT resolved FROM mistakes WHERE id=?", (ids["gender"],)))["resolved"] == 1
     assert (await fresh_db.fetchone("SELECT resolved FROM mistakes WHERE id=?", (ids["verb"],)))["resolved"] == 1
 
@@ -195,6 +200,24 @@ async def test_transform_calls_the_model_only_when_the_answer_differs(fresh_db):
     assert len(FakeProvider.calls) == n, "an empty transform answer is wrong without a model call"
 
 
+async def test_beaten_is_false_without_a_row_or_when_already_beaten(fresh_db):
+    FakeProvider.canned = {"items": [item("fill_blank")] * 3}
+    d = await drills.new(3)  # empty log: no mistake rows at all
+    assert (await drills.answer(d["id"], 0, "mit dem"))["beaten"] is False
+    mid = await mistakes.record("case", "dative after mit", "mit den", "mit dem", now=NOW)
+    await mistakes.resolve(mid)  # already beaten before the drill touches it
+    FakeProvider.canned = {"items": [item("fill_blank")] * 3}
+    d = await drills.new(3)
+    assert (await drills.answer(d["id"], 0, "mit dem"))["beaten"] is False
+    assert (await fresh_db.fetchone("SELECT resolved FROM mistakes WHERE id=?", (mid,)))["resolved"] == 1, \
+        "a beaten row is not targeted, so a generic item does not touch it"
+    # Results stored before the flag existed read back as not beaten.
+    await fresh_db.execute("UPDATE drills SET results=? WHERE id=?",
+                           ('[{"index": 0, "correct": true, "answer": "a", "your_answer": "a", "explanation": ""}, null, null]',
+                            d["id"]))
+    assert (await drills.answer(d["id"], 0, "x"))["beaten"] is False
+
+
 async def test_submit_grades_the_rest_and_skips_graded_and_null(fresh_db):
     await seed_mistakes()
     FakeProvider.canned = ITEMS
@@ -202,6 +225,7 @@ async def test_submit_grades_the_rest_and_skips_graded_and_null(fresh_db):
     await drills.answer(d["id"], 0, "mit den")
     out = await drills.submit(d["id"], ["mit dem", "Gestern habe ich gearbeitet.", None, "Ich bin ins Büro gegangen."])
     assert [r["index"] for r in out["results"]] == [0, 1, 3] and out["score"] == 2 and out["total"] == 4
+    assert [r["beaten"] for r in out["results"]] == [False, False, True]
     assert out["results"][0]["your_answer"] == "mit den" and out["results"][0]["correct"] is False, "index 0 was not re-graded"
     assert out["finished"] is False
     out = await drills.submit(d["id"], [None, None, "Gestern habe ich gearbeitet."])
@@ -229,6 +253,7 @@ def test_drill_routes(auth_client):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["total"] == 4 and body["score"] == 3 and len(body["results"]) == 4
+    assert all(set(x) == {"index", "correct", "answer", "your_answer", "explanation", "beaten"} for x in body["results"])
     assert auth_client.post("/api/drill/999/submit", json={"answers": []}).status_code == 404
     assert auth_client.post(f"/api/drill/{d['id']}/submit", json={"answers": "x"}).status_code == 422
     assert auth_client.get("/api/drill/new").status_code == 200, "n defaults to settings.drill_items"

@@ -116,6 +116,22 @@ async def test_new_prompt_feeds_recent_prompts_and_review_focus(fresh_db):
     assert "mistakes" not in placeholders("write_prompt")
 
 
+async def test_feedback_takes_the_quality_tier_and_the_task_the_fast_one(fresh_db, monkeypatch):
+    seen = []
+    original = writing.llm.complete_json
+
+    async def spy(*args, **kwargs):
+        seen.append(kwargs.get("tier", "primary"))
+        return await original(*args, **kwargs)
+
+    monkeypatch.setattr(writing.llm, "complete_json", spy)
+    FakeProvider.canned = {"task": "t", "to": "x", "must_include": ["a"], "words_min": 40, "words_max": 80}
+    await writing.new_prompt()
+    FakeProvider.canned = FEEDBACK
+    await writing.submit("t", TEXT)
+    assert seen == ["fast", "quality"]
+
+
 def test_write_routes(auth_client):
     FakeProvider.canned = {"task": "t", "to": "x", "must_include": ["a"], "words_min": 40, "words_max": 80}
     assert auth_client.get("/api/write/prompt").status_code == 200

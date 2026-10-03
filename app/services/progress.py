@@ -71,6 +71,24 @@ async def vocab_counts(now: float) -> dict:
     return {k: int((row or {}).get(k) or 0) for k in ("total", "due", "mature", "new")}
 
 
+async def checkpoint_status(unit_id: str) -> dict:
+    """{"available", "unit_id", "reason"} plus the session counts once C4's `availability` exists.
+
+    Before C4 lands the checkpoint module only has `is_available`, so the reason can only say what we
+    know; afterwards its real verdict ("ready" | "sessions" | "not_yet") comes through unchanged.
+    """
+    availability = getattr(checkpoint, "availability", None)
+    if availability is not None:
+        info = await availability(unit_id)
+        if isinstance(info, dict):
+            extra = {k: info[k] for k in ("sessions_in_unit", "sessions_needed") if k in info}
+            available = bool(info.get("available"))
+            return {"available": available, "unit_id": unit_id,
+                    "reason": str(info.get("reason") or ("ready" if available else "not_yet")), **extra}
+    available = await checkpoint.is_available(unit_id)
+    return {"available": bool(available), "unit_id": unit_id, "reason": "ready" if available else "not_yet"}
+
+
 async def payload(now: float | None = None) -> dict:
     now = now or time.time()
     today = dt.datetime.fromtimestamp(now, dt.timezone.utc).date()
@@ -86,7 +104,6 @@ async def payload(now: float | None = None) -> dict:
     for s in sessions:
         s["meta"] = loads(s["meta"], {})
     ended = (await db.fetchone("SELECT COUNT(*) AS n FROM sessions WHERE mode='talk' AND ended_at IS NOT NULL"))["n"]
-    available = await checkpoint.is_available(unit_id)
 
     return {
         "profile": {k: p[k] for k in PROFILE_FIELDS},
@@ -101,8 +118,7 @@ async def payload(now: float | None = None) -> dict:
         "beaten_mistakes": await mistakes.beaten(BEATEN_MISTAKES),
         "vocab": await vocab_counts(now),
         "recent_sessions": sessions,
-        # C4 owns the real reason ("ready" | "sessions" | "not_yet"); until it exposes one, say only what we know.
-        "checkpoint": {"available": bool(available), "unit_id": unit_id, "reason": "ready" if available else "not_yet"},
+        "checkpoint": await checkpoint_status(unit_id),
         "sessions_total": int(ended),
         "thin_data": int(ended) < THIN_DATA_SESSIONS,
     }

@@ -115,6 +115,27 @@ async def test_thin_data_sessions_and_profile_fields(fresh_db):
                                               "ended_at", "summary", "user_turns", "meta"}
 
 
+async def test_checkpoint_uses_c4_availability_when_it_exists(fresh_db, monkeypatch):
+    from app.services import checkpoint
+
+    assert not hasattr(checkpoint, "availability"), "the stub: the fallback path is what the other tests cover"
+
+    async def availability(unit_id):
+        return {"available": True, "reason": "sessions", "sessions_in_unit": 3, "sessions_needed": 3}
+
+    monkeypatch.setattr(checkpoint, "availability", availability, raising=False)
+    out = await progress.payload(now=NOW)
+    assert out["checkpoint"] == {"available": True, "unit_id": out["unit"]["id"], "reason": "sessions",
+                                 "sessions_in_unit": 3, "sessions_needed": 3}
+
+    async def not_yet(unit_id):
+        return {"available": False, "reason": "not_yet"}
+
+    monkeypatch.setattr(checkpoint, "availability", not_yet, raising=False)
+    assert (await progress.payload(now=NOW))["checkpoint"] == {"available": False, "unit_id": out["unit"]["id"],
+                                                               "reason": "not_yet"}
+
+
 def test_progress_route(auth_client):
     r = auth_client.get("/api/progress")
     assert r.status_code == 200 and set(r.json()) == KEYS
