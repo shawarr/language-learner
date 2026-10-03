@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "id": "a1.1",
+      "level": "A1.1",
+      "title": "First contact",
+      "units": [
+        {
+          "id": "a1.1-1",
+          "title": "First contact 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.1-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "a1.1-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "a1.2",
+      "level": "A1.2",
+      "title": "Daily life",
+      "units": [
+        {
+          "id": "a1.2-1",
+          "title": "Daily life 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "a1.2-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "a1.2-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "a2.1",
+      "level": "A2.1",
+      "title": "Getting things done",
+      "units": [
+        {
+          "id": "a2.1-1",
+          "title": "Getting things done 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.1-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "a2.1-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "a2.2",
+      "level": "A2.2",
+      "title": "Settling in",
+      "units": [
+        {
+          "id": "a2.2-1",
+          "title": "Settling in 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "a2.2-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "a2.2-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "b1.1",
+      "level": "B1.1",
+      "title": "Holding your own",
+      "units": [
+        {
+          "id": "b1.1-1",
+          "title": "Holding your own 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.1-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "b1.1-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "b1.2",
+      "level": "B1.2",
+      "title": "At length",
+      "units": [
+        {
+          "id": "b1.2-1",
+          "title": "At length 1",
+          "can_do": [
+            "placeholder can-do"
+          ],
+          "grammar": [
+            "placeholder grammar"
+          ],
+          "vocab_themes": [
+            "placeholder"
+          ],
+          "scenarios": [
+            {
+              "id": "b1.2-1-a",
+              "title": "Placeholder A",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            },
+            {
+              "id": "b1.2-1-b",
+              "title": "Placeholder B",
+              "setup": "Placeholder setup.",
+              "goal": "Placeholder goal."
+            }
+          ],
+          "checkpoint": {
+            "speaking": {
+              "prompt": "Placeholder speaking task."
+            },
+            "writing": {
+              "prompt": "Placeholder writing task."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
