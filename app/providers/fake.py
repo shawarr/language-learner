@@ -23,7 +23,10 @@ def _dummy(schema: dict[str, Any], key: str = "") -> Any:
         return {k: _dummy(v, k) for k, v in props.items() if k in schema.get("required", props.keys())}
     if t == "array":
         item = schema.get("items", {"type": "string"})
-        return [_dummy(item, key)] if schema.get("minItems", 1) > 0 else []
+        # Three entries for an "items" list so services that need a minimum (the drill generator
+        # wants 3+) can be driven offline; one entry everywhere else keeps replies small.
+        n = max(schema.get("minItems", 1), 3 if key == "items" else 1)
+        return [_dummy(item, key) for _ in range(n)]
     if t == "integer":
         return schema.get("minimum", 0)
     if t == "number":

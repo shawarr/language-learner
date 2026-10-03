@@ -10,14 +10,15 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 from typing import Any
 
-from ..config import settings
+from ..config import OPENAI_COMPAT_PROVIDERS, settings
 from .base import LLMProvider, LLMRequest, LLMResponse, Message, ProviderError, RateLimited
 from .fake import FakeProvider
 from .gemini import GeminiProvider
-from .groq import GroqProvider
+from .openai_compat import OpenAICompatProvider
 
 log = logging.getLogger(__name__)
 
@@ -29,38 +30,61 @@ class LLMUnavailable(Exception):
 class LLMRouter:
     def __init__(self) -> None:
         self.gemini = GeminiProvider(settings.gemini_api_key, settings.llm_timeout)
-        self.groq = GroqProvider(settings.groq_api_key, settings.llm_timeout)
         self.fake = FakeProvider()
-        self._providers: dict[str, LLMProvider] = {"gemini": self.gemini, "groq": self.groq, "fake": self.fake}
+        self._providers: dict[str, LLMProvider] = {"gemini": self.gemini, "fake": self.fake}
+        for name, (base_url, key_env) in OPENAI_COMPAT_PROVIDERS.items():
+            url = settings.custom_llm_base_url if name == "custom" else base_url
+            key = os.environ.get(key_env, "").strip()
+            # Registered even without a key so a misconfigured model string still produces a clear
+            # "api key not set" instead of "unknown provider"; `custom` needs its URL to mean anything.
+            if url:
+                self._providers[name] = OpenAICompatProvider(name, url, key, settings.llm_timeout)
+
+    @property
+    def groq(self) -> OpenAICompatProvider:
+        """Groq by name: STT and the health check reach for whisper specifically."""
+        return self._providers["groq"]  # type: ignore[return-value]
+
+    def provider(self, name: str) -> LLMProvider:
+        if name not in self._providers:
+            raise ValueError(f"provider '{name}' is not configured "
+                             f"(known: {', '.join(sorted(self._providers))})")
+        return self._providers[name]
 
     def _parse(self, spec: str) -> tuple[LLMProvider, str]:
         provider, _, model = spec.partition(":")
-        if provider not in self._providers:
-            raise ValueError(f"unknown LLM provider in '{spec}'")
-        return self._providers[provider], model or "fake"
+        return self.provider(provider), model or "fake"
 
     def _chain(self, tier: str) -> list[str]:
-        if tier == "fast":
-            return [s for s in (settings.llm_fast, settings.llm_primary, settings.llm_fallback) if s]
-        return [s for s in (settings.llm_primary, settings.llm_fallback) if s]
+        """Which models to try, in order. Unknown tiers fall back to the conversation chain."""
+        head = {"fast": settings.llm_fast, "quality": settings.llm_quality}.get(tier)
+        specs = ([head] if head else []) + [settings.llm_primary, settings.llm_fallback]
+        seen: set[str] = set()
+        return [s for s in specs if s and not (s in seen or seen.add(s))]
+
+    # Retries before failing over, per provider. Free-tier Gemini Flash hands out 503
+    # "high demand" often enough that giving up on the first one would send most turns to
+    # the weaker fallback; 429 and 5xx both clear on their own within a second or two.
+    ATTEMPTS = 2
 
     async def complete(self, req: LLMRequest, *, tier: str = "primary") -> LLMResponse:
         errors: list[str] = []
         for spec in self._chain(tier):
             provider, model = self._parse(spec)
-            for attempt in range(2):
+            for attempt in range(self.ATTEMPTS):
                 try:
                     return await provider.complete(model, req)
-                except RateLimited as e:
-                    wait = min(e.retry_after or 2.0, 8.0)
-                    log.warning("%s rate limited (attempt %d), waiting %.1fs", spec, attempt + 1, wait)
-                    errors.append(f"{spec}: rate limited")
-                    if attempt == 0:
-                        await asyncio.sleep(wait)
                 except ProviderError as e:
-                    log.warning("%s failed: %s", spec, e)
+                    transient = isinstance(e, RateLimited) or (e.status or 0) >= 500
                     errors.append(f"{spec}: {e}")
-                    break  # non-rate-limit error: go to the next provider
+                    if not transient or attempt == self.ATTEMPTS - 1:
+                        log.warning("%s failed (%s), moving on: %s",
+                                    spec, "giving up" if transient else "permanent", e)
+                        break
+                    wait = min(getattr(e, "retry_after", None) or 1.5, 8.0)
+                    log.warning("%s transient failure (attempt %d), waiting %.1fs: %s",
+                                spec, attempt + 1, wait, e)
+                    await asyncio.sleep(wait)
                 except (asyncio.TimeoutError, OSError) as e:
                     errors.append(f"{spec}: {e}")
                     break

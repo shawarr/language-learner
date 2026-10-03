@@ -60,8 +60,12 @@ async def _gemini(text: str, speed: str, voice: str, path: Path) -> None:
         if part.strip().startswith("rate="):
             rate = int(part.split("=", 1)[1])
     tmp = path.with_suffix(".part")
-    tmp.write_bytes(audio if "wav" in mime else _pcm_to_wav(audio, rate))
-    tmp.rename(path)
+    try:
+        tmp.write_bytes(audio if "wav" in mime else _pcm_to_wav(audio, rate))
+        tmp.rename(path)
+    except OSError as e:
+        tmp.unlink(missing_ok=True)
+        raise ProviderError(f"could not write tts cache file: {e}") from e
 
 
 # provider -> (extension, voice setting, engine)
@@ -76,6 +80,13 @@ async def synthesize(text: str, speed: str = "normal") -> Path:
     text = " ".join(text.split())
     if not text:
         raise ProviderError("nothing to say", retryable=False)
+    # db.connect() creates this at startup, but a script or a test can reach TTS without it, and a
+    # missing directory would otherwise surface as a FileNotFoundError — a 500 rather than a
+    # handled, retryable 503.
+    try:
+        settings.audio_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        raise ProviderError(f"audio cache dir {settings.audio_dir} is not usable: {e}") from e
     order = [settings.tts_provider] + [n for n in _ENGINES if n != settings.tts_provider]
     errors: list[str] = []
     for name in order:
