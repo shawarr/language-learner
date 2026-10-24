@@ -167,3 +167,24 @@ def test_the_app_teaches_before_it_tests():
     css = (Path(settings.static_dir) / "styles.css").read_text()
     tabs_rule = css[css.index("#tabs {"):][:400]
     assert "repeat(5" not in tabs_rule, "a hardcoded column count drops the last tab off-screen"
+
+
+def test_every_frontend_module_parses(tmp_path):
+    """A syntax error in any one module (a duplicated declaration, a stray brace) stops the whole
+    app from loading, and nothing else in this suite executes the frontend. Parsed as ES modules,
+    which is how the browser loads them. Skipped where Node is not installed."""
+    import shutil
+    import subprocess
+
+    import pytest
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node not installed")
+    files = [STATIC / "app.js", STATIC / "sw.js", *sorted((STATIC / "js").glob("*.js"))]
+    for f in files:
+        copy = tmp_path / (f.stem + ".mjs")
+        copy.write_text(f.read_text())
+        r = subprocess.run([node, "--check", str(copy)], capture_output=True, text=True, timeout=30)
+        why = next((ln for ln in r.stderr.splitlines() if "Error" in ln), r.stderr.strip()[-200:])
+        assert r.returncode == 0, f"{f.name} does not parse: {why}"

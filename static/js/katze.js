@@ -21,12 +21,6 @@ export function personColor(user, all) {
   const ids = (all || []).map((u) => u.id).sort((a, b) => a - b);
   return ids.indexOf(user.id) === 0 ? 'var(--accent)' : 'var(--cat-gender)';
 }
-
-/* Each learner keeps one colour everywhere (race bars, head-to-head), whoever is looking. */
-export function personColor(user, all) {
-  const ids = (all || []).map((u) => u.id).sort((a, b) => a - b);
-  return ids.indexOf(user.id) === 0 ? 'var(--accent)' : 'var(--cat-gender)';
-}
 export const variantName = (id) => (FUR[id] || FUR['katze-1']).name;
 
 function eyes(mood, eye) {
