@@ -226,8 +226,11 @@ class Database:
         profile_cols = [r["name"] for r in await self.fetchall("PRAGMA table_info(profile)")]
         if "user_id" not in profile_cols:
             raise RuntimeError(
-                f"{settings.db_path} is from the single-learner version. Run scripts/reset_data.py "
-                "(it wipes the database and the caches) and start again.")
+                f"{settings.db_path} is from the single-learner version and cannot be upgraded in place. "
+                "On the server: bash deploy/backup.sh; docker compose down; "
+                "rm -f data/tutor.db data/tutor.db-wal data/tutor.db-shm; rm -rf data/audio; "
+                "bash deploy/deploy.sh (README.md, 'Upgrading from the single-learner version'). "
+                "Locally: .venv/bin/python scripts/reset_data.py")
         # Accounts and their profile rows are created by app.users.seed(), after connect().
 
     async def close(self) -> None:
