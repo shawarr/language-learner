@@ -29,20 +29,20 @@
             {
               "id": "a1.1-1-nachbarin",
               "title": "Die neue Nachbarin",
-              "setup": "You are Frau Keller, Ahmad's new neighbour, meeting him in the stairwell of his building in Germany for the first time. Use Sie. Greet him, say your name and ask who he is. Keep every sentence very short; he has just started learning.",
-              "goal": "He says his name and where he comes from, and asks you one question back."
+              "setup": "You are Frau Keller, {{name}}'s new neighbour, meeting {{him}} in the stairwell of {{his}} building in Germany for the first time. Use Sie. Greet {{him}}, say your name and ask who {{he}} is. Keep every sentence very short; {{he}} has just started learning.",
+              "goal": "{{He}} says {{his}} name and where {{he}} comes from, and asks you one question back."
             },
             {
               "id": "a1.1-1-kollege",
               "title": "Der neue Kollege",
-              "setup": "You are Jonas, a developer on Ahmad's team in Berlin, and this is your first video call with him. Use du, like German tech teams do. Say hi, introduce yourself in one sentence and ask where he is calling from.",
-              "goal": "He introduces himself, says he lives in Amman and asks where you live or work."
+              "setup": "You are Jonas, a developer on {{name}}'s team in Berlin, and this is your first video call with {{him}}. Use du, like German tech teams do. Say hi, introduce yourself in one sentence and ask where {{he}} is calling from.",
+              "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or work."
             },
             {
               "id": "a1.1-1-empfang",
               "title": "Am Empfang",
-              "setup": "You are the receptionist at the company's office in Berlin. Ahmad is visiting for the first time. Use Sie. Ask for his name, which team he belongs to and spell-check his name by asking him to spell it (Wie schreibt man das?).",
-              "goal": "He gives his full name, spells it, and names his team or the person he is visiting."
+              "setup": "You are the receptionist at the company's office in Berlin. {{name}} is visiting for the first time. Use Sie. Ask for {{his}} name, which team {{he}} belongs to and spell-check {{his}} name by asking {{him}} to spell it (Wie schreibt man das?).",
+              "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} team or the person {{he}} is visiting."
             }
           ],
           "checkpoint": {
@@ -81,20 +81,20 @@
             {
               "id": "a1.1-2-standup-zeit",
               "title": "Wann ist das Standup?",
-              "setup": "You are Lena, the scrum master of Ahmad's team. The daily standup time has to move and you need to find a slot that works for Ahmad in Amman (one hour ahead of Berlin). Ask when he starts work, suggest a time and check it fits. Use du.",
-              "goal": "He says when he starts and finishes work and agrees on a concrete time for the standup."
+              "setup": "You are Lena, the scrum master of {{name}}'s team. The daily standup time has to move and you need to find a slot that works for {{name}} in Amman (one hour ahead of Berlin). Ask when {{he}} starts work, suggest a time and check it fits. Use du.",
+              "goal": "{{He}} says when {{he}} starts and finishes work and agrees on a concrete time for the standup."
             },
             {
               "id": "a1.1-2-personalabteilung",
               "title": "Anruf von der Personalabteilung",
-              "setup": "You are Frau Berger from HR. You phone Ahmad to complete his employee file: you need his phone number, his date of birth and his email address, and you want to confirm the start date of his contract. Use Sie and read numbers back to him so he can confirm.",
-              "goal": "He gives a phone number, his date of birth and an email address, and confirms a date."
+              "setup": "You are Frau Berger from HR. You phone {{name}} to complete {{his}} employee file: you need {{his}} phone number, {{his}} date of birth and {{his}} email address, and you want to confirm the start date of {{his}} contract. Use Sie and read numbers back to {{him}} so {{he}} can confirm.",
+              "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date."
             },
             {
               "id": "a1.1-2-kiosk",
               "title": "Am Kiosk",
-              "setup": "You are the owner of a kiosk near Berlin Hauptbahnhof. Ahmad wants a bottle of water, a coffee and a newspaper. Tell him the prices one by one, give him the total and ask whether he pays with card or cash. Use Sie.",
-              "goal": "He asks the price of at least one item, understands the total and says how he wants to pay."
+              "setup": "You are the owner of a kiosk near Berlin Hauptbahnhof. {{name}} wants a bottle of water, a coffee and a newspaper. Tell {{him}} the prices one by one, give {{him}} the total and ask whether {{he}} pays with card or cash. Use Sie.",
+              "goal": "{{He}} asks the price of at least one item, understands the total and says how {{he}} wants to pay."
             }
           ],
           "checkpoint": {
@@ -133,20 +133,20 @@
             {
               "id": "a1.1-3-standup",
               "title": "Das Daily Standup",
-              "setup": "You are Lena, the scrum master, running the daily standup. Ask Ahmad in very simple German what he is doing today and whether he needs help. If he answers in English, give him the German and ask again. Use du.",
-              "goal": "He names at least one task he is doing today and says whether he has a problem or not."
+              "setup": "You are Lena, the scrum master, running the daily standup. Ask {{name}} in very simple German what {{he}} is doing today and whether {{he}} needs help. If {{he}} answers in English, give {{him}} the German and ask again. Use du.",
+              "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not."
             },
             {
               "id": "a1.1-3-videocall",
               "title": "Vor dem Meeting",
-              "setup": "You are Jonas, a colleague. You are both early in a video call waiting for the others. Make small talk: ask how he is, how his morning was and what time it is in Amman now. Use du and short sentences.",
-              "goal": "He says how he is, says what time it is in Amman and asks you one question about your day."
+              "setup": "You are Jonas, a colleague. You are both early in a video call waiting for the others. Make small talk: ask how {{he}} is, how {{his}} morning was and what time it is in Amman now. Use du and short sentences.",
+              "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day."
             },
             {
               "id": "a1.1-3-tagesablauf",
               "title": "Ein Tag in Amman",
-              "setup": "You are Mira, a new colleague who is curious how remote work from Amman looks. Ask Ahmad about his day from getting up to finishing work: when he gets up, when he starts, when he eats, when he stops. Use du.",
-              "goal": "He describes his day with at least four activities and at least two separable verbs used correctly."
+              "setup": "You are Mira, a new colleague who is curious how remote work from Amman looks. Ask {{name}} about {{his}} day from getting up to finishing work: when {{he}} gets up, when {{he}} starts, when {{he}} eats, when {{he}} stops. Use du.",
+              "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly."
             }
           ],
           "checkpoint": {
@@ -185,20 +185,20 @@
             {
               "id": "a1.1-4-baeckerei",
               "title": "In der Bäckerei",
-              "setup": "You are the woman behind the counter in a busy bakery in Berlin. Greet Ahmad, ask what he would like, offer a choice when he hesitates (Brötchen oder Brezel?), tell him the price and ask if that is everything. Use Sie, speak in short phrases, keep the queue moving.",
-              "goal": "He orders at least two items with quantities, asks what something is or whether it contains something, and pays."
+              "setup": "You are the woman behind the counter in a busy bakery in Berlin. Greet {{name}}, ask what {{he}} would like, offer a choice when {{he}} hesitates (Brötchen oder Brezel?), tell {{him}} the price and ask if that is everything. Use Sie, speak in short phrases, keep the queue moving.",
+              "goal": "{{He}} orders at least two items with quantities, asks what something is or whether it contains something, and pays."
             },
             {
               "id": "a1.1-4-teamessen",
               "title": "Mittagessen mit dem Team",
-              "setup": "You are the waiter at an Italian restaurant where Ahmad is having lunch with colleagues. Hand him the menu, ask what he wants to drink, then what he wants to eat. When he asks, explain simply what a dish contains. He does not eat pork, so be ready for that question. Use Sie.",
-              "goal": "He orders a drink and a dish and asks whether a dish contains meat or pork."
+              "setup": "You are the waiter at an Italian restaurant where {{name}} is having lunch with colleagues. Hand {{him}} the menu, ask what {{he}} wants to drink, then what {{he}} wants to eat. When {{he}} asks, explain simply what a dish contains. {{He}} does not eat pork, so be ready for that question. Use Sie.",
+              "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork."
             },
             {
               "id": "a1.1-4-supermarkt",
               "title": "Im Supermarkt",
-              "setup": "You are an employee stacking shelves in a supermarket. Ahmad is looking for things on a shopping list: rice, yoghurt, tomatoes, bread. Tell him where things are (Gang drei, hinten links, neben der Kasse) and ask if he needs anything else. Use Sie.",
-              "goal": "He asks where at least two products are and understands and repeats back where to find them."
+              "setup": "You are an employee stacking shelves in a supermarket. {{name}} is looking for things on a shopping list: rice, yoghurt, tomatoes, bread. Tell {{him}} where things are (Gang drei, hinten links, neben der Kasse) and ask if {{he}} needs anything else. Use Sie.",
+              "goal": "{{He}} asks where at least two products are and understands and repeats back where to find them."
             }
           ],
           "checkpoint": {
@@ -237,20 +237,20 @@
             {
               "id": "a1.1-5-auslaenderbehoerde",
               "title": "Wo ist die Ausländerbehörde?",
-              "setup": "You are a passer-by at a tram stop in Berlin. Ahmad has an appointment at the Ausländerbehörde and does not know how to get there. Explain the way in two or three very simple steps (tram number, how many stops, then on foot) and check that he understood. Use Sie.",
-              "goal": "He asks for the way, asks you to repeat or speak more slowly at least once, and repeats the directions back correctly."
+              "setup": "You are a passer-by at a tram stop in Berlin. {{name}} has an appointment at the Ausländerbehörde and does not know how to get there. Explain the way in two or three very simple steps (tram number, how many stops, then on foot) and check that {{he}} understood. Use Sie.",
+              "goal": "{{He}} asks for the way, asks you to repeat or speak more slowly at least once, and repeats the directions back correctly."
             },
             {
               "id": "a1.1-5-buero",
               "title": "Im Bürogebäude",
-              "setup": "You are Jonas showing Ahmad around the Berlin office on his first visit. Walk him through: the kitchen, the toilets, the meeting room Mars, his desk. Ask him afterwards where each thing is to check he remembers. Use du.",
-              "goal": "He correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
+              "setup": "You are Jonas showing {{name}} around the Berlin office on {{his}} first visit. Walk {{him}} through: the kitchen, the toilets, the meeting room Mars, {{his}} desk. Ask {{him}} afterwards where each thing is to check {{he}} remembers. Use du.",
+              "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
             },
             {
               "id": "a1.1-5-hauptbahnhof",
               "title": "Am Hauptbahnhof",
-              "setup": "You are a Deutsche Bahn employee at the information desk. Ahmad wants the train to Hamburg and does not know which platform. Tell him the platform (Gleis) and the departure time, and tell him the platform is upstairs on the left. Use Sie.",
-              "goal": "He asks which platform his train leaves from and when, and confirms the answer back to you."
+              "setup": "You are a Deutsche Bahn employee at the information desk. {{name}} wants the train to Hamburg and does not know which platform. Tell {{him}} the platform (Gleis) and the departure time, and tell {{him}} the platform is upstairs on the left. Use Sie.",
+              "goal": "{{He}} asks which platform {{his}} train leaves from and when, and confirms the answer back to you."
             }
           ],
           "checkpoint": {
@@ -296,20 +296,20 @@
             {
               "id": "a1.2-1-review",
               "title": "Bitte um ein Code-Review",
-              "setup": "You are Mira, a senior developer on Ahmad's team. He is going to ask you to review his pull request. Ask what the change does, how big it is and by when he needs the review. Agree only if he gives you a time. Use du.",
-              "goal": "He asks for a review, says in simple words what the change does, and names a deadline."
+              "setup": "You are Mira, a senior developer on {{name}}'s team. {{He}} is going to ask you to review {{his}} pull request. Ask what the change does, how big it is and by when {{he}} needs the review. Agree only if {{he}} gives you a time. Use du.",
+              "goal": "{{He}} asks for a review, says in simple words what the change does, and names a deadline."
             },
             {
               "id": "a1.2-1-frage-an-chefin",
               "title": "Eine kurze Frage an die Chefin",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. He joins a short call because he has a question about a task. Ask what the problem is and give him one clear instruction. Check at the end that he knows what to do next. Use Sie; she is friendly but busy.",
-              "goal": "He explains his question, says he does or does not understand your instruction, and repeats what he will do next."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} joins a short call because {{he}} has a question about a task. Ask what the problem is and give {{him}} one clear instruction. Check at the end that {{he}} knows what to do next. Use Sie; she is friendly but busy.",
+              "goal": "{{He}} explains {{his}} question, says {{he}} does or does not understand your instruction, and repeats what {{he}} will do next."
             },
             {
               "id": "a1.2-1-onboarding",
               "title": "Dem neuen Kollegen helfen",
-              "setup": "You are Tom, a new junior on the team. You cannot get access to the staging cluster and you ask Ahmad for help. Say what you tried, ask what you have to do, and ask follow-up questions when he explains. Use du.",
-              "goal": "He gives you at least two concrete instructions using müssen or the du imperative."
+              "setup": "You are Tom, a new junior on the team. You cannot get access to the staging cluster and you ask {{name}} for help. Say what you tried, ask what you have to do, and ask follow-up questions when {{he}} explains. Use du.",
+              "goal": "{{He}} gives you at least two concrete instructions using müssen or the du imperative."
             }
           ],
           "checkpoint": {
@@ -348,20 +348,20 @@
             {
               "id": "a1.2-2-montag",
               "title": "Montagmorgen",
-              "setup": "You are Jonas, waiting with Ahmad for the others to join the Monday standup. Ask about his weekend, tell him about yours in simple sentences (you went hiking), and ask what he likes doing in his free time. Use du.",
-              "goal": "He says what he likes doing in his free time with gern or lieber and asks you about your hobbies."
+              "setup": "You are Jonas, waiting with {{name}} for the others to join the Monday standup. Ask about {{his}} weekend, tell {{him}} about yours in simple sentences (you went hiking), and ask what {{he}} likes doing in {{his}} free time. Use du.",
+              "goal": "{{He}} says what {{he}} likes doing in {{his}} free time with gern or lieber and asks you about your hobbies."
             },
             {
               "id": "a1.2-2-fitnessstudio",
               "title": "Im Fitnessstudio",
-              "setup": "You are the receptionist at a gym in Berlin. Ahmad wants a trial session. Ask what days and times he wants to train, which sport he does, and explain the opening hours and the price per month. Use Sie.",
-              "goal": "He says when and how often he wants to train, asks the price, and understands the opening hours."
+              "setup": "You are the receptionist at a gym in Berlin. {{name}} wants a trial session. Ask what days and times {{he}} wants to train, which sport {{he}} does, and explain the opening hours and the price per month. Use Sie.",
+              "goal": "{{He}} says when and how often {{he}} wants to train, asks the price, and understands the opening hours."
             },
             {
               "id": "a1.2-2-amman",
               "title": "Erzähl mir von Amman",
-              "setup": "You are Mira, a colleague who has never been to Jordan. Ask Ahmad what Amman is like: the weather, the food, what people do at the weekend, what he would show a visitor. React with interest and ask one follow-up question per answer. Use du.",
-              "goal": "He describes Amman with at least four facts (weather, food, places, free time) and recommends one thing to do."
+              "setup": "You are Mira, a colleague who has never been to Jordan. Ask {{name}} what Amman is like: the weather, the food, what people do at the weekend, what {{he}} would show a visitor. React with interest and ask one follow-up question per answer. Use du.",
+              "goal": "{{He}} describes Amman with at least four facts (weather, food, places, free time) and recommends one thing to do."
             }
           ],
           "checkpoint": {
@@ -400,20 +400,20 @@
             {
               "id": "a1.2-3-standup-gestern",
               "title": "Standup: gestern, heute, Blocker",
-              "setup": "You are Lena, the scrum master, running the standup. Ask Ahmad the three standup questions one at a time: what he did yesterday, what he is doing today, whether anything is blocking him. If he answers yesterday in the present tense, repeat it back in the Perfekt as a question (Du hast den Server neu gestartet?). Use du.",
-              "goal": "He answers all three questions and uses the Perfekt correctly for at least two things he did yesterday."
+              "setup": "You are Lena, the scrum master, running the standup. Ask {{name}} the three standup questions one at a time: what {{he}} did yesterday, what {{he}} is doing today, whether anything is blocking {{him}}. If {{he}} answers yesterday in the present tense, repeat it back in the Perfekt as a question (Du hast den Server neu gestartet?). Use du.",
+              "goal": "{{He}} answers all three questions and uses the Perfekt correctly for at least two things {{he}} did yesterday."
             },
             {
               "id": "a1.2-3-wochenende",
               "title": "Wie war dein Wochenende?",
-              "setup": "You are Tom, a colleague. It is Monday. Ask Ahmad what he did at the weekend and tell him in short Perfekt sentences what you did (cooked, met friends, slept long). Ask follow-up questions about where, with whom and how it was. Use du.",
-              "goal": "He narrates at least four weekend activities in the Perfekt, including one verb with sein."
+              "setup": "You are Tom, a colleague. It is Monday. Ask {{name}} what {{he}} did at the weekend and tell {{him}} in short Perfekt sentences what you did (cooked, met friends, slept long). Ask follow-up questions about where, with whom and how it was. Use du.",
+              "goal": "{{He}} narrates at least four weekend activities in the Perfekt, including one verb with sein."
             },
             {
               "id": "a1.2-3-verspaetung",
               "title": "Das Ticket ist noch nicht fertig",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. A task he promised for Friday is not finished. Ask calmly what happened, what he did, and when it will be ready now. Use Sie; you are not angry, you want facts.",
-              "goal": "He explains in the Perfekt what he did and what went wrong, and names a new date."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. A task {{he}} promised for Friday is not finished. Ask calmly what happened, what {{he}} did, and when it will be ready now. Use Sie; you are not angry, you want facts.",
+              "goal": "{{He}} explains in the Perfekt what {{he}} did and what went wrong, and names a new date."
             }
           ],
           "checkpoint": {
@@ -452,20 +452,20 @@
             {
               "id": "a1.2-4-automat",
               "title": "Am Fahrkartenautomaten",
-              "setup": "You are a friendly older man standing behind Ahmad at a Deutsche Bahn ticket machine in Berlin. He looks lost. Offer help, ask where he wants to go and when, and walk him through the machine step by step: destination, time, one person, pay by card. Use Sie.",
-              "goal": "He says where he wants to go and when, follows your steps, and confirms which ticket he bought."
+              "setup": "You are a friendly older man standing behind {{name}} at a Deutsche Bahn ticket machine in Berlin. {{He}} looks lost. Offer help, ask where {{he}} wants to go and when, and walk {{him}} through the machine step by step: destination, time, one person, pay by card. Use Sie.",
+              "goal": "{{He}} says where {{he}} wants to go and when, follows your steps, and confirms which ticket {{he}} bought."
             },
             {
               "id": "a1.2-4-verspaetung",
               "title": "Der Zug hat Verspätung",
-              "setup": "You are a Deutsche Bahn conductor (Zugbegleiter) on a train to Hamburg that is forty minutes late. Ahmad will miss his connection. Explain the delay in one short sentence, tell him which train he can take instead and from which platform, and ask him to show his ticket. Use Sie.",
-              "goal": "He asks why the train is late or when it arrives, asks about his connection, and understands the alternative train and platform."
+              "setup": "You are a Deutsche Bahn conductor (Zugbegleiter) on a train to Hamburg that is forty minutes late. {{name}} will miss {{his}} connection. Explain the delay in one short sentence, tell {{him}} which train {{he}} can take instead and from which platform, and ask {{him}} to show {{his}} ticket. Use Sie.",
+              "goal": "{{He}} asks why the train is late or when it arrives, asks about {{his}} connection, and understands the alternative train and platform."
             },
             {
               "id": "a1.2-4-taxi",
               "title": "Taxi vom Flughafen",
-              "setup": "You are a taxi driver at Frankfurt airport. Ahmad gets in. Ask where he is going, tell him roughly how long it takes and what it costs, and make a little small talk: where he comes from, whether it is his first time in Germany. Use Sie.",
-              "goal": "He gives the address or hotel name, asks how long the ride takes or what it costs, and answers your small-talk questions."
+              "setup": "You are a taxi driver at Frankfurt airport. {{name}} gets in. Ask where {{he}} is going, tell {{him}} roughly how long it takes and what it costs, and make a little small talk: where {{he}} comes from, whether it is {{his}} first time in Germany. Use Sie.",
+              "goal": "{{He}} gives the address or hotel name, asks how long the ride takes or what it costs, and answers your small-talk questions."
             }
           ],
           "checkpoint": {
@@ -504,20 +504,20 @@
             {
               "id": "a1.2-5-wohnung-beschreiben",
               "title": "Wo wohnst du in Amman?",
-              "setup": "You are Mira, a colleague, chatting with Ahmad on a call. Ask about his flat in Amman: how many rooms, which floor, whether he has a balcony, what his favourite room is, what his home office looks like. Ask follow-up questions. Use du.",
-              "goal": "He describes his flat with at least three rooms and says where two pieces of furniture are."
+              "setup": "You are Mira, a colleague, chatting with {{name}} on a call. Ask about {{his}} flat in Amman: how many rooms, which floor, whether {{he}} has a balcony, what {{his}} favourite room is, what {{his}} desk at home looks like. Ask follow-up questions. Use du.",
+              "goal": "{{He}} describes {{his}} flat with at least three rooms and says where two pieces of furniture are."
             },
             {
               "id": "a1.2-5-anzeige",
               "title": "Anruf wegen der Anzeige",
-              "setup": "You are Herr Weber, a landlord in Berlin. Ahmad calls about your flat ad: two rooms, forty-eight square metres, 950 euros warm, available from the first of next month. Answer his questions briefly and ask what he does for a living and when he could view the flat. Use Sie.",
-              "goal": "He asks at least three key questions (size, rent, extra costs, from when) and agrees on a viewing day."
+              "setup": "You are Herr Weber, a landlord in Berlin. {{name}} calls about your flat ad: two rooms, forty-eight square metres, 950 euros warm, available from the first of next month. Answer {{his}} questions briefly and ask what {{he}} does for a living and when {{he}} could view the flat. Use Sie.",
+              "goal": "{{He}} asks at least three key questions (size, rent, extra costs, from when) and agrees on a viewing day."
             },
             {
               "id": "a1.2-5-was-suchst-du",
               "title": "Was für eine Wohnung suchst du?",
-              "setup": "You are Jonas, a colleague who moved to Berlin last year. Ahmad is thinking about a move to Germany. Ask what kind of flat he is looking for, which area, how much he wants to pay, whether furnished or not, and give him one honest tip about the Berlin housing market. Use du.",
-              "goal": "He says what he is looking for with at least four criteria (rooms, area, rent, furnished) and asks you one question about finding a flat."
+              "setup": "You are Jonas, a colleague who moved to Berlin last year. {{name}} is thinking about a move to Germany. Ask what kind of flat {{he}} is looking for, which area, how much {{he}} wants to pay, whether furnished or not, and give {{him}} one honest tip about the Berlin housing market. Use du.",
+              "goal": "{{He}} says what {{he}} is looking for with at least four criteria (rooms, area, rent, furnished) and asks you one question about finding a flat."
             }
           ],
           "checkpoint": {
@@ -563,20 +563,20 @@
             {
               "id": "a2.1-1-praxis",
               "title": "Termin in der Praxis",
-              "setup": "You are the receptionist at a doctor's practice in Berlin. Ahmad calls for an appointment. Ask whether he is a new patient, what it is about, and offer him two slots. Make him say his name, date of birth and insurance. Use Sie, brisk but polite.",
-              "goal": "He asks for an appointment, gives a reason, chooses one of your slots and confirms the date and time back to you."
+              "setup": "You are the receptionist at a doctor's practice in Berlin. {{name}} calls for an appointment. Ask whether {{he}} is a new patient, what it is about, and offer {{him}} two slots. Make {{him}} say {{his}} name, date of birth and insurance. Use Sie, brisk but polite.",
+              "goal": "{{He}} asks for an appointment, gives a reason, chooses one of your slots and confirms the date and time back to you."
             },
             {
               "id": "a2.1-1-buergeramt",
               "title": "Termin beim Bürgeramt",
-              "setup": "You are an employee at the Bürgeramt hotline. Ahmad needs an appointment for his Anmeldung after moving to Berlin. Tell him the next free date is in three weeks, explain what he must bring (Pass, Wohnungsgeberbestätigung) and ask if the date works. Use Sie.",
-              "goal": "He says what he needs the appointment for, asks what documents to bring, and either accepts the date or asks for an earlier one."
+              "setup": "You are an employee at the Bürgeramt hotline. {{name}} needs an appointment for {{his}} Anmeldung after moving to Berlin. Tell {{him}} the next free date is in three weeks, explain what {{he}} must bring (Pass, Wohnungsgeberbestätigung) and ask if the date works. Use Sie.",
+              "goal": "{{He}} says what {{he}} needs the appointment for, asks what documents to bring, and either accepts the date or asks for an earlier one."
             },
             {
               "id": "a2.1-1-verschieben",
               "title": "Können wir das Meeting verschieben?",
-              "setup": "You are Mira, a colleague. Ahmad has a 1:1 with you tomorrow at ten but something has come up. Let him explain, ask for a reason, and negotiate a new time; you are busy before lunch all week. Use du.",
-              "goal": "He asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time."
+              "setup": "You are Mira, a colleague. {{name}} has a 1:1 with you tomorrow at ten but something has come up. Let {{him}} explain, ask for a reason, and negotiate a new time; you are busy before lunch all week. Use du.",
+              "goal": "{{He}} asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time."
             }
           ],
           "checkpoint": {
@@ -615,20 +615,20 @@
             {
               "id": "a2.1-2-krankmeldung",
               "title": "Ich bin krank",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. He calls in the morning because he is ill. Ask what is wrong, how long he thinks he will be off, whether anything urgent needs handing over, and remind him he needs a doctor's note (Krankschreibung) from the third day. Use Sie, warm and brief.",
-              "goal": "He says what is wrong using a dative expression, estimates how long he will be away, and names one task someone must take over."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} calls in the morning because {{he}} is ill. Ask what is wrong, how long {{he}} thinks {{he}} will be off, whether anything urgent needs handing over, and remind {{him}} {{he}} needs a doctor's note (Krankschreibung) from the third day. Use Sie, warm and brief.",
+              "goal": "{{He}} says what is wrong using a dative expression, estimates how long {{he}} will be away, and names one task someone must take over."
             },
             {
               "id": "a2.1-2-beim-arzt",
               "title": "Beim Hausarzt",
-              "setup": "You are Dr. Lange, a GP in Berlin. Ahmad comes in with a cold and a sore throat. Ask what he has, since when, whether he has fever, and whether he takes any medication. Then give three instructions with sollen and the imperative, and offer a sick note. Use Sie.",
-              "goal": "He describes at least three symptoms with seit and a dative expression, and repeats back your instructions."
+              "setup": "You are Dr. Lange, a GP in Berlin. {{name}} comes in with a cold and a sore throat. Ask what {{he}} has, since when, whether {{he}} has fever, and whether {{he}} takes any medication. Then give three instructions with sollen and the imperative, and offer a sick note. Use Sie.",
+              "goal": "{{He}} describes at least three symptoms with seit and a dative expression, and repeats back your instructions."
             },
             {
               "id": "a2.1-2-apotheke",
               "title": "In der Apotheke",
-              "setup": "You are the pharmacist. Ahmad has a prescription and also wants something for a headache. Explain how to take each medicine (how often, when, how long), ask whether he has allergies, and tell him the price. Use Sie.",
-              "goal": "He hands over the prescription, asks for something for a headache, and asks or confirms how often and when to take it."
+              "setup": "You are the pharmacist. {{name}} has a prescription and also wants something for a headache. Explain how to take each medicine (how often, when, how long), ask whether {{he}} has allergies, and tell {{him}} the price. Use Sie.",
+              "goal": "{{He}} hands over the prescription, asks for something for a headache, and asks or confirms how often and when to take it."
             }
           ],
           "checkpoint": {
@@ -667,20 +667,20 @@
             {
               "id": "a2.1-3-besichtigung",
               "title": "Die Wohnungsbesichtigung",
-              "setup": "You are Herr Weber, a landlord showing Ahmad a two-room flat in Berlin. Walk him through the rooms, mention the heating is new and the windows are old, name the rent and extra costs, and ask about his job and income. Answer his questions honestly. Use Sie.",
-              "goal": "He asks at least four questions about the flat and the contract and says what he likes and what he does not like, using gefallen."
+              "setup": "You are Herr Weber, a landlord showing {{name}} a two-room flat in Berlin. Walk {{him}} through the rooms, mention the heating is new and the windows are old, name the rent and extra costs, and ask about {{his}} job and income. Answer {{his}} questions honestly. Use Sie.",
+              "goal": "{{He}} asks at least four questions about the flat and the contract and says what {{he}} likes and what {{he}} does not like, using gefallen."
             },
             {
               "id": "a2.1-3-vergleich",
               "title": "Welche Wohnung nimmst du?",
-              "setup": "You are Jonas, a colleague. Ahmad has seen two flats: a bright, expensive one near the office and a bigger, cheaper one far out. Ask him to describe both and to compare them, then ask which one he takes and why. Push for reasons with weil. Use du.",
-              "goal": "He compares the two flats with at least three comparatives and gives his decision with a weil clause."
+              "setup": "You are Jonas, a colleague. {{name}} has seen two flats: a bright, expensive one in the centre and a bigger, cheaper one far out. Ask {{him}} to describe both and to compare them, then ask which one {{he}} takes and why. Push for reasons with weil. Use du.",
+              "goal": "{{He}} compares the two flats with at least three comparatives and gives {{his}} decision with a weil clause."
             },
             {
               "id": "a2.1-3-heizung",
               "title": "Die Heizung ist kalt",
-              "setup": "You are Herr Weber, Ahmad's landlord. He calls in November because the heating in his flat does not work. Ask since when, which rooms, whether he turned the thermostat up, and promise to send a technician; try to make it next week. Use Sie.",
-              "goal": "He describes the problem with seit and the dative, insists on a quicker repair, and agrees a date for the technician."
+              "setup": "You are Herr Weber, {{name}}'s landlord. {{He}} calls in November because the heating in {{his}} flat does not work. Ask since when, which rooms, whether {{he}} turned the thermostat up, and promise to send a technician; try to make it next week. Use Sie.",
+              "goal": "{{He}} describes the problem with seit and the dative, insists on a quicker repair, and agrees a date for the technician."
             }
           ],
           "checkpoint": {
@@ -719,20 +719,20 @@
             {
               "id": "a2.1-4-bank",
               "title": "Ein Konto eröffnen",
-              "setup": "You are a bank adviser in Berlin. Ahmad wants to open a current account for his salary. Ask for his passport, his registration (Meldebescheinigung) and his employer, explain the monthly fee and that the card comes by post, and ask whether he wants online banking. Use Sie.",
-              "goal": "He says what he needs, asks about fees and the card, and answers your document questions."
+              "setup": "You are a bank adviser in Berlin. {{name}} wants to open a current account for {{his}} salary. Ask for {{his}} passport, {{his}} registration (Meldebescheinigung) and {{his}} employer, explain the monthly fee and that the card comes by post, and ask whether {{he}} wants online banking. Use Sie.",
+              "goal": "{{He}} says what {{he}} needs, asks about fees and the card, and answers your document questions."
             },
             {
               "id": "a2.1-4-handyvertrag",
               "title": "Der Handyvertrag",
-              "setup": "You are a salesperson in a phone shop. Ahmad needs a German SIM card. Offer him two options: a prepaid card and a 24-month contract that is cheaper per month but has a long notice period. Explain data volume, price and Kündigungsfrist, and let him choose. Use Sie.",
-              "goal": "He asks about price, data and cancellation, and chooses one option with a reason."
+              "setup": "You are a salesperson in a phone shop. {{name}} needs a German SIM card. Offer {{him}} two options: a prepaid card and a 24-month contract that is cheaper per month but has a long notice period. Explain data volume, price and Kündigungsfrist, and let {{him}} choose. Use Sie.",
+              "goal": "{{He}} asks about price, data and cancellation, and chooses one option with a reason."
             },
             {
               "id": "a2.1-4-formular",
               "title": "Das Formular ausfüllen",
-              "setup": "You are Mira, a colleague, helping Ahmad fill in a German form for his health insurance on a call. He has the form in front of him. Tell him where each piece of information goes (in das Feld oben rechts, unter der Adresse) and ask him what he has written. Use du.",
-              "goal": "He asks where at least two things go, says where he has written them using the correct preposition and case, and asks what one German word on the form means."
+              "setup": "You are Mira, a colleague, helping {{name}} fill in a German form for {{his}} health insurance on a call. {{He}} has the form in front of {{him}}. Tell {{him}} where each piece of information goes (in das Feld oben rechts, unter der Adresse) and ask {{him}} what {{he}} has written. Use du.",
+              "goal": "{{He}} asks where at least two things go, says where {{he}} has written them using the correct preposition and case, and asks what one German word on the form means."
             }
           ],
           "checkpoint": {
@@ -771,20 +771,20 @@
             {
               "id": "a2.1-5-deploy-kaputt",
               "title": "Das Deployment ist kaputt",
-              "setup": "You are Lena, the scrum master. Yesterday evening a deployment by Ahmad broke the staging environment for an hour. In the standup, ask him what happened, step by step: what he did first, what went wrong, how he noticed, what he did then. Ask for the cause. Use du.",
-              "goal": "He narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb."
+              "setup": "You are Lena, the scrum master. Yesterday evening a deployment by {{name}} broke the staging environment for an hour. In the standup, ask {{him}} what happened, step by step: what {{he}} did first, what went wrong, how {{he}} noticed, what {{he}} did then. Ask for the cause. Use du.",
+              "goal": "{{He}} narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb."
             },
             {
               "id": "a2.1-5-chefin-erklaeren",
               "title": "Erklärung für die Chefin",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. A customer complained about an outage. Ask Ahmad to explain what happened, why, how long it took, and what he will do so it does not happen again. Ask one critical follow-up question. Use Sie.",
-              "goal": "He explains the cause with weil, says how long the outage lasted, and names one concrete measure for the future."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. A customer complained about an outage. Ask {{name}} to explain what happened, why, how long it took, and what {{he}} will do so it does not happen again. Ask one critical follow-up question. Use Sie.",
+              "goal": "{{He}} explains the cause with weil, says how long the outage lasted, and names one concrete measure for the future."
             },
             {
               "id": "a2.1-5-problem-geloest",
               "title": "Ein Problem, das ich gelöst habe",
-              "setup": "You are Tom, a junior colleague. Ahmad solved a tricky problem last week (slow database, full disk, broken pipeline, whatever he chooses). Ask him to tell you the story: what the problem was, how he found the cause, what he tried, what finally worked. Ask what you can learn from it. Use du.",
-              "goal": "He tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked."
+              "setup": "You are Tom, a junior colleague. {{name}} solved a tricky problem last week (slow database, full disk, broken pipeline, whatever {{he}} chooses). Ask {{him}} to tell you the story: what the problem was, how {{he}} found the cause, what {{he}} tried, what finally worked. Ask what you can learn from it. Use du.",
+              "goal": "{{He}} tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked."
             }
           ],
           "checkpoint": {
@@ -830,20 +830,20 @@
             {
               "id": "a2.2-1-ziele",
               "title": "Ziele für das Quartal",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager, in your monthly 1:1. Ask how the last month went, what went well, what was difficult, and what he wants to learn or achieve next quarter. Offer one piece of feedback (his documentation is good, his estimates are too optimistic). Use Sie.",
-              "goal": "He describes how the month went with at least two dass clauses and names one concrete goal for next quarter."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager, in your monthly 1:1. Ask how the last month went, what went well, what was difficult, and what {{he}} wants to learn or achieve next quarter. Offer one piece of feedback ({{his}} documentation is good, {{his}} estimates are too optimistic). Use Sie.",
+              "goal": "{{He}} describes how the month went with at least two dass clauses and names one concrete goal for next quarter."
             },
             {
               "id": "a2.2-1-urlaub",
               "title": "Urlaub beantragen",
-              "setup": "You are Frau Dr. Sommer. Ahmad wants two weeks off in a period that overlaps with a release. Ask when exactly, why then, who covers his on-call duty, and propose a compromise. Use Sie; you want to say yes but need the release covered.",
-              "goal": "He asks for the holiday with an indirect question (ob), gives a reason, and agrees on who covers his tasks."
+              "setup": "You are Frau Dr. Sommer. {{name}} wants two weeks off in a period that overlaps with a release. Ask when exactly, why then, who covers {{his}} on-call duty, and propose a compromise. Use Sie; you want to say yes but need the release covered.",
+              "goal": "{{He}} asks for the holiday with an indirect question (ob), gives a reason, and agrees on who covers {{his}} tasks."
             },
             {
               "id": "a2.2-1-zu-viel",
               "title": "Zu viele Tickets",
-              "setup": "You are Frau Dr. Sommer. Ahmad has too much on his plate and wants to talk about priorities. Ask him to list what he is working on, then ask which tasks he thinks are most important and which can wait. Decide together. Use Sie.",
-              "goal": "He lists at least three tasks, says which he thinks are most important using finden/glauben + dass, and proposes what to drop or delay."
+              "setup": "You are Frau Dr. Sommer. {{name}} has too much on {{his}} plate and wants to talk about priorities. Ask {{him}} to list what {{he}} is working on, then ask which tasks {{he}} thinks are most important and which can wait. Decide together. Use Sie.",
+              "goal": "{{He}} lists at least three tasks, says which {{he}} thinks are most important using finden/glauben + dass, and proposes what to drop or delay."
             }
           ],
           "checkpoint": {
@@ -882,20 +882,20 @@
             {
               "id": "a2.2-2-rechnung",
               "title": "Die Rechnung ist falsch",
-              "setup": "You are an agent on the hotline of an internet provider. Ahmad's invoice is sixty euros higher than his contract says. Ask for his customer number, ask what is wrong, defend the charge once (a router rental fee), then offer to check and refund if he insists politely. Use Sie.",
-              "goal": "He explains what the invoice says versus what the contract says, uses at least two polite Konjunktiv II chunks, and gets a concrete promise (refund or callback date)."
+              "setup": "You are an agent on the hotline of an internet provider. {{name}}'s invoice is sixty euros higher than {{his}} contract says. Ask for {{his}} customer number, ask what is wrong, defend the charge once (a router rental fee), then offer to check and refund if {{he}} insists politely. Use Sie.",
+              "goal": "{{He}} explains what the invoice says versus what the contract says, uses at least two polite Konjunktiv II chunks, and gets a concrete promise (refund or callback date)."
             },
             {
               "id": "a2.2-2-packstation",
               "title": "Das Paket ist nicht da",
-              "setup": "You are a DHL customer service agent. Ahmad's tracking says his parcel was delivered to a Packstation, but the Packstation shows nothing. Ask for the shipment number, ask when and where, and offer either a search request or a new delivery. Use Sie.",
-              "goal": "He gives the shipment number and the delivery date, says what the tracking shows versus what he sees, and chooses one solution."
+              "setup": "You are a DHL customer service agent. {{name}}'s tracking says {{his}} parcel was delivered to a Packstation, but the Packstation shows nothing. Ask for the shipment number, ask when and where, and offer either a search request or a new delivery. Use Sie.",
+              "goal": "{{He}} gives the shipment number and the delivery date, says what the tracking shows versus what {{he}} sees, and chooses one solution."
             },
             {
               "id": "a2.2-2-kuendigung",
               "title": "Das Fitnessstudio kündigen",
-              "setup": "You are the manager of a gym. Ahmad wants to cancel his membership because he is moving. Tell him the notice period is three months, ask for proof of the move, and try once to keep him with a discount. Use Sie.",
-              "goal": "He states clearly that he wants to cancel, asks about the notice period and the proof needed, and asks for a written confirmation."
+              "setup": "You are the manager of a gym. {{name}} wants to cancel {{his}} membership because {{he}} is moving. Tell {{him}} the notice period is three months, ask for proof of the move, and try once to keep {{him}} with a discount. Use Sie.",
+              "goal": "{{He}} states clearly that {{he}} wants to cancel, asks about the notice period and the proof needed, and asks for a written confirmation."
             }
           ],
           "checkpoint": {
@@ -934,20 +934,20 @@
             {
               "id": "a2.2-3-teamessen",
               "title": "Das Teamessen",
-              "setup": "You are Jonas, sitting next to Ahmad at a team dinner in Berlin. Chat: ask what he thinks of the food, tell him about a German dish, ask whether people eat out a lot in Amman, and invite him to a football match on Saturday. Use du, relaxed.",
-              "goal": "He keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason."
+              "setup": "You are Jonas, sitting next to {{name}} at a team dinner in Berlin. Chat: ask what {{he}} thinks of the food, tell {{him}} about a German dish, ask whether people eat out a lot in Amman, and invite {{him}} to a football match on Saturday. Use du, relaxed.",
+              "goal": "{{He}} keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason."
             },
             {
               "id": "a2.2-3-ramadan",
               "title": "Fragen über den Ramadan",
-              "setup": "You are Mira, a colleague who is curious and a bit worried about doing something wrong. Ramadan is starting. Ask Ahmad what it means for him, whether it is okay to eat in front of him in calls, whether meeting times should change, and what Eid is like with his family. Use du.",
-              "goal": "He explains Ramadan and Eid in simple sentences, says what he needs or does not need at work, and uses deshalb or trotzdem at least once."
+              "setup": "You are Mira, a colleague who is curious and a bit worried about doing something wrong. Ramadan is starting. Ask {{name}} what it means for {{him}}, whether it is okay to eat in front of {{him}} in calls, whether meeting times should change, and what Eid is like with {{his}} family. Use du.",
+              "goal": "{{He}} explains Ramadan and Eid in simple sentences, says what {{he}} needs or does not need at work, and uses deshalb or trotzdem at least once."
             },
             {
               "id": "a2.2-3-einladung",
               "title": "Eine Einladung nach Hause",
-              "setup": "You are Lena, a colleague. You invite Ahmad to dinner at your home next Friday when he is in Berlin. Tell him who else is coming, ask what he eats and does not eat, and whether he can bring something. Also ask what hospitality is like in Jordan. Use du.",
-              "goal": "He accepts the invitation politely, says what he does not eat, offers to bring something, and describes one Jordanian hospitality custom."
+              "setup": "You are Lena, a colleague. You invite {{name}} to dinner at your home next Friday when {{he}} is in Berlin. Tell {{him}} who else is coming, ask what {{he}} eats and does not eat, and whether {{he}} can bring something. Also ask what hospitality is like in Jordan. Use du.",
+              "goal": "{{He}} accepts the invitation politely, says what {{he}} does not eat, offers to bring something, and describes one Jordanian hospitality custom."
             }
           ],
           "checkpoint": {
@@ -986,20 +986,20 @@
             {
               "id": "a2.2-4-pipeline",
               "title": "Wie funktioniert unsere Pipeline?",
-              "setup": "You are Tom, a junior developer who has never seen the deployment pipeline. Ask Ahmad to explain what happens when he pushes code: step by step, until it is live. Ask why each step exists and what happens when a test fails. Use du.",
-              "goal": "He explains at least five steps in order using man and zuerst/dann, and explains the purpose of one step with um … zu."
+              "setup": "You are Tom, a junior developer who has never seen the deployment pipeline. Ask {{name}} to explain what happens when {{he}} pushes code: step by step, until it is live. Ask why each step exists and what happens when a test fails. Use du.",
+              "goal": "{{He}} explains at least five steps in order using man and zuerst/dann, and explains the purpose of one step with um … zu."
             },
             {
               "id": "a2.2-4-rollback",
               "title": "Warum brauchen wir ein Rollback?",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager, who is not technical. Ahmad wants budget for a better rollback mechanism. Ask what a rollback is in plain words, why it matters, what happens today without it, and what it costs. Use Sie.",
-              "goal": "He explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager, who is not technical. {{name}} wants budget for a better rollback mechanism. Ask what a rollback is in plain words, why it matters, what happens today without it, and what it costs. Use Sie.",
+              "goal": "{{He}} explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it."
             },
             {
               "id": "a2.2-4-vergleich",
               "title": "Zwei Lösungen",
-              "setup": "You are Mira, a senior colleague. The team must choose between two solutions for logging (a hosted service versus running it yourselves). Ask Ahmad for the advantages and disadvantages of each and a recommendation. Challenge one of his points. Use du.",
-              "goal": "He names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason."
+              "setup": "You are Mira, a senior colleague. The team must choose between two solutions for logging (a hosted service versus running it yourselves). Ask {{name}} for the advantages and disadvantages of each and a recommendation. Challenge one of {{his}} points. Use du.",
+              "goal": "{{He}} names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason."
             }
           ],
           "checkpoint": {
@@ -1038,20 +1038,20 @@
             {
               "id": "a2.2-5-relocation",
               "title": "Gespräch mit der Personalabteilung",
-              "setup": "You are Frau Berger from HR. The company wants to move Ahmad to Berlin next year. Explain what the company pays for (flights, one month of temporary housing, the visa lawyer) and ask about his timeline, whether he comes alone, and what worries him. Use Sie.",
-              "goal": "He asks at least three questions about the relocation, says when he could move using werden or the present tense, and names one thing he is worried about or looking forward to."
+              "setup": "You are Frau Berger from HR. The company wants to move {{name}} to Berlin next year. Explain what the company pays for (flights, one month of temporary housing, the visa lawyer) and ask about {{his}} timeline, whether {{he}} comes alone, and what worries {{him}}. Use Sie.",
+              "goal": "{{He}} asks at least three questions about the relocation, says when {{he}} could move using werden or the present tense, and names one thing {{he}} is worried about or looking forward to."
             },
             {
               "id": "a2.2-5-erste-wochen",
               "title": "Die ersten Wochen in Deutschland",
-              "setup": "You are Jonas, a colleague who moved to Berlin from Austria two years ago. Ahmad asks you what to do in the first weeks. Describe the order (Anmeldung, bank, insurance, phone), then ask him what he will do first and what he is preparing now. Use du.",
-              "goal": "He lists his first three steps in order with zuerst/dann/danach and uses at least one reflexive verb and one wenn clause."
+              "setup": "You are Jonas, a colleague who moved to Berlin from Austria two years ago. {{name}} asks you what to do in the first weeks. Describe the order (Anmeldung, bank, insurance, phone), then ask {{him}} what {{he}} will do first and what {{he}} is preparing now. Use du.",
+              "goal": "{{He}} lists {{his}} first three steps in order with zuerst/dann/danach and uses at least one reflexive verb and one wenn clause."
             },
             {
               "id": "a2.2-5-familie",
               "title": "Was sagt deine Familie?",
-              "setup": "You are Mira, a colleague, on a relaxed call. Ask Ahmad how his family feels about the move, what he will miss about Amman, what he is looking forward to in Germany, and what he wants to have achieved after one year. Use du.",
-              "goal": "He talks about feelings with sich freuen auf or Angst haben vor, says what he will miss, and names one goal for the first year."
+              "setup": "You are Mira, a colleague, on a relaxed call. Ask {{name}} how {{his}} family feels about the move, what {{he}} will miss about Amman, what {{he}} is looking forward to in Germany, and what {{he}} wants to have achieved after one year. Use du.",
+              "goal": "{{He}} talks about feelings with sich freuen auf or Angst haben vor, says what {{he}} will miss, and names one goal for the first year."
             }
           ],
           "checkpoint": {
@@ -1097,20 +1097,20 @@
             {
               "id": "b1.1-1-architektur",
               "title": "Kubernetes oder Serverless?",
-              "setup": "You are Mira, a senior developer, in an architecture discussion. You argue for moving a service to a serverless platform; Ahmad is sceptical. Make two arguments (less operations work, cheaper at low traffic), listen to his, concede one point and hold the other. Use du.",
-              "goal": "He states his opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not."
+              "setup": "You are Mira, a senior developer, in an architecture discussion. You argue for moving a service to a serverless platform; {{name}} is sceptical. Make two arguments (less operations work, cheaper at low traffic), listen to {{his}} arguments, concede one point and hold the other. Use du.",
+              "goal": "{{He}} states {{his}} opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not."
             },
             {
               "id": "b1.1-1-review-streit",
               "title": "Ich sehe das anders",
-              "setup": "You are Tom, a colleague who left a review comment asking Ahmad to rewrite his deployment script in a different way. Defend your comment with one good reason and one weak one. Let him disagree politely and look for a middle way. Use du.",
-              "goal": "He disagrees politely, explains why he made his choice, accepts the good reason and rejects the weak one, and proposes a middle way."
+              "setup": "You are Tom, a colleague who left a review comment asking {{name}} to rewrite {{his}} deployment script in a different way. Defend your comment with one good reason and one weak one. Let {{him}} disagree politely and look for a middle way. Use du.",
+              "goal": "{{He}} disagrees politely, explains why {{he}} made {{his}} choice, accepts the good reason and rejects the weak one, and proposes a middle way."
             },
             {
               "id": "b1.1-1-homeoffice",
               "title": "Homeoffice oder Büro?",
-              "setup": "You are Jonas, a colleague who thinks the whole team should be in the Berlin office at least three days a week. Ahmad works fully remote from Amman. Ask what he thinks, give your arguments (spontaneous exchange, team feeling), and ask him to weigh both sides honestly. Use du.",
-              "goal": "He weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons."
+              "setup": "You are Jonas, a colleague who thinks the whole team should be in the Berlin office at least three days a week. {{name}} works fully remote from Amman. Ask what {{he}} thinks, give your arguments (spontaneous exchange, team feeling), and ask {{him}} to weigh both sides honestly. Use du.",
+              "goal": "{{He}} weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons."
             }
           ],
           "checkpoint": {
@@ -1149,20 +1149,20 @@
             {
               "id": "b1.1-2-vorstellen",
               "title": "Das Postmortem vorstellen",
-              "setup": "You are Lena, facilitating a blameless postmortem meeting. Ask Ahmad to walk the team through the timeline of last week's outage: what had happened before, when the alarm went off, what was done and by whom, when the service was restored. Interrupt twice with a precise question about times and causes. Use du.",
-              "goal": "He narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once."
+              "setup": "You are Lena, facilitating a blameless postmortem meeting. Ask {{name}} to walk the team through the timeline of last week's outage: what had happened before, when the alarm went off, what was done and by whom, when the service was restored. Interrupt twice with a precise question about times and causes. Use du.",
+              "goal": "{{He}} narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once."
             },
             {
               "id": "b1.1-2-ursache",
               "title": "Fragen der Chefin zur Ursache",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. After the postmortem you want to understand the root cause, not the symptoms. Ask why the configuration change was not caught, who had reviewed it, why the alarm came late, and what exactly will change. Use Sie; you are calm and precise.",
-              "goal": "He explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. After the postmortem you want to understand the root cause, not the symptoms. Ask why the configuration change was not caught, who had reviewed it, why the alarm came late, and what exactly will change. Use Sie; you are calm and precise.",
+              "goal": "{{He}} explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
             },
             {
               "id": "b1.1-2-kunde",
               "title": "Erklärung für den Kunden",
-              "setup": "You are Herr Brandt, a customer's IT manager. Your users had no access for two hours yesterday. Ask Ahmad on a call what happened, whether data was lost, what was done, and how you can be sure it will not happen again. Use Sie, polite but demanding.",
-              "goal": "He explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure."
+              "setup": "You are Herr Brandt, a customer's IT manager. Your users had no access for two hours yesterday. Ask {{name}} on a call what happened, whether data was lost, what was done, and how you can be sure it will not happen again. Use Sie, polite but demanding.",
+              "goal": "{{He}} explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure."
             }
           ],
           "checkpoint": {
@@ -1201,20 +1201,20 @@
             {
               "id": "b1.1-3-deadline",
               "title": "Die Deadline ist nicht realistisch",
-              "setup": "You are Sabine, the product manager. You need a feature by the end of the month because sales promised it. Ahmad thinks it needs two more weeks. Push back once, ask what could be delivered on time, and accept a reduced scope if he argues well. Use du.",
-              "goal": "He explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date."
+              "setup": "You are Sabine, the product manager. You need a feature by the end of the month because sales promised it. {{name}} thinks it needs two more weeks. Push back once, ask what could be delivered on time, and accept a reduced scope if {{he}} argues well. Use du.",
+              "goal": "{{He}} explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date."
             },
             {
               "id": "b1.1-3-vermieter",
               "title": "Die Heizung, zum dritten Mal",
-              "setup": "You are Herr Weber, Ahmad's landlord. The heating has been broken for two weeks and you have been slow. Ahmad calls again. Make excuses (the technician is busy), then react when he mentions a deadline and the possibility of a rent reduction. Use Sie.",
-              "goal": "He stays polite but sets a clear deadline with Konjunktiv II forms, mentions his rights as a tenant, and gets a firm date."
+              "setup": "You are Herr Weber, {{name}}'s landlord. The heating has been broken for two weeks and you have been slow. {{name}} calls again. Make excuses (the technician is busy), then react when {{he}} mentions a deadline and the possibility of a rent reduction. Use Sie.",
+              "goal": "{{He}} stays polite but sets a clear deadline with Konjunktiv II forms, mentions {{his}} rights as a tenant, and gets a firm date."
             },
             {
               "id": "b1.1-3-rat",
               "title": "Was würdest du machen?",
-              "setup": "You are Tom, a junior colleague. You are on call this weekend for the first time and you are nervous; also you think the on-call rota is unfair because you are on it twice as often as others. Ask Ahmad for advice on both things. Use du.",
-              "goal": "He gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause."
+              "setup": "You are Tom, a junior colleague. You are on call this weekend for the first time and you are nervous; also you think the on-call rota is unfair because you are on it twice as often as others. Ask {{name}} for advice on both things. Use du.",
+              "goal": "{{He}} gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause."
             }
           ],
           "checkpoint": {
@@ -1253,20 +1253,20 @@
             {
               "id": "b1.1-4-aufenthaltstitel",
               "title": "Termin bei der Ausländerbehörde",
-              "setup": "You are Frau Nowak, a case worker at the Berlin Ausländerbehörde. Ahmad has an appointment for his Blue Card. Ask for his passport, contract, salary statement and health insurance proof. One document is missing (the Meldebescheinigung). Explain what he must do within two weeks and what he gets today. Use Sie, formal, not unfriendly.",
-              "goal": "He explains his situation, hands over the documents, asks what he must do about the missing one and by when, and repeats the next steps back correctly."
+              "setup": "You are Frau Nowak, a case worker at the Berlin Ausländerbehörde. {{name}} has an appointment for {{his}} Blue Card. Ask for {{his}} passport, contract, salary statement and health insurance proof. One document is missing (the Meldebescheinigung). Explain what {{he}} must do within two weeks and what {{he}} gets today. Use Sie, formal, not unfriendly.",
+              "goal": "{{He}} explains {{his}} situation, hands over the documents, asks what {{he}} must do about the missing one and by when, and repeats the next steps back correctly."
             },
             {
               "id": "b1.1-4-krankenkasse",
               "title": "Welche Krankenkasse?",
-              "setup": "You are an adviser at a public health insurance company (gesetzliche Krankenkasse). Ahmad calls to join. Explain what the contribution depends on, what is covered, that the employer pays half, and ask about his salary, start date and family. Use Sie.",
-              "goal": "He asks at least three questions using a relative clause or a genitive, and gives the information you need to enrol him."
+              "setup": "You are an adviser at a public health insurance company (gesetzliche Krankenkasse). {{name}} calls to join. Explain what the contribution depends on, what is covered, that the employer pays half, and ask about {{his}} salary, start date and family. Use Sie.",
+              "goal": "{{He}} asks at least three questions using a relative clause or a genitive, and gives the information you need to enrol {{him}}."
             },
             {
               "id": "b1.1-4-abgelehnt",
               "title": "Der Antrag wurde abgelehnt",
-              "setup": "You are a volunteer at a migration advice centre. Ahmad's application for a residence permit extension was refused because of a formal error in the form. Ask him what the letter says, explain that he can file an objection (Widerspruch) within one month, and go through what he needs. Use Sie.",
-              "goal": "He summarises the letter using a relative clause, asks what his options are, and says what he will do within which deadline."
+              "setup": "You are a volunteer at a migration advice centre. {{name}}'s application for a residence permit extension was refused because of a formal error in the form. Ask {{him}} what the letter says, explain that {{he}} can file an objection (Widerspruch) within one month, and go through what {{he}} needs. Use Sie.",
+              "goal": "{{He}} summarises the letter using a relative clause, asks what {{his}} options are, and says what {{he}} will do within which deadline."
             }
           ],
           "checkpoint": {
@@ -1305,20 +1305,20 @@
             {
               "id": "b1.1-5-direktheit",
               "title": "Sind die Deutschen wirklich so direkt?",
-              "setup": "You are Jonas, a colleague, at a beer after work. Ahmad has had a misunderstanding: a colleague's blunt review comment felt rude to him. Ask what happened, explain how it was meant, and ask how feedback works in Jordan. Compare honestly. Use du.",
-              "goal": "He describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means."
+              "setup": "You are Jonas, a colleague, at a beer after work. {{name}} has had a misunderstanding: a colleague's blunt review comment felt rude to {{him}}. Ask what happened, explain how it was meant, and ask how feedback works in Jordan. Compare honestly. Use du.",
+              "goal": "{{He}} describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means."
             },
             {
               "id": "b1.1-5-stadtvergleich",
               "title": "Amman oder Berlin?",
-              "setup": "You are Mira, a colleague who is considering a sabbatical somewhere warm. Ask Ahmad to compare Amman and Berlin: rent, traffic, safety, food, weather, friendliness. Ask what he misses from Amman and what he prefers in Berlin. Use du.",
-              "goal": "He compares the cities in at least five areas with comparatives and superlatives and says what he misses using vermissen or Heimweh."
+              "setup": "You are Mira, a colleague who is considering a sabbatical somewhere warm. Ask {{name}} to compare Amman and Berlin: rent, traffic, safety, food, weather, friendliness. Ask what {{he}} misses from Amman and what {{he}} prefers in Berlin. Use du.",
+              "goal": "{{He}} compares the cities in at least five areas with comparatives and superlatives and says what {{he}} misses using vermissen or Heimweh."
             },
             {
               "id": "b1.1-5-nachbar",
               "title": "Smalltalk mit dem Nachbarn",
-              "setup": "You are Herr Schulz, Ahmad's retired neighbour in Berlin who likes to chat in the stairwell. Ask how he is settling in, whether he has got used to the weather and the quiet hours (Ruhezeiten), and tell him about the Hausordnung. Ask what people in Amman do differently as neighbours. Use Sie.",
-              "goal": "He talks about settling in with sich gewöhnen an or sich wohlfühlen, asks what one rule means, and describes neighbourhood life in Amman in comparison."
+              "setup": "You are Herr Schulz, {{name}}'s retired neighbour in Berlin who likes to chat in the stairwell. Ask how {{he}} is settling in, whether {{he}} has got used to the weather and the quiet hours (Ruhezeiten), and tell {{him}} about the Hausordnung. Ask what people in Amman do differently as neighbours. Use Sie.",
+              "goal": "{{He}} talks about settling in with sich gewöhnen an or sich wohlfühlen, asks what one rule means, and describes neighbourhood life in Amman in comparison."
             }
           ],
           "checkpoint": {
@@ -1364,20 +1364,20 @@
             {
               "id": "b1.2-1-migration",
               "title": "Der Migrationsplan",
-              "setup": "You are Lena, facilitating a planning meeting. Ahmad presents his plan to migrate the services to a new cluster. Let him present without interruption, then ask about the order of steps, the downtime, what has already been done and what the biggest risk is. Use du.",
-              "goal": "He presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions."
+              "setup": "You are Lena, facilitating a planning meeting. {{name}} presents {{his}} plan to migrate the services to a new cluster. Let {{him}} present without interruption, then ask about the order of steps, the downtime, what has already been done and what the biggest risk is. Use du.",
+              "goal": "{{He}} presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions."
             },
             {
               "id": "b1.2-1-stakeholder",
               "title": "Kritische Fragen",
-              "setup": "You are Herr Brandt, the customer's IT manager. Ahmad has presented a change that affects your systems. Ask what it means for you concretely, how long the downtime will be, what happens if it fails, and why you should trust the timeline. Be sceptical but fair. Use Sie.",
-              "goal": "He answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what he does not know yet and when he will know."
+              "setup": "You are Herr Brandt, the customer's IT manager. {{name}} has presented a change that affects your systems. Ask what it means for you concretely, how long the downtime will be, what happens if it fails, and why you should trust the timeline. Be sceptical but fair. Use Sie.",
+              "goal": "{{He}} answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what {{he}} does not know yet and when {{he}} will know."
             },
             {
               "id": "b1.2-1-quartal",
               "title": "Was haben wir im Quartal geschafft?",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. In the quarterly review, ask him to summarise what his team delivered, what was postponed and why, which numbers improved, and what he proposes for next quarter. Push for honesty about what did not work. Use Sie.",
-              "goal": "He summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next quarter."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. In the quarterly review, ask {{him}} to summarise what {{his}} team delivered, what was postponed and why, which numbers improved, and what {{he}} proposes for next quarter. Push for honesty about what did not work. Use Sie.",
+              "goal": "{{He}} summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next quarter."
             }
           ],
           "checkpoint": {
@@ -1416,20 +1416,20 @@
             {
               "id": "b1.2-2-feedback-geben",
               "title": "Feedback für Tom",
-              "setup": "You are Tom, a junior developer. Ahmad is your mentor and needs to tell you that your pull requests are too big and rarely tested, which costs the team time. React a little defensively at first, then ask what exactly he expects. Use du.",
-              "goal": "He gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you."
+              "setup": "You are Tom, a junior developer. {{name}} is your mentor and needs to tell you that your pull requests are too big and rarely tested, which costs the team time. React a little defensively at first, then ask what exactly {{he}} expects. Use du.",
+              "goal": "{{He}} gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you."
             },
             {
               "id": "b1.2-2-feedback-bekommen",
               "title": "Kritik von der Chefin",
-              "setup": "You are Frau Dr. Sommer, Ahmad's manager. In a review you tell him that his communication during incidents is too quiet: the team hears about problems too late. Give one concrete example. Then listen to how he takes it. Use Sie.",
-              "goal": "He asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what he would have done differently, and proposes a concrete change."
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. In a review you tell {{him}} that {{his}} communication during incidents is too quiet: the team hears about problems too late. Give one concrete example. Then listen to how {{he}} takes it. Use Sie.",
+              "goal": "{{He}} asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what {{he}} would have done differently, and proposes a concrete change."
             },
             {
               "id": "b1.2-2-wer-war-das",
               "title": "Wer hat die Pipeline kaputt gemacht?",
-              "setup": "You are Mira, a colleague, annoyed. A change in the pipeline broke everyone's builds this morning and you think it was Ahmad's commit. Say so directly. In fact both of you changed the same file; let him find that out. Use du.",
-              "goal": "He stays calm, clears up the facts with sich einigen auf or klären, takes his share of the responsibility, apologises for his part, and proposes how to avoid it next time."
+              "setup": "You are Mira, a colleague, annoyed. A change in the pipeline broke everyone's builds this morning and you think it was {{name}}'s commit. Say so directly. In fact both of you changed the same file; let {{him}} find that out. Use du.",
+              "goal": "{{He}} stays calm, clears up the facts with sich einigen auf or klären, takes {{his}} share of the responsibility, apologises for {{his}} part, and proposes how to avoid it next time."
             }
           ],
           "checkpoint": {
@@ -1468,20 +1468,20 @@
             {
               "id": "b1.2-3-mahnung",
               "title": "Die Mahnung",
-              "setup": "You are an agent in the accounts department of an electricity provider. Ahmad received a reminder with a fee for an invoice he paid on time. Ask for the invoice number and the payment date, claim the payment is not visible, and only concede when he offers proof. Use Sie.",
-              "goal": "He states the facts with dates, uses formal connectors (daher, andernfalls), insists on cancellation of the fee, and names what proof he will send by when."
+              "setup": "You are an agent in the accounts department of an electricity provider. {{name}} received a reminder with a fee for an invoice {{he}} paid on time. Ask for the invoice number and the payment date, claim the payment is not visible, and only concede when {{he}} offers proof. Use Sie.",
+              "goal": "{{He}} states the facts with dates, uses formal connectors (daher, andernfalls), insists on cancellation of the fee, and names what proof {{he}} will send by when."
             },
             {
               "id": "b1.2-3-nebenkosten",
               "title": "Die Nebenkostenabrechnung",
-              "setup": "You are Herr Weber, Ahmad's landlord. You sent a utility bill with a large back payment. Ahmad has questions: the heating costs doubled and the distribution key is unclear. Defend it vaguely, then agree to send the underlying documents (Belege) when he asks for them properly. Use Sie.",
-              "goal": "He asks precise questions about at least two items, asks to see the Belege using a formal phrase, and says he will pay only after checking, with a conditional (falls/sofern)."
+              "setup": "You are Herr Weber, {{name}}'s landlord. You sent a utility bill with a large back payment. {{name}} has questions: the heating costs doubled and the distribution key is unclear. Defend it vaguely, then agree to send the underlying documents (Belege) when {{he}} asks for them properly. Use Sie.",
+              "goal": "{{He}} asks precise questions about at least two items, asks to see the Belege using a formal phrase, and says {{he}} will pay only after checking, with a conditional (falls/sofern)."
             },
             {
               "id": "b1.2-3-kuendigung-telefon",
               "title": "Die Kündigung wurde nicht bestätigt",
-              "setup": "You are an agent in the retention team of a mobile provider. Ahmad cancelled his contract in writing two months ago and has no confirmation; the contract will renew automatically next week. Claim you have no record of the letter and offer a better tariff. Use Sie.",
-              "goal": "He explains when and how he cancelled, rejects the offer politely, insists on written confirmation with a deadline, and says what he will do otherwise."
+              "setup": "You are an agent in the retention team of a mobile provider. {{name}} cancelled {{his}} contract in writing two months ago and has no confirmation; the contract will renew automatically next week. Claim you have no record of the letter and offer a better tariff. Use Sie.",
+              "goal": "{{He}} explains when and how {{he}} cancelled, rejects the offer politely, insists on written confirmation with a deadline, and says what {{he}} will do otherwise."
             }
           ],
           "checkpoint": {
@@ -1520,20 +1520,20 @@
             {
               "id": "b1.2-4-interview",
               "title": "Das Gespräch mit dem Teamleiter",
-              "setup": "You are Herr Krüger, team lead of the platform team in Munich. Ahmad is interviewing for an internal transfer to your team. Ask about his career so far, a difficult situation he solved, a weakness, why he wants to move, and what he expects from you. Use Sie, professional and curious.",
-              "goal": "He narrates his career with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions."
+              "setup": "You are Herr Krüger, team lead of the platform team in Munich. {{name}} is interviewing for an internal transfer to your team. Ask about {{his}} career so far, a difficult situation {{he}} solved, a weakness, why {{he}} wants to move, and what {{he}} expects from you. Use Sie, professional and curious.",
+              "goal": "{{He}} narrates {{his}} career with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions."
             },
             {
               "id": "b1.2-4-gehalt",
               "title": "Gehalt und Umzug",
-              "setup": "You are Frau Berger from HR. You make Ahmad an offer for the Munich position: a salary below what he hoped, thirty days of holiday, a relocation bonus. Let him negotiate; you have some room on salary and more on the relocation package. Use Sie.",
-              "goal": "He states his expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing."
+              "setup": "You are Frau Berger from HR. You make {{name}} an offer for the Munich position: a salary below what {{he}} hoped, thirty days of holiday, a relocation bonus. Let {{him}} negotiate; you have some room on salary and more on the relocation package. Use Sie.",
+              "goal": "{{He}} states {{his}} expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing."
             },
             {
               "id": "b1.2-4-meetup",
               "title": "Beim DevOps-Meetup",
-              "setup": "You are Katja, an engineer at a Berlin DevOps meetup. You get talking to Ahmad over pizza. Ask what he does, what stack he works with, what he is proud of, and tell him your company is hiring. Keep it natural and informal. Use du.",
-              "goal": "He describes his work and one project he is proud of in some detail, asks about your work, and reacts to the hiring hint with a question or a polite deferral."
+              "setup": "You are Katja, an engineer at a Berlin DevOps meetup. You get talking to {{name}} over pizza. Ask what {{he}} does, what stack {{he}} works with, what {{he}} is proud of, and tell {{him}} your company is hiring. Keep it natural and informal. Use du.",
+              "goal": "{{He}} describes {{his}} work and one project {{he}} is proud of in some detail, asks about your work, and reacts to the hiring hint with a question or a polite deferral."
             }
           ],
           "checkpoint": {
@@ -1572,20 +1572,20 @@
             {
               "id": "b1.2-5-rueckblick",
               "title": "Ein Jahr in Deutschland",
-              "setup": "You are Herr Schulz, Ahmad's retired neighbour, over coffee. It has been a year since he moved in. Ask him to tell the whole story: the arrival, the first weeks, what was hardest, what he is proud of, what has changed for him. Listen, react, ask for details. Use Sie.",
-              "goal": "He narrates the year at length with at least eight connected sentences, uses subordinate clauses before main clauses, and expresses at least two feelings."
+              "setup": "You are Herr Schulz, {{name}}'s retired neighbour, over coffee. It has been a year since {{he}} moved in. Ask {{him}} to tell the whole story: the arrival, the first weeks, what was hardest, what {{he}} is proud of, what has changed for {{him}}. Listen, react, ask for details. Use Sie.",
+              "goal": "{{He}} narrates the year at length with at least eight connected sentences, uses subordinate clauses before main clauses, and expresses at least two feelings."
             },
             {
               "id": "b1.2-5-facharzt",
               "title": "Beim Facharzt",
-              "setup": "You are Dr. Vogel, a specialist (orthopaedist). Ahmad has had back pain for months from sitting and sleeps badly. Ask detailed questions about the pain, his desk, his sport, his sleep and stress; give a diagnosis in plain words; offer two options (physiotherapy, a change of workplace setup) and ask him to decide. Use Sie.",
-              "goal": "He describes his symptoms in detail with time and manner, understands and repeats the diagnosis, asks about both options, and chooses one with a reason."
+              "setup": "You are Dr. Vogel, a specialist (orthopaedist). {{name}} has had back pain for months from sitting and sleeps badly. Ask detailed questions about the pain, {{his}} desk, {{his}} sport, {{his}} sleep and stress; give a diagnosis in plain words; offer two options (physiotherapy, a change of workplace setup) and ask {{him}} to decide. Use Sie.",
+              "goal": "{{He}} describes {{his}} symptoms in detail with time and manner, understands and repeats the diagnosis, asks about both options, and chooses one with a reason."
             },
             {
               "id": "b1.2-5-zukunft",
               "title": "Bleibst du?",
-              "setup": "You are Mira, a close colleague, on a walk. Ask Ahmad whether he sees himself staying in Germany long term, what would make him stay or leave, how his family sees it, and what he would tell someone in Amman who wants to do the same. Use du.",
-              "goal": "He weighs staying and leaving with conditions and feelings, uses relative clauses with was or wo, and gives a piece of advice with reasons."
+              "setup": "You are Mira, a close colleague, on a walk. Ask {{name}} whether {{he}} sees {{himself}} staying in Germany long term, what would make {{him}} stay or leave, how {{his}} family sees it, and what {{he}} would tell someone in Amman who wants to do the same. Use du.",
+              "goal": "{{He}} weighs staying and leaving with conditions and feelings, uses relative clauses with was or wo, and gives a piece of advice with reasons."
             }
           ],
           "checkpoint": {
