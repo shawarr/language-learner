@@ -30,7 +30,7 @@ LINES = [("assistant", "Hallo! Wie kommst du zur Arbeit?"), ("user", "Ich fahre 
 
 async def seed(db, lines=LINES, *, ended=True, voice=False):
     now = time.time()
-    sid = await db.execute("INSERT INTO sessions (mode, unit_id, started_at, ended_at) VALUES ('talk', 'a1.1-1', ?, ?)",
+    sid = await db.execute("INSERT INTO sessions (user_id, mode, unit_id, started_at, ended_at) VALUES ((SELECT id FROM users WHERE username='ahmad'), 'talk', 'a1.1-1', ?, ?)",
                            (now, now if ended else None))
     for role, content in lines:
         kind = "voice" if voice and role == "user" else "text"
@@ -108,7 +108,7 @@ def test_validate_tolerates_missing_optional_fields():
 
 
 def test_prompt_placeholders_match_the_service():
-    assert placeholders("analyzer") == {"level", "unit_title", "grammar_targets", "categories", "known_mistakes",
+    assert placeholders("analyzer") == {"name", "about", "level", "unit_title", "grammar_targets", "categories", "known_mistakes",
                                         "rolling_summary", "transcript", "audio"}
 
 
@@ -121,7 +121,7 @@ async def test_audio_is_attached_for_spoken_turns_and_deleted_afterwards(fresh_d
     req = FakeProvider.calls[-1]
     assert req.audio == b"ID3" and req.audio_mime == "audio/mpeg"
     assert fake_build == [[Path(p) for p in paths]], "every clip, in message order"
-    assert "Attached: his 2 spoken turns, in order." in req.system
+    assert "Attached: the learner's 2 spoken turns, in order." in req.system
     assert not any(Path(p).exists() for p in paths), "heard once, then gone"
     rows = await fresh_db.fetchall("SELECT audio_path FROM messages WHERE session_id=?", (sid,))
     assert all(r["audio_path"] is None for r in rows)
@@ -142,7 +142,7 @@ async def test_a_missing_recording_is_skipped_not_fatal(fresh_db, fake_build, tm
     Path(paths[0]).unlink()
     assert await analyzer.analyze_session(sid) is not None
     assert fake_build == [[Path(paths[1])]]
-    assert "Attached: 1 of his 2 spoken turns, in order" in FakeProvider.calls[-1].system
+    assert "Attached: 1 of the learner's 2 spoken turns, in order" in FakeProvider.calls[-1].system
     rows = await fresh_db.fetchall("SELECT audio_path FROM messages WHERE session_id=?", (sid,))
     assert all(r["audio_path"] is None for r in rows) and not Path(paths[1]).exists()
     # Every file gone: text-only, no ffmpeg, no crash.

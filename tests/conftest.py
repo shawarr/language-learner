@@ -62,6 +62,18 @@ def auth_client(client):
 
 
 @pytest.fixture(autouse=True)
+def offline_tts(request, monkeypatch):
+    """The tutor pre-renders every reply's audio in the background; in tests that would reach for
+    edge-tts on the network. A test about the pre-warm itself opts out with @pytest.mark.real_tts
+    and patches the engine instead."""
+    if request.node.get_closest_marker("real_tts"):
+        return
+    from app.services import tutor
+
+    monkeypatch.setattr(tutor, "schedule_tts", lambda text: None)
+
+
+@pytest.fixture(autouse=True)
 def reset_fake():
     from app.providers.fake import FakeProvider
 

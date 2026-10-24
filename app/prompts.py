@@ -40,8 +40,10 @@ def load(name: str) -> str:
     return _read(name)
 
 
-def render(name: str, **values: object) -> str:
-    """Substitute every {{placeholder}}. Raises on unknown or missing keys."""
+def render(name: str, /, **values: object) -> str:
+    """Substitute every {{placeholder}}. Raises on unknown or missing keys.
+
+    `name` is positional-only so a prompt can have its own {{name}} placeholder (the learner's)."""
     text = load(name)
     needed = set(_PLACEHOLDER.findall(text))
     given = set(values)

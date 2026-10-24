@@ -27,7 +27,7 @@ async def _answer_all(sid: int) -> None:
 
 
 def test_prompt_and_service_agree_on_placeholders():
-    assert placeholders("placement") == {"answered", "answers"}
+    assert placeholders("placement") == {"name", "about", "answered", "answers"}
 
 
 async def test_start_creates_a_placement_session_with_four_tasks(fresh_db):

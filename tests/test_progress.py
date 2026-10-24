@@ -19,8 +19,8 @@ def day(offset: int) -> str:
 
 
 async def bump(db, offset: int, kind: str = "talk_turn", n: int = 1):
-    await db.execute("INSERT INTO activity (day, kind, count) VALUES (?, ?, ?) "
-                     "ON CONFLICT(day, kind) DO UPDATE SET count = count + excluded.count", (day(offset), kind, n))
+    await db.execute("INSERT INTO activity (user_id, day, kind, count) VALUES ((SELECT id FROM users WHERE username='ahmad'), ?, ?, ?) "
+                     "ON CONFLICT(user_id, day, kind) DO UPDATE SET count = count + excluded.count", (day(offset), kind, n))
 
 
 def test_streak_maths():
@@ -58,10 +58,10 @@ async def test_vocab_counts(fresh_db):
     await vocab.upsert("neu", "new", now=NOW)                                   # new and due
     await vocab.upsert("später", "later", now=NOW)
     await fresh_db.execute("UPDATE vocab SET due=? WHERE word='später'", (NOW + DAY,))    # new, not due
-    await fresh_db.execute("INSERT INTO vocab (word, translation, created_at, due, interval_days, reps, last_review) "
-                           "VALUES ('reif', 'mature', ?, ?, 30, 6, ?)", (NOW, NOW - DAY, NOW - 31 * DAY))
-    await fresh_db.execute("INSERT INTO vocab (word, translation, created_at, due, interval_days, reps, last_review) "
-                           "VALUES ('jung', 'young', ?, ?, 6, 2, ?)", (NOW, NOW + 3 * DAY, NOW - 3 * DAY))
+    await fresh_db.execute("INSERT INTO vocab (user_id, word, translation, created_at, due, interval_days, reps, last_review) "
+                           "VALUES ((SELECT id FROM users WHERE username='ahmad'), 'reif', 'mature', ?, ?, 30, 6, ?)", (NOW, NOW - DAY, NOW - 31 * DAY))
+    await fresh_db.execute("INSERT INTO vocab (user_id, word, translation, created_at, due, interval_days, reps, last_review) "
+                           "VALUES ((SELECT id FROM users WHERE username='ahmad'), 'jung', 'young', ?, ?, 6, 2, ?)", (NOW, NOW + 3 * DAY, NOW - 3 * DAY))
     assert (await progress.payload(now=NOW))["vocab"] == {"total": 4, "due": 2, "mature": 1, "new": 2}
 
 
@@ -101,7 +101,7 @@ async def test_thin_data_sessions_and_profile_fields(fresh_db):
 
     for i in range(5):
         await fresh_db.execute(
-            "INSERT INTO sessions (mode, unit_id, started_at, ended_at, meta) VALUES (?, 'a1.1-1', ?, ?, ?)",
+            "INSERT INTO sessions (user_id, mode, unit_id, started_at, ended_at, meta) VALUES ((SELECT id FROM users WHERE username='ahmad'), ?, 'a1.1-1', ?, ?, ?)",
             ("talk" if i < 4 else "placement", NOW - i * 100, NOW - i * 100 + 50 if i != 3 else None,
              json.dumps({"unit_readiness": "ready"})))
     out = await progress.payload(now=NOW)

@@ -73,7 +73,7 @@ async def test_advance_moves_and_clears_review_focus(fresh_db):
 
 def test_curriculum_routes(client):
     assert client.get("/api/curriculum").status_code == 401
-    client.post("/api/auth/login", json={"password": "test-password"})
+    client.post("/api/auth/login", json={"username": "ahmad", "password": "test-password"})
     tree = client.get("/api/curriculum").json()
     assert [p["id"] for p in tree["phases"]] == curriculum.PHASE_ORDER
     assert tree["current"]["unit_id"] == "a1.1-1" and "checkpoint" not in tree["phases"][0]["units"][0]

@@ -1,14 +1,14 @@
 You grade one free-text answer in a German grammar drill for a beginner. The app already compared
-his answer with the expected one, ignoring case, punctuation and spacing, and they differ. Decide
-whether his version is nevertheless correct German that does what the task asked.
+the learner's answer with the expected one, ignoring case, punctuation and spacing, and they differ. Decide
+whether the learner's version is nevertheless correct German that does what the task asked.
 
 ## The item
 - Task: {{prompt}}
 - Expected answer: {{expected}}
-- His answer: {{given}}
+- The learner's answer: {{given}}
 
 ## How to judge
-- `correct` is true when his answer is grammatically correct German and fulfils the instruction,
+- `correct` is true when the learner's answer is grammatically correct German and fulfils the instruction,
   even if it differs from the expected answer in a way German allows: another word order that is
   also right, a synonym, a contraction ("zum" for "zu dem"). "Gestern bin ich ins Büro gefahren"
   and "Ich bin gestern ins Büro gefahren" are both right.

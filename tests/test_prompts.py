@@ -37,6 +37,18 @@ def test_unknown_prompt_file_raises():
 def test_shipped_tutor_prompt_declares_the_profile_it_needs():
     """If this list changes, the tutor service must pass the new value — it will raise otherwise."""
     assert placeholders("tutor_talk") == {
-        "level", "unit_title", "unit_goals", "grammar_targets", "top_mistakes",
+        "name", "about", "level", "unit_title", "unit_goals", "grammar_targets", "top_mistakes",
         "due_vocab", "facts", "rolling_summary", "scenario",
     }
+
+
+def test_a_prompt_may_have_a_name_placeholder(tmp_path, monkeypatch):
+    """The learner's {{name}} must not collide with render()'s own first parameter."""
+    from app.config import settings
+    from app.prompts import _read
+
+    monkeypatch.setattr(settings, "prompts_dir", tmp_path)
+    _read.cache_clear()
+    (tmp_path / "t.md").write_text("Hallo {{name}}")
+    assert render("t", name="Maryan") == "Hallo Maryan"
+    _read.cache_clear()

@@ -119,13 +119,13 @@ async def test_review_unknown_and_bad_rating(fresh_db):
 async def _seed(db, *, reviewed: int, new: int, future: int = 0):
     for i in range(reviewed):
         # oldest-due first means the highest i (due furthest in the past) must come first
-        await db.execute("INSERT INTO vocab (word, translation, created_at, due, reps, last_review, interval_days) "
-                         "VALUES (?, 'r', ?, ?, 2, ?, 6)", (f"rev{i}", NOW, NOW - i * DAY, NOW - 7 * DAY))
+        await db.execute("INSERT INTO vocab (user_id, word, translation, created_at, due, reps, last_review, interval_days) "
+                         "VALUES ((SELECT id FROM users WHERE username='ahmad'), ?, 'r', ?, ?, 2, ?, 6)", (f"rev{i}", NOW, NOW - i * DAY, NOW - 7 * DAY))
     for i in range(new):
         await vocab.upsert(f"new{i}", "n", now=NOW - i)
     for i in range(future):
-        await db.execute("INSERT INTO vocab (word, translation, created_at, due, reps, last_review) "
-                         "VALUES (?, 'f', ?, ?, 1, ?)", (f"fut{i}", NOW, NOW + DAY, NOW))
+        await db.execute("INSERT INTO vocab (user_id, word, translation, created_at, due, reps, last_review) "
+                         "VALUES ((SELECT id FROM users WHERE username='ahmad'), ?, 'f', ?, ?, 1, ?)", (f"fut{i}", NOW, NOW + DAY, NOW))
 
 
 async def test_due_queue_orders_oldest_first_and_interleaves_new(fresh_db):

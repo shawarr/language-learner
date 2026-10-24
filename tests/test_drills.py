@@ -51,8 +51,8 @@ async def test_generation_targets_weakest_categories_and_links_mistake_ids(fresh
     out = await drills.new(8)
     assert out["categories"] == ["case", "word_order", "gender"], "ranked by open count, ties by name; beaten rows ignored"
     system = FakeProvider.calls[-1].system
-    assert "1. [case] dative after mit" in system and 'he wrote "mit den Bus", correct "mit dem Bus"' in system
-    assert "verb_conjugation" not in system.split("## His own mistakes")[1], "only the targeted categories are listed"
+    assert "1. [case] dative after mit" in system and 'written "mit den Bus", correct "mit dem Bus"' in system
+    assert "verb_conjugation" not in system.split("## The learner's own mistakes")[1], "only the targeted categories are listed"
     assert "Generate 8 items." in FakeProvider.calls[-1].messages[-1].content
     assert set(out) == {"id", "categories", "items"}
     for i, it in enumerate(out["items"]):

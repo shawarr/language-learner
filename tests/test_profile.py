@@ -59,7 +59,7 @@ async def test_build_context_truncates_vocab_and_mistakes(fresh_db):
     now = time.time()
     for i in range(20):
         await fresh_db.execute(
-            "INSERT INTO vocab (word, translation, created_at, due) VALUES (?, ?, ?, ?)",
+            "INSERT INTO vocab (user_id, word, translation, created_at, due) VALUES ((SELECT id FROM users WHERE username='ahmad'), ?, ?, ?, ?)",
             (f"wort{i}", "word", now, now - i))
     for i in range(10):
         await mistakes.record("other", f"pattern {i}", f"w{i}", f"r{i}", now=now)

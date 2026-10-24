@@ -19,7 +19,7 @@ async def _session(db, *, age_minutes: float, voice_turns: int = 2, ended: bool 
     """A talk session whose last message is `age_minutes` old, with recordings on disk."""
     when = time.time() - age_minutes * 60
     session_id = await db.execute(
-        "INSERT INTO sessions (mode, unit_id, started_at, ended_at, user_turns) VALUES ('talk','a1.1-1',?,?,?)",
+        "INSERT INTO sessions (user_id, mode, unit_id, started_at, ended_at, user_turns) VALUES ((SELECT id FROM users WHERE username='ahmad'), 'talk','a1.1-1',?,?,?)",
         (when, when if ended else None, voice_turns))
     turns = tutor.turns_dir()
     turns.mkdir(parents=True, exist_ok=True)
@@ -119,7 +119,7 @@ async def test_orphan_recordings_are_removed_but_fresh_ones_are_not(fresh_db, mo
     referenced.write_bytes(b"x")
     os.utime(referenced, (stale, stale))
     session_id = await fresh_db.execute(
-        "INSERT INTO sessions (mode, started_at) VALUES ('talk', ?)", (time.time(),))
+        "INSERT INTO sessions (user_id, mode, started_at) VALUES ((SELECT id FROM users WHERE username='ahmad'), 'talk', ?)", (time.time(),))
     mid = await fresh_db.execute(
         "INSERT INTO messages (session_id, role, content, input_kind, created_at) "
         "VALUES (?, 'user', 'hallo', 'voice', ?)", (session_id, time.time()))

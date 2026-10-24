@@ -37,13 +37,13 @@ async def _talk_session(unit_id: str, *, ended: bool = True, meta: dict | None =
 
     now = time.time()
     return await db.execute(
-        "INSERT INTO sessions (mode, unit_id, started_at, ended_at, meta) VALUES ('talk', ?, ?, ?, ?)",
+        "INSERT INTO sessions (user_id, mode, unit_id, started_at, ended_at, meta) VALUES ((SELECT id FROM users WHERE username='ahmad'), 'talk', ?, ?, ?, ?)",
         (unit_id, now - 600, now if ended else None, json.dumps(meta or {})))
 
 
 def test_prompt_and_service_agree_on_placeholders():
     assert placeholders("checkpoint_grade") == {
-        "level", "unit_title", "can_do", "grammar", "speaking_task", "writing_task", "words_range",
+        "name", "about", "level", "unit_title", "can_do", "grammar", "speaking_task", "writing_task", "words_range",
         "speaking_transcript", "writing_text"}
 
 
@@ -203,7 +203,7 @@ async def test_submit_guards(fresh_db, monkeypatch):
         await checkpoint.submit(cid, SPEAK, WRITE)
     assert e.value.status_code == 409
     # A stale open row from a unit he already left cannot advance him again.
-    stale = await fresh_db.execute("INSERT INTO checkpoints (unit_id, tasks, created_at) VALUES ('a1.1-1', '{}', ?)",
+    stale = await fresh_db.execute("INSERT INTO checkpoints (user_id, unit_id, tasks, created_at) VALUES ((SELECT id FROM users WHERE username='ahmad'), 'a1.1-1', '{}', ?)",
                                    (time.time(),))
     with pytest.raises(HTTPException) as e:
         await checkpoint.submit(stale, SPEAK, WRITE)

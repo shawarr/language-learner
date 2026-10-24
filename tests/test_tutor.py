@@ -491,6 +491,7 @@ def test_silent_recording_is_a_400_with_no_rows(auth_client, monkeypatch):
     assert len(FakeProvider.calls) == calls, "no tutor call without a transcript"
 
 
+@pytest.mark.real_tts
 async def test_turn_prewarms_the_reply_audio(fresh_db, monkeypatch):
     """The TTS render starts in the background right after the turn, so GET /api/tts hits the cache."""
     from app.services import tutor
@@ -507,6 +508,7 @@ async def test_turn_prewarms_the_reply_audio(fresh_db, monkeypatch):
     assert [s for s, _ in spoken] == [data["opening_turn"]["reply"], "fake reply"]
 
 
+@pytest.mark.real_tts
 async def test_tts_prewarm_failure_never_touches_the_turn(fresh_db, monkeypatch):
     from app.services import tutor
 

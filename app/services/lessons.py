@@ -60,8 +60,13 @@ def _validate(unit_id: str, lesson: dict) -> None:
 
 
 def for_unit(unit_id: str) -> dict[str, Any] | None:
+    """The unit's lesson as the current learner should read it: lessons.json writes {{name}} and the
+    pronoun placeholders, and curriculum renders them for whoever is logged in."""
     lesson = load().get(unit_id)
-    return dict(lesson) if isinstance(lesson, dict) else None
+    if not isinstance(lesson, dict):
+        return None
+    from . import curriculum  # late import: curriculum imports profile, which this module must not
+    return curriculum.lesson_for_user(lesson)
 
 
 def spoken_lines(lesson: dict) -> list[str]:
