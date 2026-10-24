@@ -1,9 +1,10 @@
-"""Drill mode: short items generated from his own mistakes, graded locally where the answer is exact.
+"""Drill mode: short items generated from the learner's own mistakes, graded locally where the answer is exact.
 
-The items are built from the stored examples of his weakest mistake categories, so he re-meets his
-own sentences. Grading is a string compare for everything but free-text `transform` items, which go
-to the fast model only when the normalised answer differs. A right answer bumps `mistakes.resolved`
-on the source row, a wrong one bumps `count` — that is what retires a mistake from the tutor prompt.
+The items are built from the stored examples of the weakest mistake categories, so the learner
+re-meets their own sentences. Grading is a string compare for everything but free-text `transform`
+items, which go to the fast model only when the normalised answer differs. A right answer bumps
+`mistakes.resolved` on the source row, a wrong one bumps `count` — that is what retires a mistake
+from the tutor prompt.
 """
 from __future__ import annotations
 
@@ -11,7 +12,7 @@ import json
 import time
 import unicodedata
 
-from .. import taxonomy
+from .. import taxonomy, users
 from ..config import settings
 from ..db import db, loads
 from ..prompts import render
@@ -39,7 +40,7 @@ GENERATE_SCHEMA = {
                     "prompt": {"type": "string", "description": "The sentence with ___, the question, the scrambled words, or the sentence plus instruction."},
                     "options": {"type": "array", "items": {"type": "string"},
                                 "description": "choose: 3-4 choices incl. the answer; fill_blank: 3 short choices; reorder/transform: empty."},
-                    "answer": {"type": "string", "description": "Exactly what he must produce."},
+                    "answer": {"type": "string", "description": "Exactly what the learner must produce."},
                     "category": {"type": "string", "enum": taxonomy.CATEGORY_SLUGS},
                     "explanation": {"type": "string", "description": "One sentence, English, concrete: the rule and the result."},
                     "mistake_ref": {"type": "integer", "description": "Number of the mistake this item is built from, or -1."},
@@ -109,7 +110,7 @@ async def _touch_mistake(item: dict, correct: bool) -> bool:
     if not correct:
         await mistakes.fail(int(mid))
         return False
-    before = await db.fetchone("SELECT count, resolved FROM mistakes WHERE id=?", (int(mid),))
+    before = await mistakes.get(int(mid))
     await mistakes.resolve(int(mid))
     return bool(before) and int(before["resolved"]) < int(before["count"]) <= int(before["resolved"]) + 1
 
@@ -146,7 +147,7 @@ def _format_refs(refs: list[dict]) -> str:
     lines = []
     for i, r in enumerate(refs, 1):
         examples = [e for e in r.get("examples") or [] if e.get("wrong") and e.get("right")][-MAX_EXAMPLES_PER_REF:]
-        shown = "; ".join(f"he wrote \"{e['wrong']}\", correct \"{e['right']}\"" for e in examples) or "(no example stored)"
+        shown = "; ".join(f"written \"{e['wrong']}\", correct \"{e['right']}\"" for e in examples) or "(no example stored)"
         lines.append(f"{i}. [{r['category']}] {r['pattern']} — {shown}")
     return "\n".join(lines)
 
@@ -163,7 +164,7 @@ async def pick_targets() -> tuple[list[str], list[dict]]:
 
 
 def public_item(item: dict, index: int) -> dict:
-    """docs/API.md: answers, explanations and mistake links stay on the server until he answers."""
+    """docs/API.md: answers, explanations and mistake links stay on the server until the learner answers."""
     return {"index": index, "type": item["type"], "prompt": item["prompt"],
             "options": item["options"] or None, "category": item["category"]}
 
@@ -172,19 +173,22 @@ async def new(n: int | None = None) -> dict:
     """docs/API.md GET /drill/new."""
     n = settings.drill_items if n is None else int(n)
     n = max(MIN_ITEMS, min(MAX_ITEMS, n))
+    user = users.current()
     p = await profile.get_profile()
     unit = await curriculum.current_unit()
     categories, refs = await pick_targets()
     if categories:
-        targets = ("The categories where he currently makes the most mistakes — every item drills one of these:\n"
+        targets = (f"The categories where {user['name']} currently makes the most mistakes — every item drills one of these:\n"
                    + "\n".join(f"- {c}: {taxonomy.CATEGORIES[c]}" for c in categories))
     else:
         # Nothing in the log yet (first days, or everything beaten): drill the unit instead, and say so.
-        targets = ("He has no open mistakes in the log yet, so drill this unit's grammar targets instead, "
-                   "with sentences from his life. Use mistake_ref -1 for every item:\n"
+        targets = (f"{user['name']} has no open mistakes in the log yet, so drill this unit's grammar targets instead, "
+                   f"with sentences from {user['name']}'s life. Use mistake_ref -1 for every item:\n"
                    + "\n".join(f"- {g}" for g in unit.get("grammar") or []))
     system = render(
         "drill_generate",
+        name=user["name"],
+        about=profile.about_text(user),
         level=p["level"],
         unit_title=unit.get("title") or NONE_YET,
         review_focus="; ".join(p["review_focus"]) or NONE_YET,
@@ -210,15 +214,16 @@ async def new(n: int | None = None) -> dict:
         categories = sorted({i["category"] for i in items})
     blanks = json.dumps([None] * len(items))
     drill_id = await db.execute(
-        "INSERT INTO drills (categories, items, answers, results, created_at) VALUES (?, ?, ?, ?, ?)",
-        (json.dumps(categories), json.dumps(items, ensure_ascii=False), blanks, blanks, time.time()))
+        "INSERT INTO drills (user_id, categories, items, answers, results, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (user["id"], json.dumps(categories), json.dumps(items, ensure_ascii=False), blanks, blanks, time.time()))
     return {"id": drill_id, "categories": categories, "items": [public_item(it, i) for i, it in enumerate(items)]}
 
 
 # -- answering --------------------------------------------------------------------------
 
 async def _load(drill_id: int) -> dict:
-    row = await db.fetchone("SELECT * FROM drills WHERE id=?", (drill_id,))
+    # The other learner's drill is "no drill": the router turns LookupError into a 404 either way.
+    row = await db.fetchone("SELECT * FROM drills WHERE id=? AND user_id=?", (drill_id, users.user_id()))
     if row is None:
         raise LookupError(f"no drill {drill_id}")
     items = [i for i in loads(row["items"], []) if isinstance(i, dict)]

@@ -15,6 +15,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
+from .. import users
 from ..config import settings
 from ..db import db, loads
 from ..prompts import render
@@ -170,7 +171,9 @@ def schedule_tts(text: str) -> asyncio.Task:
 
 # -- the service ----------------------------------------------------------------
 async def _load(session_id: int) -> dict:
-    row = await db.fetchone("SELECT * FROM sessions WHERE id=?", (session_id,))
+    """The current user's session, or 404. The other learner's id is indistinguishable from a
+    missing one, so nothing about their sessions leaks; every message query hangs off this check."""
+    row = await db.fetchone("SELECT * FROM sessions WHERE id=? AND user_id=?", (session_id, users.user_id()))
     if not row:
         raise HTTPException(status_code=404, detail="session not found")
     return row
@@ -178,7 +181,7 @@ async def _load(session_id: int) -> dict:
 
 async def _system_prompt(scenario: dict | None) -> str:
     # The profile's unit, even when the scenario was picked from another one: the context describes
-    # where he is, the scenario only what is being played.
+    # where the learner is, the scenario only what is being played.
     unit = await curriculum.current_unit()
     return render("tutor_talk", **await profile.build_context(unit, scenario))
 
@@ -216,8 +219,9 @@ async def start_session(mode: str = "talk", scenario_id: str | None = None) -> d
     now = time.time()
     try:
         cur = await db.conn.execute(
-            "INSERT INTO sessions (mode, scenario_id, scenario_title, unit_id, started_at) VALUES (?, ?, ?, ?, ?)",
-            (mode, scenario["id"] if scenario else None, scenario["title"] if scenario else None, unit["id"], now))
+            "INSERT INTO sessions (user_id, mode, scenario_id, scenario_title, unit_id, started_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (users.user_id(), mode, scenario["id"] if scenario else None, scenario["title"] if scenario else None,
+             unit["id"], now))
         session_id = int(cur.lastrowid or 0)
         message_id = await _write_assistant(session_id, turn, data.get("_model"), now)
         await db.conn.commit()
@@ -239,8 +243,8 @@ def _write_file(path: Path, data: bytes) -> None:
 
 
 async def _keep_recording(session_id: int, message_id: int, audio: bytes, ext: str) -> None:
-    """The analyzer listens to the recording later, because the transcript hides the endings he got
-    wrong. A failed save only means that analysis runs text-only, so it never fails the turn."""
+    """The analyzer listens to the recording later, because the transcript hides the endings the
+    learner got wrong. A failed save only means that analysis runs text-only, so it never fails the turn."""
     path = turns_dir() / f"{session_id}-{message_id}.{ext}"
     try:
         await asyncio.to_thread(_write_file, path, audio)
@@ -272,17 +276,27 @@ async def close_stale_sessions(limit: int = STALE_CLOSE_LIMIT, now: float | None
     `analyzer.catch_up()` cannot help, because it only considers sessions that were ended.
 
     Reuses `end_session`, so an abandoned session takes exactly the path a tidily ended one does.
+
+    Runs across both learners, whoever's new session triggered it: each stale session is closed as
+    its own owner, so the analysis behind it writes to the right profile and mistake log.
     """
     now = now or time.time()
     cutoff = now - max(1, settings.session_stale_minutes) * 60
     rows = await db.fetchall(
-        "SELECT s.id FROM sessions s WHERE s.ended_at IS NULL AND s.mode = 'talk' "
+        "SELECT s.id, s.user_id FROM sessions s WHERE s.ended_at IS NULL AND s.mode = 'talk' "
         "AND COALESCE((SELECT MAX(m.created_at) FROM messages m WHERE m.session_id = s.id), s.started_at) < ? "
         "ORDER BY s.started_at, s.id LIMIT ?", (cutoff, max(0, int(limit))))
     closed: list[int] = []
     for row in rows:
         try:
-            await end_session(row["id"])
+            owner = await users.get(row["user_id"])
+            if owner is None:
+                raise LookupError(f"session {row['id']} belongs to unknown user {row['user_id']}")
+            token = users.set_current(owner)
+            try:
+                await end_session(row["id"])
+            finally:
+                users.reset_current(token)
             closed.append(int(row["id"]))
             log.info("closed abandoned session %s", row["id"])
         except Exception:
@@ -295,7 +309,8 @@ async def sweep_orphan_audio(now: float | None = None) -> int:
 
     Belt and braces for the paths that bypass the per-session sweep: a crash between writing the
     file and the UPDATE that records its path, or a failed delete. Only touches files older than
-    two days, so a recording mid-flight is never pulled out from under a live turn.
+    two days, so a recording mid-flight is never pulled out from under a live turn. Needs no current
+    user: a file is an orphan when no message of anyone points at it.
     """
     now = now or time.time()
     directory = turns_dir()
@@ -351,7 +366,7 @@ async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
     voice = input_kind == "voice"
     if voice and audio:
         await _keep_recording(session_id, user_message_id, audio, audio_ext or normalize_mime(audio_mime)[0])
-    # One learner, one conversation at a time: the count read above plus this turn is the real one.
+    # One conversation at a time per learner: the count read above plus this turn is the real one.
     turns = int(session["user_turns"] or 0) + 1
     if settings.analyze_every_turns > 0 and turns % settings.analyze_every_turns == 0:
         schedule_analysis(session_id)
@@ -407,7 +422,7 @@ async def end_session(session_id: int) -> dict:
 
 
 async def get_session(session_id: int) -> dict | None:
-    row = await db.fetchone("SELECT * FROM sessions WHERE id=?", (session_id,))
+    row = await db.fetchone("SELECT * FROM sessions WHERE id=? AND user_id=?", (session_id, users.user_id()))
     if not row:
         return None
     rows = await db.fetchall("SELECT * FROM messages WHERE session_id=? ORDER BY id", (session_id,))
@@ -415,6 +430,6 @@ async def get_session(session_id: int) -> dict | None:
 
 
 async def recent_sessions(limit: int = 20) -> list[dict]:
-    rows = await db.fetchall("SELECT * FROM sessions ORDER BY started_at DESC, id DESC LIMIT ?",
-                             (max(1, min(int(limit), 100)),))
+    rows = await db.fetchall("SELECT * FROM sessions WHERE user_id=? ORDER BY started_at DESC, id DESC LIMIT ?",
+                             (users.user_id(), max(1, min(int(limit), 100))))
     return [session_json(r) for r in rows]

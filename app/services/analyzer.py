@@ -5,6 +5,10 @@ onward), asks the model for mistakes, vocabulary, skill movement, facts and a re
 summary, validates the answer, and only then writes. It runs every Nth turn and at session end, so
 it has to be incremental and idempotent: a second run right after the first finds nothing new and
 does nothing, and two runs never see the same user message twice.
+
+It also runs outside any request (a background task, the catch-up behind someone else's new
+session), so the learner it writes to is taken from `sessions.user_id`, never from whoever happened
+to be current when it was called.
 """
 from __future__ import annotations
 
@@ -17,6 +21,7 @@ import time
 from collections.abc import Iterable
 from pathlib import Path
 
+from .. import users
 from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
@@ -39,7 +44,7 @@ MAX_AUDIO_BYTES = 15 * 1024 * 1024
 ANALYSIS_SCHEMA = {
     "type": "object",
     "properties": {
-        "session_summary": {"type": "string", "description": "2-3 sentences, English: what he practised and how it went."},
+        "session_summary": {"type": "string", "description": "2-3 sentences, English: what the learner practised and how it went."},
         "rolling_summary": {"type": "string", "description": "Rewritten cumulative picture of the learner, max 120 words."},
         "mistakes": {"type": "array", "items": {"type": "object", "properties": {
             "category": {"type": "string", "enum": CATEGORY_SLUGS},
@@ -56,7 +61,7 @@ ANALYSIS_SCHEMA = {
         "facts": {"type": "array", "items": {"type": "string"},
                   "description": "New durable personal facts worth using as conversation material later."},
         "unit_readiness": {"type": "string", "enum": ["not_yet", "almost", "ready"],
-                           "description": "Is he ready for this unit's checkpoint?"},
+                           "description": "Is the learner ready for this unit's checkpoint?"},
     },
     "required": ["session_summary", "rolling_summary", "mistakes", "new_vocab", "skill_deltas", "unit_readiness"],
 }
@@ -153,12 +158,13 @@ def _serial() -> asyncio.Lock:
 
 
 def _line(row: dict) -> str:
+    """One transcript line, the learner's turns labelled with their name so the prompt can refer to them."""
     if row["role"] == "assistant":
         return f"Tutor: {row['content']}"
-    # The raw STT output is what he actually said; `content` is the same text today, but the
+    # The raw STT output is what was actually said; `content` is the same text today, but the
     # column is the contract.
     spoken = row.get("transcript_raw") if row.get("input_kind") == "voice" else None
-    return f"Ahmad: {spoken or row['content']}"
+    return f"{users.current()['name']}: {spoken or row['content']}"
 
 
 def _audio_note(attached: int, spoken: int) -> str:
@@ -166,16 +172,19 @@ def _audio_note(attached: int, spoken: int) -> str:
     if not attached:
         return "Not attached."
     if attached < spoken:
-        return f"Attached: {attached} of his {spoken} spoken turns, in order (the others were not kept)."
-    return f"Attached: his {attached} spoken turns, in order."
+        return f"Attached: {attached} of the learner's {spoken} spoken turns, in order (the others were not kept)."
+    return f"Attached: the learner's {attached} spoken turns, in order."
 
 
 async def _system_prompt(transcript: str, audio_note: str) -> str:
     unit = await curriculum.current_unit()
+    user = users.current()
     p = await profile.get_profile()
     known = await mistakes.all_open(KNOWN_MISTAKES)
     return render(
         "analyzer",
+        name=user["name"],
+        about=profile.about_text(user),
         level=p["level"],
         unit_title=unit.get("title") or NONE_YET,
         grammar_targets=", ".join(unit.get("grammar") or []) or NONE_YET,
@@ -230,13 +239,28 @@ async def build_audio(clips: list[Path]) -> bytes | None:
 
 
 async def analyze_session(session_id: int) -> dict | None:
-    """Analyse what the session has said since the last run. None when there is nothing new."""
-    async with _serial():
-        return await _analyze(session_id)
+    """Analyse what the session has said since the last run. None when there is nothing new.
+
+    The session's owner becomes the current user for the duration, whoever is current at call time:
+    the mistakes, vocabulary and profile memory this writes belong to the person who spoke.
+    """
+    session = await db.fetchone("SELECT user_id FROM sessions WHERE id=?", (session_id,))
+    if not session:
+        return None
+    owner = await users.get(session["user_id"])
+    if owner is None:
+        log.error("session %s belongs to unknown user %s; not analysed", session_id, session["user_id"])
+        return None
+    token = users.set_current(owner)
+    try:
+        async with _serial():
+            return await _analyze(session_id)
+    finally:
+        users.reset_current(token)
 
 
 async def _analyze(session_id: int) -> dict | None:
-    session = await db.fetchone("SELECT * FROM sessions WHERE id=?", (session_id,))
+    session = await db.fetchone("SELECT * FROM sessions WHERE id=? AND user_id=?", (session_id, users.user_id()))
     if not session:
         return None
     rows = await db.fetchall("SELECT * FROM messages WHERE session_id=? ORDER BY id", (session_id,))
@@ -250,7 +274,7 @@ async def _analyze(session_id: int) -> dict | None:
         return None
     lines = [_line(r) for r in new]
     if seen and rows[seen - 1]["role"] == "assistant":
-        # The question his first new line answers; without it a short reply reads as a fragment.
+        # The question the first new line answers; without it a short reply reads as a fragment.
         lines.insert(0, _line(rows[seen - 1]))
     transcript = "\n".join(lines)
     # The transcript hides what Whisper repaired ("mit den Bus" came out as "mit dem Bus"), so the
@@ -311,7 +335,8 @@ async def catch_up(limit: int = 1) -> int:
     """Analyse ended talk sessions the analyzer missed (a 503 at session end), oldest first.
 
     Returns how many analyses ran. Failures are logged per session and never raised: this runs in the
-    background behind a new session. `limit` bounds the model calls spent on old sessions.
+    background behind a new session. `limit` bounds the model calls spent on old sessions. Sessions
+    of both learners qualify; `analyze_session` switches to each one's owner.
     """
     rows = await db.fetchall(
         "SELECT id FROM sessions s WHERE mode='talk' AND ended_at IS NOT NULL "

@@ -16,6 +16,7 @@ import time
 
 from fastapi import HTTPException
 
+from .. import users
 from ..config import settings
 from ..db import db, loads
 from ..prompts import render
@@ -39,7 +40,7 @@ GRADE_SCHEMA = {
                     "type": "object",
                     "properties": {
                         "score": {"type": "integer", "minimum": 1, "maximum": 5},
-                        "comment": {"type": "string", "description": "One concrete sentence, English, quoting him."},
+                        "comment": {"type": "string", "description": "One concrete sentence, English, quoting the learner."},
                     },
                     "required": ["score", "comment"],
                 }
@@ -48,7 +49,7 @@ GRADE_SCHEMA = {
             "required": list(DIMENSIONS),
         },
         "passed": {"type": "boolean", "description": "True only when every dimension scores 3 or more."},
-        "summary": {"type": "string", "description": "English, two sentences addressed to him."},
+        "summary": {"type": "string", "description": "English, two sentences addressed to the learner."},
         "review_focus": {"type": "array", "items": {"type": "string"},
                          "description": "One to three grammar or vocabulary gaps to work on next, phrased as drillable targets."},
     },
@@ -61,7 +62,8 @@ GRADE_SCHEMA = {
 async def availability(unit_id: str) -> dict:
     """docs/API.md: "ready" from the analyzer's verdict, "sessions" from the ended-session count, else "not_yet"."""
     needed = max(0, int(settings.checkpoint_min_sessions))
-    rows = await db.fetchall("SELECT ended_at, meta FROM sessions WHERE mode='talk' AND unit_id=?", (unit_id,))
+    rows = await db.fetchall("SELECT ended_at, meta FROM sessions WHERE user_id=? AND mode='talk' AND unit_id=?",
+                             (users.user_id(), unit_id))
     ended = sum(1 for r in rows if r["ended_at"] is not None)
     ready = False
     for r in rows:
@@ -99,13 +101,15 @@ def tasks_for(unit: dict) -> dict:
 
 async def _open_row(unit_id: str) -> dict | None:
     return await db.fetchone(
-        "SELECT * FROM checkpoints WHERE unit_id=? AND finished_at IS NULL ORDER BY id DESC LIMIT 1", (unit_id,))
+        "SELECT * FROM checkpoints WHERE user_id=? AND unit_id=? AND finished_at IS NULL ORDER BY id DESC LIMIT 1",
+        (users.user_id(), unit_id))
 
 
 async def last_result(unit_id: str) -> dict | None:
     row = await db.fetchone(
-        "SELECT result FROM checkpoints WHERE unit_id=? AND finished_at IS NOT NULL ORDER BY finished_at DESC, id DESC LIMIT 1",
-        (unit_id,))
+        "SELECT result FROM checkpoints WHERE user_id=? AND unit_id=? AND finished_at IS NOT NULL "
+        "ORDER BY finished_at DESC, id DESC LIMIT 1",
+        (users.user_id(), unit_id))
     result = loads(row["result"], None) if row else None
     return result if isinstance(result, dict) else None
 
@@ -121,8 +125,8 @@ async def current() -> dict:
         row = await _open_row(unit["id"])
         if row is None:
             checkpoint_id = await db.execute(
-                "INSERT INTO checkpoints (unit_id, tasks, created_at) VALUES (?, ?, ?)",
-                (unit["id"], json.dumps(tasks, ensure_ascii=False), time.time()))
+                "INSERT INTO checkpoints (user_id, unit_id, tasks, created_at) VALUES (?, ?, ?, ?)",
+                (users.user_id(), unit["id"], json.dumps(tasks, ensure_ascii=False), time.time()))
         else:
             checkpoint_id = int(row["id"])
     return {
@@ -169,8 +173,10 @@ def _bullets(items: list) -> str:
 
 
 async def submit(checkpoint_id: int, speaking_text: str, writing_text: str, *, stt_provider: str | None = None) -> dict:
-    """Grade one attempt. 404 unknown, 409 already graded or no longer the current unit, 400 missing text."""
-    row = await db.fetchone("SELECT * FROM checkpoints WHERE id=?", (checkpoint_id,))
+    """Grade one attempt. 404 unknown (or the other learner's), 409 already graded or no longer the
+    current unit, 400 missing text."""
+    user = users.current()
+    row = await db.fetchone("SELECT * FROM checkpoints WHERE id=? AND user_id=?", (checkpoint_id, user["id"]))
     if row is None:
         raise HTTPException(status_code=404, detail="No such checkpoint.")
     if row["finished_at"] is not None:
@@ -184,7 +190,7 @@ async def submit(checkpoint_id: int, speaking_text: str, writing_text: str, *, s
         raise HTTPException(status_code=400, detail="The written part is missing.")
     unit = await curriculum.current_unit()
     if unit["id"] != row["unit_id"]:
-        # A stale row from a unit he already left must not advance him a second time.
+        # A stale row from a unit already left behind must not advance the learner a second time.
         raise HTTPException(status_code=409, detail="This checkpoint belongs to a unit you are no longer in.")
     phase = curriculum.phase_of(unit["id"])
     tasks = loads(row["tasks"], None)
@@ -192,6 +198,7 @@ async def submit(checkpoint_id: int, speaking_text: str, writing_text: str, *, s
         tasks = tasks_for(unit)
     system = render(
         "checkpoint_grade",
+        name=user["name"], about=profile.about_text(user),
         level=phase["level"], unit_title=unit["title"],
         can_do=_bullets(unit.get("can_do") or []), grammar=_bullets(unit.get("grammar") or []),
         speaking_task=tasks["speaking"].get("prompt", ""), writing_task=tasks["writing"].get("prompt", ""),
@@ -206,8 +213,10 @@ async def submit(checkpoint_id: int, speaking_text: str, writing_text: str, *, s
     # the profile change together, so an outage during grading leaves nothing behind.
     result = {**graded, "speaking_transcript": speaking, "stt_provider": stt_provider}
     await db.conn.execute(
-        "UPDATE checkpoints SET speaking_transcript=?, writing_text=?, result=?, passed=?, finished_at=? WHERE id=?",
-        (speaking, writing, json.dumps(result, ensure_ascii=False), int(graded["passed"]), time.time(), checkpoint_id))
+        "UPDATE checkpoints SET speaking_transcript=?, writing_text=?, result=?, passed=?, finished_at=? "
+        "WHERE id=? AND user_id=?",
+        (speaking, writing, json.dumps(result, ensure_ascii=False), int(graded["passed"]), time.time(),
+         checkpoint_id, user["id"]))
     advanced_to = None
     finished = False
     if graded["passed"]:

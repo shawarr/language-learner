@@ -9,6 +9,7 @@ from __future__ import annotations
 import random
 import time
 
+from .. import users
 from ..config import settings
 from ..db import db
 from . import vocab as vocab_svc
@@ -70,7 +71,9 @@ async def review(vocab_id: int, rating: int, now: float | None = None) -> dict:
     """Apply one rating: update the row, log it in vocab_reviews, count it as activity. Returns the card."""
     rating = int(rating)
     now = now or time.time()
-    row = await db.fetchone("SELECT * FROM vocab WHERE id=?", (vocab_id,))
+    # The other learner's card id is "no such word": vocab_reviews hangs off the vocab row, so
+    # checking the owner here covers the review log too.
+    row = await db.fetchone("SELECT * FROM vocab WHERE id=? AND user_id=?", (vocab_id, users.user_id()))
     if row is None:
         raise LookupError(f"no vocab row {vocab_id}")
     new = schedule(row, rating, now)
@@ -96,12 +99,14 @@ async def due_queue(limit: int = 20, new_cap: int | None = None, now: float | No
     limit = max(1, min(int(limit), 200))
     new_cap = settings.new_cards_per_review if new_cap is None else max(0, int(new_cap))
     new_filter = "reps = 0 AND last_review IS NULL"
-    total = (await db.fetchone("SELECT COUNT(*) AS n FROM vocab WHERE due <= ?", (now,)))["n"]
+    uid = users.user_id()
+    total = (await db.fetchone("SELECT COUNT(*) AS n FROM vocab WHERE user_id=? AND due <= ?", (uid, now)))["n"]
     in_rotation = await db.fetchall(
-        f"SELECT * FROM vocab WHERE due <= ? AND NOT ({new_filter}) ORDER BY due ASC, id ASC LIMIT ?", (now, limit))
+        f"SELECT * FROM vocab WHERE user_id=? AND due <= ? AND NOT ({new_filter}) ORDER BY due ASC, id ASC LIMIT ?",
+        (uid, now, limit))
     fresh = await db.fetchall(
-        f"SELECT * FROM vocab WHERE due <= ? AND {new_filter} ORDER BY due ASC, id ASC LIMIT ?",
-        (now, min(new_cap, limit)))
+        f"SELECT * FROM vocab WHERE user_id=? AND due <= ? AND {new_filter} ORDER BY due ASC, id ASC LIMIT ?",
+        (uid, now, min(new_cap, limit)))
     queue: list[dict] = []
     ri = ni = 0
     while len(queue) < limit and (ri < len(in_rotation) or ni < len(fresh)):

@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime as dt
 import time
 
+from .. import users
 from ..db import db, loads
 from . import checkpoint, curriculum, mistakes, profile
 
@@ -49,7 +50,8 @@ def trend(row: dict, now: float) -> str:
 
 async def activity_strip(today: dt.date) -> list[dict]:
     start = today - dt.timedelta(days=ACTIVITY_DAYS - 1)
-    rows = await db.fetchall("SELECT day, kind, count FROM activity WHERE day >= ?", (start.isoformat(),))
+    rows = await db.fetchall("SELECT day, kind, count FROM activity WHERE user_id=? AND day >= ?",
+                             (users.user_id(), start.isoformat()))
     by_day: dict[str, dict] = {}
     for i in range(ACTIVITY_DAYS):
         day = (start + dt.timedelta(days=i)).isoformat()
@@ -67,7 +69,7 @@ async def vocab_counts(now: float) -> dict:
         "SUM(CASE WHEN due <= ? THEN 1 ELSE 0 END) AS due, "
         "SUM(CASE WHEN interval_days >= ? THEN 1 ELSE 0 END) AS mature, "
         "SUM(CASE WHEN reps = 0 AND last_review IS NULL THEN 1 ELSE 0 END) AS new "
-        "FROM vocab", (now, MATURE_INTERVAL_DAYS))
+        "FROM vocab WHERE user_id=?", (now, MATURE_INTERVAL_DAYS, users.user_id()))
     return {k: int((row or {}).get(k) or 0) for k in ("total", "due", "mature", "new")}
 
 
@@ -92,18 +94,21 @@ async def checkpoint_status(unit_id: str) -> dict:
 async def payload(now: float | None = None) -> dict:
     now = now or time.time()
     today = dt.datetime.fromtimestamp(now, dt.timezone.utc).date()
+    uid = users.user_id()
     p = await profile.get_profile()
     cur = await curriculum.current()
     unit_id = cur["unit"]["id"]
 
     active = {r["day"] for r in await db.fetchall(
-        "SELECT day FROM activity GROUP BY day HAVING SUM(count) > 0")}
+        "SELECT day FROM activity WHERE user_id=? GROUP BY day HAVING SUM(count) > 0", (uid,))}
     top = [{**m, "trend": trend(m, now)} for m in await profile.top_mistakes(TOP_MISTAKES)]
     sessions = await db.fetchall(
-        f"SELECT {', '.join(SESSION_FIELDS)} FROM sessions ORDER BY started_at DESC, id DESC LIMIT ?", (RECENT_SESSIONS,))
+        f"SELECT {', '.join(SESSION_FIELDS)} FROM sessions WHERE user_id=? ORDER BY started_at DESC, id DESC LIMIT ?",
+        (uid, RECENT_SESSIONS))
     for s in sessions:
         s["meta"] = loads(s["meta"], {})
-    ended = (await db.fetchone("SELECT COUNT(*) AS n FROM sessions WHERE mode='talk' AND ended_at IS NOT NULL"))["n"]
+    ended = (await db.fetchone(
+        "SELECT COUNT(*) AS n FROM sessions WHERE user_id=? AND mode='talk' AND ended_at IS NOT NULL", (uid,)))["n"]
 
     return {
         "profile": {k: p[k] for k in PROFILE_FIELDS},

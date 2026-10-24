@@ -6,7 +6,7 @@ something a learner can use. These lessons are the teaching, hand-written in
 identical every time, correct, and free of quota.
 
 A unit's lesson is a list of steps (`sounds`, `words`, `grammar`, `check`). Progress is the furthest
-step reached, so closing the app mid-lesson costs nothing.
+step reached, so closing the app mid-lesson costs nothing; it is kept per (user, unit).
 """
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ import time
 from functools import lru_cache
 from typing import Any
 
+from .. import users
 from ..config import settings
 from ..db import db
 
@@ -82,7 +83,7 @@ EMPTY = {"step": 0, "completed": False, "checks_right": 0, "checks_total": 0,
 
 
 async def progress(unit_id: str) -> dict[str, Any]:
-    row = await db.fetchone("SELECT * FROM lesson_progress WHERE unit_id=?", (unit_id,))
+    row = await db.fetchone("SELECT * FROM lesson_progress WHERE user_id=? AND unit_id=?", (users.user_id(), unit_id))
     if not row:
         return dict(EMPTY)
     return {"step": int(row["step"]), "completed": bool(row["completed"]),
@@ -95,18 +96,18 @@ async def save_step(unit_id: str, step: int) -> dict[str, Any]:
     losing progress."""
     now = time.time()
     await db.execute(
-        "INSERT INTO lesson_progress (unit_id, step, started_at) VALUES (?, ?, ?) "
-        "ON CONFLICT(unit_id) DO UPDATE SET step = MAX(step, excluded.step)",
-        (unit_id, max(0, int(step)), now))
+        "INSERT INTO lesson_progress (user_id, unit_id, step, started_at) VALUES (?, ?, ?, ?) "
+        "ON CONFLICT(user_id, unit_id) DO UPDATE SET step = MAX(step, excluded.step)",
+        (users.user_id(), unit_id, max(0, int(step)), now))
     return await progress(unit_id)
 
 
 async def record_check(unit_id: str, correct: bool) -> dict[str, Any]:
     now = time.time()
     await db.execute(
-        "INSERT INTO lesson_progress (unit_id, checks_right, checks_total, started_at) VALUES (?, ?, 1, ?) "
-        "ON CONFLICT(unit_id) DO UPDATE SET checks_right = checks_right + ?, checks_total = checks_total + 1",
-        (unit_id, 1 if correct else 0, now, 1 if correct else 0))
+        "INSERT INTO lesson_progress (user_id, unit_id, checks_right, checks_total, started_at) VALUES (?, ?, ?, 1, ?) "
+        "ON CONFLICT(user_id, unit_id) DO UPDATE SET checks_right = checks_right + ?, checks_total = checks_total + 1",
+        (users.user_id(), unit_id, 1 if correct else 0, now, 1 if correct else 0))
     return await progress(unit_id)
 
 
@@ -118,29 +119,29 @@ async def complete(unit_id: str) -> dict[str, Any]:
     now = time.time()
     last = len(lesson["steps"])
     await db.execute(
-        "INSERT INTO lesson_progress (unit_id, step, completed, started_at, completed_at) VALUES (?, ?, 1, ?, ?) "
-        "ON CONFLICT(unit_id) DO UPDATE SET step = MAX(step, excluded.step), completed = 1, "
+        "INSERT INTO lesson_progress (user_id, unit_id, step, completed, started_at, completed_at) VALUES (?, ?, ?, 1, ?, ?) "
+        "ON CONFLICT(user_id, unit_id) DO UPDATE SET step = MAX(step, excluded.step), completed = 1, "
         "completed_at = COALESCE(completed_at, excluded.completed_at)",
-        (unit_id, last, now, now))
+        (users.user_id(), unit_id, last, now, now))
     await db.bump_activity("lesson")
     return await progress(unit_id)
 
 
 async def restart(unit_id: str) -> dict[str, Any]:
-    """Send him back to the first step without losing the credit for having finished it.
+    """Back to the first step without losing the credit for having finished it.
 
     `save_step` deliberately never moves backwards, so going round again needs its own door —
     otherwise "do the lesson again" reloads straight back onto the finished card.
     """
     await db.execute(
-        "INSERT INTO lesson_progress (unit_id, step, started_at) VALUES (?, 0, ?) "
-        "ON CONFLICT(unit_id) DO UPDATE SET step = 0",
-        (unit_id, time.time()))
+        "INSERT INTO lesson_progress (user_id, unit_id, step, started_at) VALUES (?, ?, 0, ?) "
+        "ON CONFLICT(user_id, unit_id) DO UPDATE SET step = 0",
+        (users.user_id(), unit_id, time.time()))
     return await progress(unit_id)
 
 
 async def status_for(unit_id: str) -> dict[str, Any]:
-    """What the Talk screen and the tab badge need: is there a lesson, and has he done it?"""
+    """What the Talk screen and the tab badge need: is there a lesson, and has the learner done it?"""
     lesson = for_unit(unit_id)
     if lesson is None:
         return {"has_lesson": False, "completed": True, "step": 0, "steps": 0, "title": None}

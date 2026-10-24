@@ -1,13 +1,14 @@
 """Placement: a short flow, not a quiz, that decides where on the path the learner starts.
 
 Four fixed tasks (three spoken, rising difficulty, then one written), each stored as it comes in,
-graded once at the end with `app/prompts/placement.md`. The grading writes the profile; `finish`
-is idempotent because a double tap on a phone is normal, and a second model call would both burn
-quota and possibly place him somewhere else.
+graded once at the end with `app/prompts/placement.md`. The grading writes the profile (level, unit,
+skills, facts — never the name, which comes from the account); `finish` is idempotent because a
+double tap on a phone is normal, and a second model call would both burn quota and possibly place
+the learner somewhere else.
 
 Everything the model returns is validated before it touches the DB, and the code is conservative
 on top of the prompt: an unknown level is A1.1, and fewer than two answered tasks cannot place
-him above A1.2 — a beginner placed too high is a learner who quits.
+anyone above A1.2 — a beginner placed too high is a learner who quits.
 """
 from __future__ import annotations
 
@@ -16,6 +17,7 @@ import time
 
 from fastapi import HTTPException
 
+from .. import users
 from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
@@ -41,23 +43,24 @@ TASKS: list[dict] = [
         "prompt_de": "Stell dich bitte kurz vor. Wer bist du, woher kommst du, was machst du?",
     },
     {
-        "id": "workday", "kind": "speak", "title": "Dein Arbeitstag",
-        "instruction_en": "Describe a normal working day: when you start, what you do, who you talk to, "
-                          "when you finish. Try to use full sentences.",
-        "prompt_de": "Beschreib einen normalen Arbeitstag. Wann fängst du an, was machst du, wann hörst du auf?",
+        "id": "workday", "kind": "speak", "title": "Dein Tag",
+        "instruction_en": "Describe a normal day at work or at university: when you start, what you do, who "
+                          "you talk to, when you finish. Try to use full sentences.",
+        "prompt_de": "Beschreib einen normalen Tag bei der Arbeit oder an der Uni. Wann fängst du an, was machst du, "
+                     "wann hörst du auf?",
     },
     {
         "id": "problem", "kind": "speak", "title": "Ein Problem, das du gelöst hast",
-        "instruction_en": "Tell the story of a problem you solved at work last week or last month: what "
-                          "happened, what you did, how it ended. Past tense if you can.",
+        "instruction_en": "Tell the story of a problem you solved last week or last month, at work or in your "
+                          "studies: what happened, what you did, how it ended. Past tense if you can.",
         "prompt_de": "Erzähl von einem Problem, das du letzte Woche gelöst hast. Was ist passiert, und was hast du gemacht?",
     },
     {
-        "id": "message", "kind": "write", "title": "Eine Nachricht an einen Kollegen",
-        "instruction_en": "Write a short message (three to five sentences) to a German colleague: you cannot "
-                          "join tomorrow's meeting, say why, and suggest another time.",
-        "prompt_de": "Schreib eine kurze Nachricht an einen Kollegen: Du kannst morgen nicht zum Meeting kommen. "
-                     "Warum nicht? Wann passt es dir?",
+        "id": "message", "kind": "write", "title": "Eine Nachricht an eine Kollegin oder einen Kollegen",
+        "instruction_en": "Write a short message (three to five sentences) to a German colleague or fellow student: "
+                          "you cannot join tomorrow's meeting, say why, and suggest another time.",
+        "prompt_de": "Schreib eine kurze Nachricht an eine Kollegin oder einen Kollegen: Du kannst morgen nicht zum "
+                     "Meeting kommen. Warum nicht? Wann passt es dir?",
     },
 ]
 
@@ -71,11 +74,11 @@ PLACEMENT_SCHEMA = {
             "required": list(profile.SKILLS),
         },
         "explanation": {"type": "string",
-                        "description": "English, two or three sentences addressed to him: where he landed and why."},
+                        "description": "English, two or three sentences addressed to the learner: where they landed and why."},
         "strengths": {"type": "array", "items": {"type": "string"}},
         "gaps": {"type": "array", "items": {"type": "string"}},
         "facts": {"type": "array", "items": {"type": "string"},
-                  "description": "Durable personal facts he revealed, reusable as conversation material."},
+                  "description": "Durable personal facts the learner revealed, reusable as conversation material."},
     },
     "required": ["level", "skills", "explanation", "strengths", "gaps", "facts"],
 }
@@ -90,7 +93,8 @@ def task(task_id: str | None) -> dict | None:
 
 
 async def _session(session_id: int) -> dict:
-    row = await db.fetchone("SELECT * FROM sessions WHERE id=? AND mode='placement'", (session_id,))
+    row = await db.fetchone("SELECT * FROM sessions WHERE id=? AND user_id=? AND mode='placement'",
+                            (session_id, users.user_id()))
     if row is None:
         raise HTTPException(status_code=404, detail="No such placement session.")
     row["meta"] = loads(row["meta"], {})
@@ -101,8 +105,8 @@ async def _session(session_id: int) -> dict:
 
 async def start() -> dict:
     """A new placement session. Works when placement_done is already 1: the progress page offers a re-run."""
-    sid = await db.execute("INSERT INTO sessions (mode, started_at, meta) VALUES ('placement', ?, '{}')",
-                           (time.time(),))
+    sid = await db.execute("INSERT INTO sessions (user_id, mode, started_at, meta) VALUES (?, 'placement', ?, '{}')",
+                           (users.user_id(), time.time()))
     return {"session_id": sid, "tasks": tasks()}
 
 
@@ -179,7 +183,7 @@ def _format_answers(answers: dict) -> str:
     for t in TASKS:
         a = answers.get(t["id"]) if isinstance(answers.get(t["id"]), dict) else None
         head = f"### Task: {t['title']} ({'spoken, raw transcript' if t['kind'] == 'speak' else 'written'})\n" \
-               f"Instruction given to him: {t['instruction_en']}\n"
+               f"Instruction given to the learner: {t['instruction_en']}\n"
         if not a or not str(a.get("text", "")).strip():
             blocks.append(head + "Answer: (not answered)")
             continue
@@ -207,14 +211,17 @@ async def finish(session_id: int) -> dict:
     answers = {k: v for k, v in answers.items() if task(k) and isinstance(v, dict) and str(v.get("text", "")).strip()}
     if not answers:
         raise HTTPException(status_code=400, detail="Answer at least one task before finishing.")
-    system = render("placement", answered=f"{len(answers)} of {len(TASKS)}", answers=_format_answers(answers))
-    data = await llm.complete_json(system, [Message("user", "Place him.")], PLACEMENT_SCHEMA,
+    user = users.current()
+    system = render("placement", name=user["name"], about=profile.about_text(user),
+                    answered=f"{len(answers)} of {len(TASKS)}", answers=_format_answers(answers))
+    data = await llm.complete_json(system, [Message("user", f"Place {user['name']}.")], PLACEMENT_SCHEMA,
                                    tier="quality", temperature=0.2, max_tokens=1024)
     graded = validate_result(data, answered=len(answers))
     unit = curriculum.first_unit_of_level(graded["level"])
     # Profile first, session last: if the session write fails, the next finish() re-grades and
     # overwrites the profile with a fresh verdict; the other order would leave a stored result
-    # that the profile never received.
+    # that the profile never received. The name is not among the columns written: it belongs to
+    # the account, and a model that heard "ich heiße Ahmed" must not rename anyone.
     await profile.update_profile(level=graded["level"], unit_id=unit["id"], skills=graded["skills"], placement_done=1)
     await profile.add_facts(graded["facts"])
     result = _public_result(graded["level"], unit, graded["skills"], graded["explanation"],

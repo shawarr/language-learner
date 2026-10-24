@@ -2,12 +2,16 @@
 
 `upsert` never touches an existing row's SRS state — a word the tutor mentions again must not reset
 to "due now" and wipe out months of scheduling. The SRS scheduling itself lives in srs.py.
+
+Each learner has their own deck (`vocab` is UNIQUE(user_id, word)); the `translations` cache is the
+one thing shared, because a dictionary entry is the same whoever tapped the word.
 """
 from __future__ import annotations
 
 import json
 import time
 
+from .. import users
 from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
@@ -47,7 +51,8 @@ async def upsert(word: str, translation: str, example: str = "", source: str = "
         raise ValueError("word and translation are required")
     source = source if source in SOURCES else "manual"
     now = now or time.time()
-    row = await db.fetchone("SELECT id, example FROM vocab WHERE word=? COLLATE NOCASE", (word,))
+    uid = users.user_id()
+    row = await db.fetchone("SELECT id, example FROM vocab WHERE user_id=? AND word=? COLLATE NOCASE", (uid, word))
     if row:
         if example and not row["example"]:
             await db.conn.execute("UPDATE vocab SET example=? WHERE id=?", (clean_word(example), row["id"]))
@@ -55,15 +60,15 @@ async def upsert(word: str, translation: str, example: str = "", source: str = "
             await db.conn.commit()
         return int(row["id"]), False
     cur = await db.conn.execute(
-        "INSERT INTO vocab (word, translation, example, source, created_at, due) VALUES (?, ?, ?, ?, ?, ?)",
-        (word, translation, clean_word(example), source, now, now))
+        "INSERT INTO vocab (user_id, word, translation, example, source, created_at, due) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (uid, word, translation, clean_word(example), source, now, now))
     if commit:
         await db.conn.commit()
     return int(cur.lastrowid or 0), True
 
 
 async def get(vocab_id: int) -> dict | None:
-    row = await db.fetchone("SELECT * FROM vocab WHERE id=?", (vocab_id,))
+    row = await db.fetchone("SELECT * FROM vocab WHERE id=? AND user_id=?", (vocab_id, users.user_id()))
     return card(row) if row else None
 
 
@@ -73,18 +78,19 @@ def card(row: dict) -> dict:
 
 
 async def delete(vocab_id: int) -> bool:
-    row = await db.fetchone("SELECT id FROM vocab WHERE id=?", (vocab_id,))
+    uid = users.user_id()
+    row = await db.fetchone("SELECT id FROM vocab WHERE id=? AND user_id=?", (vocab_id, uid))
     if not row:
         return False
-    await db.execute("DELETE FROM vocab WHERE id=?", (vocab_id,))
+    await db.execute("DELETE FROM vocab WHERE id=? AND user_id=?", (vocab_id, uid))
     return True
 
 
 async def search(q: str = "", sort: str = "due", limit: int = 50) -> tuple[list[dict], int]:
     order = {"due": "due ASC", "word": "word COLLATE NOCASE ASC", "created": "created_at DESC"}.get(sort, "due ASC")
-    where, params = "", ()
+    where, params = "WHERE user_id=?", (users.user_id(),)
     if q:
-        where, params = "WHERE word LIKE ? OR translation LIKE ?", (f"%{q}%", f"%{q}%")
+        where, params = where + " AND (word LIKE ? OR translation LIKE ?)", (*params, f"%{q}%", f"%{q}%")
     total = (await db.fetchone(f"SELECT COUNT(*) AS n FROM vocab {where}", params))["n"]
     rows = await db.fetchall(f"SELECT * FROM vocab {where} ORDER BY {order} LIMIT ?", (*params, max(1, min(limit, 500))))
     return [card(r) for r in rows], int(total)
@@ -112,7 +118,8 @@ def _validate_translation(data: dict, word: str) -> dict:
 
 
 async def in_vocab(lemma: str) -> bool:
-    row = await db.fetchone("SELECT id FROM vocab WHERE word=? COLLATE NOCASE", (clean_word(lemma),))
+    row = await db.fetchone("SELECT id FROM vocab WHERE user_id=? AND word=? COLLATE NOCASE",
+                            (users.user_id(), clean_word(lemma)))
     return row is not None
 
 
@@ -134,5 +141,6 @@ async def translate(word: str, context: str = "") -> dict:
             "INSERT INTO translations (word, data, created_at) VALUES (?, ?, ?) "
             "ON CONFLICT(word) DO UPDATE SET data=excluded.data, created_at=excluded.created_at",
             (key, json.dumps(entry, ensure_ascii=False), time.time()))
-    # in_vocab is live, never cached: he may add the word right after this call.
+    # in_vocab is live, never cached: the learner may add the word right after this call, and the
+    # cached entry is shared while the deck is not.
     return {"word": surface, **entry, "in_vocab": await in_vocab(entry["lemma"])}

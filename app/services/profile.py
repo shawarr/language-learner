@@ -1,14 +1,16 @@
-"""The learner profile: the one row the tutor's memory hangs off, and the context the prompt needs.
+"""The learner profile: one row per user the tutor's memory hangs off, and the context the prompt needs.
 
-Everything the tutor prompt knows about Ahmad comes through `build_context`, so the formatting rules
-that keep the prompt small (six mistakes, twelve words, "(none yet)" instead of "[]") live here and
-nowhere else.
+Everything the tutor prompt knows about the learner comes through `build_context`, so the formatting
+rules that keep the prompt small (six mistakes, twelve words, "(none yet)" instead of "[]") live here
+and nowhere else. Every query is scoped to the current user (`app.users`): the row is keyed by
+`user_id`, never by `id`.
 """
 from __future__ import annotations
 
 import json
 import time
 
+from .. import users
 from ..db import db, loads
 
 SKILLS = ("speaking", "listening", "writing", "grammar", "vocab")
@@ -22,9 +24,9 @@ NONE_YET = "(none yet)"
 
 
 async def get_profile() -> dict:
-    """The profile row with skills/facts/review_focus parsed into objects."""
-    row = await db.fetchone("SELECT * FROM profile WHERE id=1")
-    assert row is not None, "profile row missing: db.connect() creates it"
+    """The current user's profile row with skills/facts/review_focus parsed into objects."""
+    row = await db.fetchone("SELECT * FROM profile WHERE user_id=?", (users.user_id(),))
+    assert row is not None, "profile row missing: users.seed() creates it"
     skills = loads(row["skills"], {})
     row["skills"] = {k: _clamp(skills.get(k, 10)) for k in SKILLS}
     row["facts"] = [f for f in loads(row["facts"], []) if isinstance(f, str) and f.strip()]
@@ -46,8 +48,8 @@ async def update_profile(**fields: object) -> None:
         sets.append(f"{key}=?")
         params.append(value)
     sets.append("updated_at=?")
-    params.append(time.time())
-    await db.execute(f"UPDATE profile SET {', '.join(sets)} WHERE id=1", tuple(params))
+    params.extend([time.time(), users.user_id()])
+    await db.execute(f"UPDATE profile SET {', '.join(sets)} WHERE user_id=?", tuple(params))
 
 
 def _clamp(v: object) -> int:
@@ -94,8 +96,9 @@ async def top_mistakes(limit: int = MAX_TOP_MISTAKES) -> list[dict]:
     week one haunts the prompt forever.
     """
     rows = await db.fetchall(
-        "SELECT * FROM mistakes WHERE count > resolved ORDER BY (count - resolved) DESC, last_seen DESC LIMIT ?",
-        (limit,),
+        "SELECT * FROM mistakes WHERE user_id=? AND count > resolved "
+        "ORDER BY (count - resolved) DESC, last_seen DESC LIMIT ?",
+        (users.user_id(), limit),
     )
     for r in rows:
         r["examples"] = [e for e in loads(r["examples"], []) if isinstance(e, dict)]
@@ -103,8 +106,9 @@ async def top_mistakes(limit: int = MAX_TOP_MISTAKES) -> list[dict]:
 
 
 async def due_vocab(limit: int = MAX_DUE_VOCAB, now: float | None = None) -> list[dict]:
-    return await db.fetchall("SELECT id, word, translation FROM vocab WHERE due <= ? ORDER BY due LIMIT ?",
-                             (now or time.time(), limit))
+    return await db.fetchall(
+        "SELECT id, word, translation FROM vocab WHERE user_id=? AND due <= ? ORDER BY due LIMIT ?",
+        (users.user_id(), now or time.time(), limit))
 
 
 def format_mistakes(rows: list[dict]) -> str:
@@ -119,10 +123,21 @@ def format_mistakes(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def about_text(user: dict | None = None) -> str:
+    """The paragraph the prompts are told about the learner (personas.json, via `users.about`).
+
+    It carries the name, the situation and, for Maryan, the feminine forms, so every prompt that used
+    to hard-code one learner reads it instead. A user seeded without a persona still gets one line,
+    so no prompt ever describes nobody.
+    """
+    user = user or users.current()
+    return " ".join(str(user.get("about") or "").split()) or f"{user['name']} is learning German."
+
+
 def format_scenario(scenario: dict | None) -> str:
     if not scenario:
-        return ("Free conversation. Pick something from his life or this unit's can-do goals and start it. "
-                "There is no fixed goal, so scenario_done stays false.")
+        return ("Free conversation. Pick something from the learner's life or this unit's can-do goals and "
+                "start it. There is no fixed goal, so scenario_done stays false.")
     return (f"Title: {scenario.get('title', '')}\n"
             f"Setup: {scenario.get('setup', '')}\n"
             f"Goal (set scenario_done to true once it is reached, not before): {scenario.get('goal', '')}")
@@ -130,6 +145,7 @@ def format_scenario(scenario: dict | None) -> str:
 
 async def build_context(unit: dict, scenario: dict | None = None) -> dict[str, str]:
     """Exactly the placeholders app/prompts/tutor_talk.md declares. `render()` raises on a mismatch."""
+    user = users.current()
     p = await get_profile()
     mistakes = await top_mistakes(MAX_TOP_MISTAKES)
     due = await due_vocab(MAX_DUE_VOCAB)
@@ -138,6 +154,8 @@ async def build_context(unit: dict, scenario: dict | None = None) -> dict[str, s
         # A failed checkpoint's gaps ride along with the unit's grammar so the tutor re-exposes them.
         targets += " | Review focus after the last checkpoint, bring these up again: " + "; ".join(p["review_focus"])
     return {
+        "name": user["name"],
+        "about": about_text(user),
         "level": p["level"],
         "unit_title": unit.get("title") or NONE_YET,
         "unit_goals": "; ".join(unit.get("can_do") or []) or NONE_YET,

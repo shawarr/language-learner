@@ -1,14 +1,14 @@
-"""Write mode: a task from the current unit, then feedback on what he wrote.
+"""Write mode: a task from the current unit, then feedback on what the learner wrote.
 
 The feedback's corrections go into the mistake log through `mistakes.record`, the same merge path
-the analyzer uses, so an error he makes in writing and in speech is one row with one count.
+the analyzer uses, so an error made in writing and in speech is one row with one count.
 """
 from __future__ import annotations
 
 import json
 import time
 
-from .. import taxonomy
+from .. import taxonomy, users
 from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
@@ -44,10 +44,10 @@ FEEDBACK_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "wrong": {"type": "string", "description": "The exact span from his text."},
+                    "wrong": {"type": "string", "description": "The exact span from the learner's text."},
                     "right": {"type": "string", "description": "The fixed span."},
                     "category": {"type": "string", "enum": taxonomy.CATEGORY_SLUGS},
-                    "explanation": {"type": "string", "description": "One sentence, English, about his sentence."},
+                    "explanation": {"type": "string", "description": "One sentence, English, about the learner's sentence."},
                     "pattern": {"type": "string",
                                 "description": "The recurring error in a few words; reuse the wording of a known mistake when it is the same error."},
                 },
@@ -55,7 +55,7 @@ FEEDBACK_SCHEMA = {
             },
         },
         "improved": {"type": "string",
-                     "description": "His text rewritten one level above his own: recognisably his, not a new text."},
+                     "description": "The text rewritten one level above the learner's own: recognisably theirs, not a new text."},
         "score": {"type": "integer", "minimum": 1, "maximum": 5},
         "strengths": {"type": "string", "description": "One sentence."},
         "next_time": {"type": "string", "description": "One concrete thing to try next time."},
@@ -88,11 +88,15 @@ def _word_range(lo: object, hi: object, level: str) -> tuple[int, int]:
 
 async def new_prompt() -> dict:
     """docs/API.md GET /write/prompt."""
+    user = users.current()
     p = await profile.get_profile()
     unit = await curriculum.current_unit()
-    recent = await db.fetchall("SELECT prompt FROM writings ORDER BY created_at DESC, id DESC LIMIT ?", (RECENT_PROMPTS,))
+    recent = await db.fetchall("SELECT prompt FROM writings WHERE user_id=? ORDER BY created_at DESC, id DESC LIMIT ?",
+                               (user["id"], RECENT_PROMPTS))
     system = render(
         "write_prompt",
+        name=user["name"],
+        about=profile.about_text(user),
         level=p["level"],
         unit_title=unit.get("title") or NONE_YET,
         can_do="; ".join(unit.get("can_do") or []) or NONE_YET,
@@ -144,10 +148,13 @@ async def submit(prompt: str, text: str) -> dict:
     if not text:
         raise ValueError("Write something first.")
     prompt = (prompt or "").strip() or "(free writing)"
+    user = users.current()
     p = await profile.get_profile()
     unit = await curriculum.current_unit()
     system = render(
         "write_feedback",
+        name=user["name"],
+        about=profile.about_text(user),
         level=p["level"],
         grammar_targets=", ".join(unit.get("grammar") or []) or NONE_YET,
         top_mistakes=profile.format_mistakes(await profile.top_mistakes()) or NONE_YET,
@@ -155,16 +162,16 @@ async def submit(prompt: str, text: str) -> dict:
         prompt=prompt,
         text=text,
     )
-    # Feedback is the one place a weak model does real damage (a wrong "correction" gets logged as his
-    # mistake), so it takes the quality tier; the task prompt above is fine on the fast one.
+    # Feedback is the one place a weak model does real damage (a wrong "correction" gets logged as
+    # the learner's mistake), so it takes the quality tier; the task prompt above is fine on the fast one.
     data = await llm.complete_json(system, [Message("user", "Give your feedback as JSON.")], FEEDBACK_SCHEMA,
                                    tier="quality", temperature=0.3, max_tokens=1536)
     feedback = validate_feedback(data, text)
     now = time.time()
     # One transaction: the writing row and its corrections land together or not at all.
     cur = await db.conn.execute(
-        "INSERT INTO writings (unit_id, prompt, text, feedback, score, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        (unit["id"], prompt, text, json.dumps(feedback, ensure_ascii=False), feedback["score"], now))
+        "INSERT INTO writings (user_id, unit_id, prompt, text, feedback, score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (user["id"], unit["id"], prompt, text, json.dumps(feedback, ensure_ascii=False), feedback["score"], now))
     for c in feedback["corrections"]:
         await mistakes.record(c["category"], c["pattern"], c["wrong"], c["right"], note=c["explanation"],
                               now=now, commit=False)
@@ -175,8 +182,19 @@ async def submit(prompt: str, text: str) -> dict:
 
 async def recent(limit: int = 10) -> list[dict]:
     rows = await db.fetchall(
-        "SELECT id, prompt, text, feedback, score, created_at FROM writings ORDER BY created_at DESC, id DESC LIMIT ?",
-        (max(1, min(int(limit), 100)),))
+        "SELECT id, prompt, text, feedback, score, created_at FROM writings WHERE user_id=? "
+        "ORDER BY created_at DESC, id DESC LIMIT ?",
+        (users.user_id(), max(1, min(int(limit), 100))))
     for r in rows:
         r["feedback"] = loads(r["feedback"], {})
     return rows
+
+
+async def get(writing_id: int) -> dict | None:
+    """One of the current user's writings, or None: the other learner's id is a missing row."""
+    row = await db.fetchone(
+        "SELECT id, prompt, text, feedback, score, created_at FROM writings WHERE id=? AND user_id=?",
+        (writing_id, users.user_id()))
+    if row:
+        row["feedback"] = loads(row["feedback"], {})
+    return row
