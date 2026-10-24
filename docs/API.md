@@ -155,3 +155,46 @@ step   = {"type": "sounds"|"words"|"grammar"|"check", …}
   grammar {"title","body","table":{"head":[…],"rows":[[…]]},"examples":[{"de","en","note"}],"note"}
   check   {"question","options":[…],"answer": <index>,"why"}
 ```
+
+## Game and leaderboard (M3)
+
+XP is derived from the `activity` counters every mode already bumps, so nothing new is written when
+a learner earns points. Points per count: talk_turn 10, review 2, drill 15, write 25, checkpoint 60,
+lesson 40. Level n starts at 100·n·(n−1)/2 XP (1 at 0, 2 at 100, 3 at 300, 4 at 600, 5 at 1000…);
+titles: 1 Newcomer, 2–3 Tourist, 4–5 Neighbour, 6–7 Colleague, 8–9 Local, 10+ Fluent-ish. Days and
+weeks are UTC; the week starts Monday 00:00. The three rings per day: `speak` (talk turns, 5),
+`review` (reviews, 10), `study` (lesson + drill + write + checkpoint, 1). The streak rule is the
+progress page's: consecutive days ending today, or yesterday when today is still empty. Only the
+`badges` table is written to, by `/game/me`.
+
+- `GET /game/me` → evaluates badges first, so one earned by the last action is already in
+  `new_badges` when the page opens.
+  ```
+  {"xp_total": 130, "xp_today": 30, "xp_week": 90,
+   "level": {"n": 2, "title": "Tourist", "xp_into_level": 30, "xp_for_next": 200, "fraction": 0.15},
+   "streak_days": 3,
+   "goals": {"speak": {"done": 3, "target": 5, "fraction": 0.6},
+             "review": {"done": 10, "target": 10, "fraction": 1.0},
+             "study": {"done": 0, "target": 1, "fraction": 0.0}},
+   "rings_closed": 1,
+   "badges": [{"id": "first_talk", "title": "First words", "description": "…", "icon": "mic",
+               "earned_at": 1761048000.0, "seen": 0}],          // earned only, oldest first
+   "new_badges": ["first_talk"],                                // earned and not yet shown
+   "catalogue": [{"id", "title", "description", "icon"}…]}     // every badge, for the locked grid
+  ```
+  `fraction` is capped at 1. Icons are slugs the client maps to SVGs: mic, flame, book, star,
+  trophy, cat. Badges: first_talk, first_lesson, streak_3, streak_7, streak_30, xp_500, xp_2000,
+  words_50, words_200 (vocab with interval ≥ 21 days), checkpoint_first, units_5 (passed
+  checkpoints), drill_clean (a finished drill with every item right), early_week (all three rings
+  on one day). A badge is never taken away.
+- `POST /game/seen` `{"badge_ids": ["first_talk"]}` → `{"ok": true}` — the client has shown the
+  full-screen moment once; small wins are quiet lines (docs/DESIGN.md).
+- `GET /leaderboard` → every learner, totals only, never a mistake or a transcript. Sorted by
+  `xp_week` desc, then `xp_total` desc.
+  ```
+  {"week_start": "2026-10-19", "me": 1,
+   "users": [{"id": 2, "name": "Maryan", "avatar": "katze-1", "gender": "f",
+              "xp_week": 80, "xp_total": 80, "level": {"n": 1, "title": "Newcomer"},
+              "streak_days": 1, "cefr_level": "A1.2", "units_passed": 1, "words_mature": 0,
+              "rings_closed_today": 2, "badges_count": 1}, …]}
+  ```
