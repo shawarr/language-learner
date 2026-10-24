@@ -38,6 +38,10 @@ _PRONOUNS = {"m": ("he", "him", "his", "himself"),
 VARIANT_KINDS = ("engineer", "student")
 _SCENARIO_VARIANT_KEYS = ("title", "setup", "goal")
 _TASK_VARIANT_KEYS = ("prompt", "hint")
+# A unit that is about one learner's job end to end (the standup, the postmortem) carries the other
+# kind's title, goals, themes and grammar examples. Same grammar points, same level, so both learners
+# move through one syllabus; lists must keep their length so no point is silently dropped.
+_UNIT_VARIANT_KEYS = ("title", "can_do", "grammar", "vocab_themes")
 
 # Used when no user is current (a script, a job without request context). Reads a little flat but
 # never crashes; nothing user-facing should reach it.
@@ -81,6 +85,30 @@ def _check_variants(owner: dict, where: str, required: tuple[str, ...], allowed:
         extra = set(variant) - set(allowed)
         if extra:
             raise CurriculumError(f"{where}: variant {kind} has unexpected keys {sorted(extra)}")
+
+
+def _check_unit_variants(unit: dict, uid: str) -> None:
+    variants = unit.get("variants")
+    if variants is None:
+        return
+    if not isinstance(variants, dict) or not variants:
+        raise CurriculumError(f"unit {uid}: variants must be a non-empty object")
+    for kind, variant in variants.items():
+        if kind not in VARIANT_KINDS or not isinstance(variant, dict) or not variant:
+            raise CurriculumError(f"unit {uid}: bad variant {kind!r}")
+        extra = set(variant) - set(_UNIT_VARIANT_KEYS)
+        if extra:
+            raise CurriculumError(f"unit {uid}: variant {kind} has unexpected keys {sorted(extra)}")
+        if "title" in variant and (not isinstance(variant["title"], str) or not variant["title"].strip()):
+            raise CurriculumError(f"unit {uid}: variant {kind} needs a non-empty title")
+        for key in ("can_do", "grammar", "vocab_themes"):
+            if key not in variant:
+                continue
+            v = variant[key]
+            if not isinstance(v, list) or not all(isinstance(x, str) and x.strip() for x in v):
+                raise CurriculumError(f"unit {uid}: variant {kind}.{key} must be a list of strings")
+            if key == "grammar" and len(v) != len(unit["grammar"]):
+                raise CurriculumError(f"unit {uid}: variant {kind}.grammar must keep the unit's grammar points one for one")
 
 
 def validate(data: dict) -> None:
@@ -129,6 +157,7 @@ def validate(data: dict) -> None:
             if not isinstance(cp, dict) or not all(isinstance(cp.get(k), dict) and cp[k].get("prompt")
                                                    for k in ("speaking", "writing")):
                 raise CurriculumError(f"unit {uid} needs checkpoint.speaking.prompt and checkpoint.writing.prompt")
+            _check_unit_variants(unit, uid)
             for task in ("speaking", "writing"):
                 _check_variants(cp[task], f"unit {uid} checkpoint.{task}", ("prompt",), _TASK_VARIANT_KEYS)
     _check_placeholders(data, "curriculum")

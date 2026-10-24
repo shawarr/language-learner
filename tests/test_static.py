@@ -45,6 +45,8 @@ def test_every_module_the_shell_imports_is_precached():
 def test_no_external_resources_in_the_shell():
     for f in list(STATIC.glob("*.html")) + list(STATIC.glob("*.css")) + list(STATIC.glob("*.js")) + list((STATIC / "js").glob("*.js")):
         text = f.read_text()
+        # The SVG namespace is an identifier the browser never fetches, not a resource.
+        text = text.replace("http://www.w3.org/2000/svg", "")
         assert "https://" not in text and "http://" not in text, f"{f.name} references an external URL; the CSP blocks it"
     html = (STATIC / "index.html").read_text()
     assert "<script" not in html.replace('<script type="module" src="/app.js"></script>', ""), "inline scripts are blocked by the CSP"
@@ -141,18 +143,26 @@ def test_every_tutor_reply_can_be_understood():
 
 
 def test_the_app_teaches_before_it_tests():
-    """Practice assumes you were taught. Learn is the first tab, is precached, and a unit with an
-    unfinished lesson wins the landing screen over whatever tab was last open."""
+    """Practice assumes you were taught. Home is the landing screen, Learn sits right beside it, and
+    an unfinished lesson is the first and only highlighted item of Home's plan for the day."""
     html = (Path(settings.static_dir) / "index.html").read_text()
     tabs = re.findall(r'data-tab="(\w+)"', html)
-    assert tabs[0] == "learn", f"Learn must be the first tab, got {tabs}"
-    assert len(tabs) == 6
+    assert tabs == ["home", "learn", "talk", "practice", "you"], tabs
 
     sw = (Path(settings.static_dir) / "sw.js").read_text()
-    assert "/js/learn.js" in sw, "the Learn screen must work offline like the rest of the shell"
+    for module in ("/js/learn.js", "/js/home.js"):
+        assert module in sw, f"{module} must work offline like the rest of the shell"
 
     app = (Path(settings.static_dir) / "app.js").read_text()
-    assert "firstTab" in app and "'learn'" in app
+    assert "switchTo('home')" in app
+
+    home = (Path(settings.static_dir) / "js" / "home.js").read_text()
+    lesson_card = home.index("/api/lesson/status")
+    assert "lesson.has_lesson && !lesson.completed" in home
+    plan = home[home.index("const plan ="):]
+    assert plan.index("Lesson") < plan.index("Talk") < plan.index("Review"), "the lesson comes first in the plan"
+    assert "'Continue', () => window.dtSwitchTo('learn'), true)" in plan, "and is the highlighted action"
+    assert lesson_card
 
     css = (Path(settings.static_dir) / "styles.css").read_text()
     tabs_rule = css[css.index("#tabs {"):][:400]

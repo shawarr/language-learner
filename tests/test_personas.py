@@ -245,3 +245,36 @@ def test_validator_rejects_an_incomplete_or_unknown_variant():
         u["checkpoint"]["writing"]["variants"] = {"student": {"prompt": "P", "words_max": 10}}
     with pytest.raises(curriculum.CurriculumError, match="unexpected keys"):
         curriculum.validate(_tree_with(extra_key))
+
+
+async def test_job_only_units_read_as_student_life_for_maryan(fresh_db):
+    """Ten units are about the engineer's job end to end; their title and goals reach the tutor's
+    prompt, so the student sees her own version, with the same grammar points."""
+    from app.services import curriculum
+    from tests.conftest import as_user
+
+    raw = curriculum.unit("a1.2-1")
+    ahmad = curriculum.public_unit(raw)
+    await as_user("maryan")
+    maryan = curriculum.public_unit(raw)
+    assert "code review" in " ".join(ahmad["can_do"]) and "code review" not in " ".join(maryan["can_do"])
+    assert maryan["title"] != ahmad["title"] and "variants" not in maryan
+    assert len(maryan["grammar"]) == len(ahmad["grammar"])
+    assert "Server" not in " ".join(maryan["grammar"])
+
+
+def test_unit_variant_must_keep_every_grammar_point():
+    import copy
+
+    import pytest
+
+    from app.services import curriculum
+
+    data = copy.deepcopy(curriculum.load())
+    unit = data["phases"][0]["units"][0]
+    unit["variants"] = {"student": {"title": "X", "grammar": unit["grammar"][:-1]}}
+    with pytest.raises(curriculum.CurriculumError, match="grammar"):
+        curriculum.validate(data)
+    unit["variants"] = {"student": {"title": "X", "colour": "red"}}
+    with pytest.raises(curriculum.CurriculumError, match="unexpected"):
+        curriculum.validate(data)

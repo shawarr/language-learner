@@ -243,6 +243,27 @@
                 }
               }
             }
+          },
+          "variants": {
+            "student": {
+              "title": "Mein Unitag",
+              "can_do": [
+                "say what I study and what I do on a normal day",
+                "give a very short update to my study group: what I am doing today",
+                "ask a fellow student what they are working on and react to the answer"
+              ],
+              "vocab_themes": [
+                "studying and the basics: die Vorlesung, das Labor, die Übung, die Hausarbeit",
+                "daily routine verbs and times of day",
+                "simple feelings and states: müde, beschäftigt, fertig"
+              ],
+              "grammar": [
+                "regular present tense in all persons (wir, ihr, sie)",
+                "separable verbs: anfangen, aufstehen, anrufen, aufhören (ich fange … an)",
+                "time at the front, verb second: Um neun Uhr fange ich an",
+                "studieren with a subject and a place: Ich studiere Maschinenbau an der Universität"
+              ]
+            }
           }
         },
         {
@@ -462,6 +483,27 @@
                   "prompt": "Write a chat message to your project group: you have a problem with your part of the project, explain what you want to do, what does not work, and ask one person for help by a certain time."
                 }
               }
+            }
+          },
+          "variants": {
+            "student": {
+              "title": "In der Lerngruppe",
+              "can_do": [
+                "ask a fellow student for help or to read my lab report and say by when I need it",
+                "say that I do not understand something and ask for an explanation",
+                "explain in simple words what I can, must or want to do today"
+              ],
+              "vocab_themes": [
+                "the student's day: der Laborbericht, der Fehler, die Aufgabe, die Abgabe, die Formel",
+                "asking for and offering help",
+                "understanding and not understanding: Ich verstehe nicht, was bedeutet, kannst du das erklären"
+              ],
+              "grammar": [
+                "modal verbs können, müssen, wollen with the sentence bracket (Ich muss heute den Bericht abgeben)",
+                "the du imperative for requests: Schau mal, Schick mir, Warte kurz",
+                "possessive articles mein, dein, sein, ihr, unser, Ihr",
+                "verbs with accusative objects: brauchen, haben, suchen, finden"
+              ]
             }
           }
         },
@@ -1048,6 +1090,27 @@
                 }
               }
             }
+          },
+          "variants": {
+            "student": {
+              "title": "Was ist passiert?",
+              "can_do": [
+                "tell what happened when an experiment or a project went wrong, in order: first, then, after that, in the end",
+                "explain why something went wrong and what I did to fix it",
+                "tell a fellow student about a problem I solved last week"
+              ],
+              "vocab_themes": [
+                "the failed experiment: der Versuch, der Fehler, die Ursache, die Messung, das Protokoll, die Warnung",
+                "fixing: neu starten, wiederholen, prüfen, die Lösung, funktionieren",
+                "the group's reaction: die Nachricht, Bescheid sagen, informieren, die Betreuerin"
+              ],
+              "grammar": [
+                "Präteritum of sein, haben and the modal verbs: war, hatte, konnte, musste, wollte",
+                "sequence words with verb-second: zuerst, dann, danach, später, am Ende",
+                "weil and deshalb for cause and effect (clause order with each)",
+                "Perfekt of verbs with prefixes and foreign verbs: kalibriert, programmiert, neu gestartet, ausgetauscht"
+              ]
+            }
           }
         }
       ]
@@ -1139,6 +1202,27 @@
                   "hint": "Sehr geehrte Frau Prof. Dr. Sommer, ich möchte im Gespräch über … sprechen. Ich glaube, dass … Außerdem möchte ich fragen, ob …"
                 }
               }
+            }
+          },
+          "variants": {
+            "student": {
+              "title": "Das Gespräch mit der Betreuerin",
+              "can_do": [
+                "talk about my goals, my workload and what I need in a meeting with my supervisor or professor",
+                "say what I think and believe, and ask whether something is possible",
+                "ask for time off or a later deadline and give reasons"
+              ],
+              "vocab_themes": [
+                "the meeting: das Ziel, das Feedback, die Priorität, die Abgabe, die Prüfungsphase",
+                "time off and deadlines: die Semesterferien, die Verlängerung, der Termin, der Feiertag",
+                "opinions and feelings at uni: zufrieden, gestresst, motiviert, unsicher"
+              ],
+              "grammar": [
+                "dass clauses: Ich glaube, dass wir zu viele Abgaben haben",
+                "indirect yes/no questions with ob: Ich möchte wissen, ob ich die Abgabe verschieben kann",
+                "wenn clauses for conditions and time: Wenn ich früher anfange, kann ich früher aufhören",
+                "verbs with dass: finden, denken, glauben, hoffen, meinen, wissen"
+              ]
             }
           }
         },
@@ -1354,6 +1438,27 @@
                 }
               }
             }
+          },
+          "variants": {
+            "student": {
+              "title": "Technik erklären",
+              "can_do": [
+                "explain in simple German how a machine or mechanism works, step by step",
+                "say what is important, why we do something and what you have to do to get a result",
+                "compare two technical solutions and recommend one"
+              ],
+              "vocab_themes": [
+                "mechanisms: das Bauteil, die Kraft, der Druck, die Reibung, das Getriebe, die Bremse",
+                "explaining: der Schritt, zuerst, das bedeutet, zum Beispiel, einfach gesagt",
+                "comparing solutions: der Vorteil, der Nachteil, sicher, leicht, teuer, einfach"
+              ],
+              "grammar": [
+                "man + verb for general statements: Man muss zuerst die Last berechnen",
+                "infinitive with zu: Es ist wichtig, die Maße zu prüfen; Ich habe vergessen, die Datei zu speichern",
+                "um … zu for purpose: Wir nutzen Aluminium, um Gewicht zu sparen",
+                "the superlative: am schnellsten, der beste Weg, das größte Problem"
+              ]
+            }
           }
         },
         {
@@ -1510,6 +1615,21 @@
                 }
               }
             }
+          },
+          "variants": {
+            "student": {
+              "title": "Meinung sagen",
+              "can_do": [
+                "give my opinion in a technical discussion in a seminar or project group and support it with two or three arguments",
+                "agree, disagree and concede a point politely",
+                "weigh two sides of a question and come to a conclusion"
+              ],
+              "vocab_themes": [
+                "the design discussion: die Entscheidung, der Vorschlag, das Risiko, der Werkstoff, die Kosten",
+                "agreeing and disagreeing: zustimmen, widersprechen, überzeugen, der Kompromiss, Recht haben",
+                "studying online and on campus: die Online-Vorlesung, die Zusammenarbeit, der Austausch, die Präsenz"
+              ]
+            }
           }
         },
         {
@@ -1594,6 +1714,21 @@
                   "hint": "Zusammenfassung: … Zeitstrahl: … Ursache: Das Bauteil wurde nicht geprüft, weil … Maßnahmen: …"
                 }
               }
+            }
+          },
+          "variants": {
+            "student": {
+              "title": "Der Projektrückblick",
+              "can_do": [
+                "present the timeline of a project that went wrong at length and in order, with causes and effects",
+                "describe what was done, by whom and what had happened before",
+                "propose measures so that it does not happen again"
+              ],
+              "vocab_themes": [
+                "the review: die Ursache, die Auswirkung, der Zeitplan, die Maßnahme, die Lehre, ohne Schuldzuweisung",
+                "testing: der Prüfstand, die Messung, die Toleranz, der Bruch, die Wiederholung",
+                "responsibility: zuständig, übernehmen, informieren, Bescheid geben"
+              ]
             }
           }
         },
@@ -1889,6 +2024,27 @@
                 }
               }
             }
+          },
+          "variants": {
+            "student": {
+              "title": "Projekte präsentieren",
+              "can_do": [
+                "present a project to my group or professor with a clear structure: goal, current state, steps, risks",
+                "describe what has been done and what still has to be done, in formal and neutral language",
+                "answer critical questions from the examiner or a partner company and admit what I do not know yet"
+              ],
+              "vocab_themes": [
+                "presenting: die Gliederung, der Überblick, der aktuelle Stand, der nächste Schritt, zusammenfassen",
+                "projects: die Konstruktion, der Meilenstein, der Zeitplan, das Risiko, die Abhängigkeit, der Aufwand",
+                "partners: die Partnerfirma, die Erwartung, der Nutzen, die Kosten, absichern"
+              ],
+              "grammar": [
+                "Passiv with modal verbs: Das Bauteil muss neu konstruiert werden; Das kann nicht automatisiert werden",
+                "Passiv Perfekt: Der Prototyp ist bereits gebaut worden",
+                "participles as adjectives: das laufende Projekt, die getesteten Teile, der geplante Versuch",
+                "nominalisation for signposting: die Einführung, die Umstellung, die Überprüfung, die Entscheidung"
+              ]
+            }
           }
         },
         {
@@ -1972,6 +2128,16 @@
                   "hint": "Ehrlich gesagt hätte ich die Zeichnung vorher prüfen sollen. Es tut mir leid, dass … Ich schlage vor, dass wir in Zukunft …"
                 }
               }
+            }
+          },
+          "variants": {
+            "student": {
+              "title": "Konflikt und Feedback",
+              "can_do": [
+                "give a fellow student critical feedback that is concrete, kind and leads somewhere",
+                "receive criticism, ask what exactly is meant and say what I will change",
+                "clear up a conflict in a group project about who is responsible for a mistake and apologise where appropriate"
+              ]
             }
           }
         },
@@ -2109,6 +2275,21 @@
                   "hint": "Sehr geehrter Herr Wagner, mit großem Interesse habe ich … Seit … studiere ich Maschinenbau an der … Dabei habe ich … Ich könnte ab … anfangen."
                 }
               }
+            }
+          },
+          "variants": {
+            "student": {
+              "title": "Bewerbung und Praktikum",
+              "can_do": [
+                "talk about my studies so far, my strengths and weaknesses and what I want next",
+                "handle an interview for an internship or a student job in German",
+                "discuss pay, the move to Germany and conditions and ask good questions back"
+              ],
+              "vocab_themes": [
+                "the CV: der Werdegang, das Studium, die Stärke, die Schwäche, das Projekt, die Erfahrung",
+                "the interview: die Stelle, die Anforderungen, die Vergütung, die Dauer, der Praktikumsvertrag, die Betreuung",
+                "conditions: das Gehalt, die Urlaubstage, die Wohnung, der Umzug, die Arbeitszeit"
+              ]
             }
           }
         },
