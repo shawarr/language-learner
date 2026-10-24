@@ -31,7 +31,7 @@ contract, and `docs/HANDOVER.md` what was built, what changed and what still nee
 | Any other provider | one OpenAI-compatible class + a registry | swapping is a key and a model string, not code |
 | Speech → text | Groq `whisper-large-v3` (Gemini audio as fallback) | free tier, 8 h/day |
 | Text → speech | edge-tts, German neural voices | free, no key, no quota |
-| Auth | one password → long-lived httpOnly cookie | single user, no accounts |
+| Accounts | two learners (Ahmad, Maryan), PBKDF2-hashed passwords from `.env`, signed cookie per user | separate progress, one shared leaderboard |
 | Deploy | Docker + compose behind nginx | matches the rest of the box |
 
 Every model, voice and provider is an env var. Nothing is hardcoded — see `.env.example`.
@@ -127,6 +127,37 @@ git pull
 cp .env.example .env && $EDITOR .env        # first time only
 bash deploy/deploy.sh                       # build, restart, wait for health
 ```
+
+### Accounts
+
+Two learners, set in `.env`. The passwords are hashed (PBKDF2) on every boot and never stored in
+clear; changing a line and restarting rotates the hash. Names, genders and what the tutor is told
+about each person live in `app/curriculum/personas.json`.
+
+```bash
+USERS=ahmad,maryan
+USER_AHMAD_PASSWORD=...
+USER_MARYAN_PASSWORD=...
+APP_PASSWORD=                     # leave empty once the two lines above are set
+```
+
+### Upgrading from the single-learner version (wipes all history)
+
+The two-learner schema cannot be migrated in place, and the app refuses to start on the old
+database with a message saying so. Back up, wipe the database and both caches, then deploy:
+
+```bash
+cd /opt/language-learner
+git pull
+bash deploy/backup.sh                       # keep a copy of the old history in backups/
+docker compose down
+rm -f data/tutor.db data/tutor.db-wal data/tutor.db-shm
+rm -rf data/audio && mkdir -p data/audio    # TTS cache and stored recordings
+$EDITOR .env                                # add USERS and the two USER_*_PASSWORD lines
+bash deploy/deploy.sh                       # both accounts are created on boot
+```
+
+Locally the same wipe is `.venv/bin/python scripts/reset_data.py`.
 
 `deploy.sh` builds the image, recreates the container (bound to `127.0.0.1:9003`), chowns `data/` to
 uid 1000 and blocks until `/api/health` answers, dumping the last 50 log lines if it doesn't.

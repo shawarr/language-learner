@@ -254,3 +254,71 @@ screen without its own sticky footer hid its last control behind it.
 **Still to write:** lessons for a1.1-3 through a1.1-5 and everything above A1.1 — 28 units. The
 shape is set by the two that exist; follow their density and keep every explanation shorter than it
 wants to be.
+
+
+---
+
+# Two learners, a game layer and a new shell (2026-10-24)
+
+Ahmad asked for: a full reset; a second learner, Maryan, with her own login and progress; a
+competitive leaderboard; and a much more finished frontend (Duolingo's traversal, Apple Fitness's
+rings and motion, a mascot, avatars, quiet lines for small wins and a full-screen moment for big
+ones). The design was mocked on a Design canvas first, then built.
+
+## Accounts and isolation
+
+- `app/users.py`: the current user lives in a contextvar set by `auth.require_auth`;
+  `asyncio.create_task` copies it, so background work stays attributed. PBKDF2 hashing, accounts
+  seeded on boot from `USERS` + `personas.json` + `USER_<NAME>_PASSWORD`.
+- The cookie now names the user (`uid.exp.nonce.sig`); a forged uid fails the signature.
+- Every learner table has `user_id`; `translations` and `kv` stay shared. The old single-learner
+  database is refused at startup with a pointer to the reset (README, "Upgrading").
+- Every service filters on `users.user_id()`. Id-taking routes answer the other learner's ids with
+  404, exactly like a missing row. The analyzer and the stale-session cleanup adopt the session's
+  owner for the duration and restore whoever was current. `tests/test_isolation.py` proves it
+  through the real routes.
+- On the device, everything stored locally (drafts, the unsent-recording queue, offline review
+  ratings, toggles) is keyed by user id, and logging in as someone else reloads the page once, so
+  two people on one phone never see or send each other's work.
+
+## Persona
+
+- All nine prompts take `{{name}}` and `{{about}}` (from `personas.json`) instead of hard-coding
+  Ahmad; the tutor is told to use the forms that fit the learner (Studentin, not Student).
+- `prompts.render`'s file-name parameter is positional-only now: a `{{name}}` placeholder collided
+  with it and would have crashed every persona-aware prompt. Foundation file, one character.
+- `units.json` and `lessons.json` use `{{name}}`, pronoun placeholders and `{{role_de}}`;
+  `curriculum.render_for_user` resolves them per login. 50 scenarios and 37 checkpoint tasks carry
+  a `variants.student` version for Maryan (a lab, a study group, office hours, an internship
+  interview, a disc brake instead of a deploy pipeline), and ten job-only units carry a student
+  title, can-do goals, themes and grammar examples (same grammar points, checked one for one).
+
+## Game layer
+
+`app/services/game.py`, derived entirely from the `activity` counters, so every mode already
+earns: XP per action, a triangular level curve with titles, three daily rings (speak 5 turns,
+review 10 cards, study one lesson/drill/writing), streaks, 13 badges. `GET /game/me`,
+`POST /game/seen`, `GET /leaderboard` (totals only: no mistakes, no transcripts). See docs/API.md.
+
+## Frontend
+
+Five tabs in a floating liquid-glass bar: **Home** (greeting with your cat, the three rings,
+tonight's plan with the unfinished lesson first and highlighted, the week's race), **Learn**,
+**Talk**, **Practice** (Review, Drill, Write, and what Katze noticed), **You** (level ring,
+head-to-head, badges, then the full progress page, avatar picker, log out). The login is a
+pick-your-cat screen. Katze is inline SVG: eight avatar variants, five moods. Level-ups, new badges
+and three closed rings get a full-screen moment; everything else is a line.
+
+## Verified
+
+- 268 offline tests, including isolation, persona rendering, the game maths and a check that every
+  frontend module parses as an ES module (it caught a duplicated declaration that would have
+  stopped the app from loading).
+- Both learners driven end to end in headless Chromium: picker, wrong password, placement skip,
+  talk, practice, drill, badge moment, avatar change, logout, the other learner starting clean,
+  head-to-head. No horizontal scroll at 320 px light or 430 px dark, no console errors.
+
+## Not verified
+
+Real phones (the glass blur on iOS Safari, haptics), real model output with the persona prompts,
+and Maryan's student scenarios with a live tutor.

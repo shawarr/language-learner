@@ -11,9 +11,11 @@ Shapes marked **(spec)** are copied from `docs/TASKS.md` verbatim.
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
-| POST | `/auth/login` | `{"password"}` | `{"ok": true}` + cookie |
+| GET | `/auth/users` | — | `{"users": [{"id","username","name","gender","avatar"}], "avatars": [id…]}` — public, for the login picker; nothing secret |
+| POST | `/auth/login` | `{"username", "password"}` | `{"ok": true, "user": {…}}` + cookie naming the user |
 | POST | `/auth/logout` | — | `{"ok": true}` |
-| GET | `/auth/me` | — | 200 / 401 |
+| GET | `/auth/me` | — | `{"ok": true, "user": {…}, "avatars": […]}` / 401 |
+| POST | `/auth/avatar` | `{"avatar": "katze-3"}` | `{"ok": true, "user": {…}}`; 422 for an unknown id |
 | GET | `/system/status` | — | models/voices/keys present |
 | GET | `/tts?text=&speed=normal|slow` | — | audio/mpeg (cached) |
 | POST | `/voice/transcribe` | multipart `file`, `compare` | `{"text","provider","model"}` |
