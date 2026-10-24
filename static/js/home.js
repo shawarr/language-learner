@@ -54,7 +54,7 @@ function render({ game, lesson, cur, board, due }) {
     h('button', { class: 'avatar-btn', type: 'button', 'aria-label': 'Your profile', onClick: () => window.dtSwitchTo('you') }, katze({ variant: me.avatar, mood, size: 40 })),
     h('div', { class: 'grow' },
       h('div', { class: 'home-greet', lang: 'de' }, `${greeting()}, ${me.name || ''}`),
-      h('div', { class: 'muted small row', style: { gap: '6px' } }, flame(), `${game.streak_days}-day streak`)),
+      h('div', { class: 'muted small row', style: { gap: '6px' } }, flame(), game.streak_days ? `${game.streak_days}-day streak` : 'No streak yet')),
     h('span', { class: 'pill xp' }, `Lv ${game.level.n} · ${game.xp_total} XP`)));
 
   const ringsEl = rings([
@@ -74,9 +74,9 @@ function render({ game, lesson, cur, board, due }) {
       `Step ${(lesson.step || 0)} of ${lesson.steps || '?'} · about ${lesson.minutes || 6} min`, 'Continue', () => window.dtSwitchTo('learn'), true));
   }
   const sc = cur && cur.scenarios && cur.scenarios[0];
-  plan.append(planCard('mic', 'var(--accent)', 'var(--accent-dim)', sc ? `Talk · ${sc.title}` : 'Talk', sc ? sc.goal : 'A conversation with the tutor', 'Start', () => window.dtSwitchTo('talk'), !lesson || lesson.completed));
+  plan.append(planCard('mic', 'var(--accent)', 'var(--accent-dim)', sc ? `Talk · ${sc.title}` : 'Talk', 'A short conversation with the tutor · about 5 min', 'Start', () => window.dtSwitchTo('talk'), !lesson || lesson.completed));
   const n = due ? due.due_count || 0 : 0;
-  plan.append(planCard('cards', 'var(--good)', 'var(--good-dim)', n ? `Review · ${n} cards due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
+  plan.append(planCard('cards', 'var(--good)', 'var(--good-dim)', n ? `Review · ${n} card${n === 1 ? '' : 's'} due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
   S.body.append(plan);
 
   if (board && board.users && board.users.length > 1) {

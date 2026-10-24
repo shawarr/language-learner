@@ -716,3 +716,11 @@ mark.better { background: var(--good-dim); }
 .moment-h { font-size: 40px; font-weight: 600; letter-spacing: -.8px; line-height: 1.05; }
 .moment-sub { font-size: var(--t-md); color: var(--text-dim); max-width: 300px; margin: 0 auto; }
 .moment .btn { max-width: 340px; position: relative; }
+
+/* Narrow phones (320 px): smaller rings and greeting so the legend and the XP pill still fit. */
+@media (max-width: 359px) {
+  .rings-card { gap: var(--s-3); padding: var(--s-3); }
+  .rings-card > svg { width: 104px; height: 104px; flex: 0 0 auto; }
+  .home-greet { font-size: var(--t-md); }
+  .home-head .pill { display: none; }
+}

@@ -86,7 +86,7 @@ export function says(kind, ctx = {}) {
     case 'ahead': return `You lead by ${ctx.gap} XP. ${other} usually catches up after dinner.`;
     case 'tied': return `Level with ${other}. Whoever reviews tonight pulls ahead.`;
     case 'streak_risk': return 'Your streak sleeps at midnight. One review keeps it awake.';
-    case 'due': return `${ctx.n} cards are due. About ${Math.max(1, Math.round(ctx.n / 4))} minutes.`;
+    case 'due': return ctx.n === 1 ? 'One card is due. About a minute.' : `${ctx.n} cards are due. About ${Math.max(1, Math.round(ctx.n / 4))} minutes.`;
     case 'lesson': return 'The lesson first. Practice assumes someone taught you.';
     case 'empty': return 'Nothing due, nothing waiting. Talk to me anyway.';
     default: return '';

@@ -1,6 +1,6 @@
 /* Service worker: caches the shell for offline start-up. Never caches /api/* or itself.
    Bump CACHE_VERSION whenever a shell file changes, or phones keep the old one forever. */
-const CACHE_VERSION = 'v7-two-learners';
+const CACHE_VERSION = 'v8-two-learners';
 const CACHE = `tutor-shell-${CACHE_VERSION}`;
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js', '/js/api.js', '/js/ui.js', '/js/audio.js',
