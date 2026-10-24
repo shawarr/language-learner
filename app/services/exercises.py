@@ -16,6 +16,7 @@ second run through the lesson is a different order.
 """
 from __future__ import annotations
 
+import difflib
 import random
 from typing import Any
 
@@ -41,6 +42,67 @@ def _pick(rng: random.Random, pool: list[str], exclude: str, n: int) -> list[str
     return options[:n]
 
 
+def _norm(s: str) -> str:
+    return "".join(ch for ch in _clean(s).lower() if ch.isalnum() or ch == " ")
+
+
+def _sim(a: str, b: str) -> float:
+    return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+
+_TWINS = ({"der", "die", "das", "den", "dem"}, {"am", "um", "im", "an"}, {"ein", "eine", "einen", "einem"},
+          {"von", "vor"}, {"in", "im"})
+
+
+def _confusable(rng: random.Random, target: str, pool: list[str], n: int, groups: list[set[str]] = ()) -> list[str]:
+    """Distractors for a listening item that only a listening ear tells apart.
+
+    Picking any other lesson item made the answer obvious ("eins" and "zehn" against a whole
+    sentence). So the candidates are near-misses: the target with one word swapped for a similar
+    word from the same lesson (Englisch -> Deutsch, Morgen -> Abend), plus the lesson's other lines,
+    all ranked by how alike they look and how many words they have.
+    """
+    words = _words_of(target)
+    tokens = list(dict.fromkeys(w.strip(".,!?") for item in pool for w in _words_of(item)))
+    candidates = [c for c in dict.fromkeys(pool) if _norm(c) != _norm(target)]
+    if len(words) >= 2:
+        present = {w.strip(".,!?").lower() for w in words}
+        # Never the first word: its capital letter is the sentence's, not the word's, so a swap there
+        # produced "Arabisch komme aus Jordanien".
+        for i, w in enumerate(words[1:], start=1):
+            core = w.strip(".,!?")
+            tail = w[len(core):] if w.startswith(core) else ""
+            for t in tokens:
+                if not t or t.lower() in present or t[:1].isupper() != core[:1].isupper() or "{" in t:
+                    continue
+                siblings = any(core.lower() in g and t.lower() in g for g in groups)
+                # Articles and prepositions trade with their twins (der/die, am/um), nothing else.
+                twin = any(core.lower() in g and t.lower() in g for g in _TWINS)
+                if not (siblings or twin):
+                    continue
+                variant = " ".join(words[:i] + [t + tail] + words[i + 1:])
+                if _norm(variant) != _norm(target) and _norm(variant) not in {_norm(c) for c in candidates}:
+                    candidates.append(variant)
+
+    head = (words[-1].strip(".,!?").lower() if words else "")
+
+    def score(c: str) -> float:
+        gap = abs(len(_words_of(c)) - len(words))
+        cw = _words_of(c)
+        sibling = bool(cw) and any(head in g and cw[-1].strip(".,!?").lower() in g for g in groups)
+        return _sim(c, target) - 0.15 * gap + (0.4 if sibling else 0) + rng.random() * 0.05
+
+    ranked = sorted(candidates, key=score, reverse=True)
+    picked: list[str] = []
+    for c in ranked:
+        # Two distractors that differ only from each other would make the odd one out the answer.
+        if all(_sim(c, p) < 0.97 for p in picked):
+            picked.append(c)
+        if len(picked) == n:
+            break
+    return picked
+
+
 def build(lesson: dict[str, Any], seed: int = 0) -> list[dict[str, Any]]:
     """The full sequence the Learn screen walks: teaching steps interleaved with practice."""
     rng = random.Random(f"{lesson.get('title')}:{seed}")
@@ -49,20 +111,32 @@ def build(lesson: dict[str, Any], seed: int = 0) -> list[dict[str, Any]]:
     # Everything sayable in this lesson, for distractors that are plausibly confusable.
     vocabulary = [i["de"] for s in steps for i in (s.get("items") or []) if s.get("type") == "words" and i.get("de")]
     sentences = [e["de"] for s in steps for e in (s.get("examples") or []) if e.get("de")]
+    # Words taught side by side in one list are one class (the days, the numbers, the greetings):
+    # the head word of each short item, which is what a listening distractor may swap.
+    # Keyed by the frame too, so "Guten ___" swaps Morgen for Abend but never for "Hallo".
+    frames: dict[tuple, set[str]] = {}
+    for si, s in enumerate(steps):
+        if s.get("type") != "words":
+            continue
+        for i in s.get("items") or []:
+            ws = _words_of(i.get("de", ""))
+            if 1 <= len(ws) <= 2:
+                frames.setdefault((si, " ".join(ws[:-1]).lower()), set()).add(ws[-1].strip(".,!?").lower())
+    groups = [g for g in frames.values() if len(g) > 1]
 
     out: list[dict[str, Any]] = []
     for step in steps:
         kind = step.get("type")
         out.append({**step, "mode": "teach"})
         if kind == "words":
-            out.extend(_practise_words(step, vocabulary, rng))
+            out.extend(_practise_words(step, vocabulary + sentences, rng, groups))
         elif kind == "grammar":
             out.extend(_practise_grammar(step, sentences, rng))
         # `check` and `sounds` already are what they are: a question, and a reference page.
     return out
 
 
-def _practise_words(step: dict, vocabulary: list[str], rng: random.Random) -> list[dict]:
+def _practise_words(step: dict, vocabulary: list[str], rng: random.Random, groups: list[set[str]] = ()) -> list[dict]:
     items = [i for i in step.get("items", []) if i.get("de") and i.get("en")]
     if not items:
         return []
@@ -78,7 +152,7 @@ def _practise_words(step: dict, vocabulary: list[str], rng: random.Random) -> li
 
     # 2. Listen: audio only, choose the German. The one exercise that builds the ear.
     for item in _sample(items, LISTEN_PER_WORDS, rng):
-        distractors = _pick(rng, vocabulary, item["de"], 2)
+        distractors = _confusable(rng, item["de"], vocabulary, 2, groups)
         if len(distractors) < 2:
             continue
         options = [item["de"], *distractors]

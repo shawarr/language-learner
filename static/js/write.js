@@ -1,9 +1,12 @@
-/* Write screen (docs/DESIGN.md §5): the task pinned at the top (collapsible), a generous textarea,
-   a live word count against the target. On submit his text is re-rendered with the wrong spans
-   underlined in amber — tapping one reveals the explanation inline — and the improved version sits
-   below with the changed words highlighted. The draft is saved on every keystroke. */
+/* Write screen (docs/DESIGN.md §5): the task as a short brief (who it is for, the words it must
+   use, which tick off as they appear), a generous textarea and a word meter against the target
+   range. On submit the text is re-rendered with the wrong spans underlined in amber — tapping one
+   reveals the explanation inline — and the improved version sits below with the changed words
+   highlighted. The draft is saved on every keystroke. */
 import { api } from './api.js';
-import { h, clear, toast, sheet, errorLine, prefs, skeleton, fmtDate, tappableWords, catChip, setExpanded } from './ui.js';
+import { h, clear, toast, sheet, errorLine, prefs, skeleton, fmtDate, tappableWords, catChip } from './ui.js';
+import { icon } from './icons.js';
+import { katzeSays, wordMeter } from './kit.js';
 
 const S = { body: null, task: prefs.get('writeTask', null), result: null, textarea: null, pending: false };
 
@@ -28,7 +31,7 @@ async function newTask(confirmDiscard = false) {
   }
   S.result = null;
   prefs.set('writeDraft', '');
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(3)), skeleton(1, { tall: true }));
+  clear(S.body).append(h('div', { class: 'task-card' }, skeleton(3)), skeleton(1, { tall: true }));
   try {
     S.task = await api('/api/write/prompt', { timeout: 60000 });
     prefs.set('writeTask', S.task);
@@ -41,33 +44,36 @@ async function newTask(confirmDiscard = false) {
 
 function words(text) { return (text.trim().match(/\S+/g) || []).length; }
 
-function taskCard(t, open = true) {
-  const panel = h('div', { class: 'corr-panel', hidden: !open, style: { height: open ? 'auto' : '0px' } },
-    h('div', { class: 'stack', style: { paddingTop: '8px' } },
-      h('p', {}, t.task),
-      t.to ? h('p', { class: 'muted small' }, 'To: ', t.to) : null,
-      (t.must_include || []).length ? h('div', { class: 'chip-row wrap' }, t.must_include.map((m) => h('span', { class: 'chip small' }, m))) : null,
-      h('p', { class: 'muted xs' }, `${t.words_min}–${t.words_max} words`)));
-  const toggle = h('button', { class: 'task-toggle', type: 'button', 'aria-expanded': String(open),
-    onClick: () => setExpanded(toggle, panel, toggle.getAttribute('aria-expanded') !== 'true') },
-    h('span', { class: 'card-title' }, 'Your task'), h('span', { class: 'muted xs' }, 'show / hide'));
-  return h('div', { class: 'card task-card' }, toggle, panel);
+function taskCard(t) {
+  const needs = (t.must_include || []).map((m) => h('span', { class: 'need', lang: 'de', dataset: { word: m } }, icon('check', 14), m));
+  return {
+    el: h('section', { class: 'task-card', 'aria-label': 'Your task' },
+      h('p', { class: 'task-text' }, t.task),
+      t.to ? h('p', { class: 'task-to' }, icon('chat', 16), h('span', {}, 'To ', h('b', {}, t.to))) : null,
+      needs.length ? h('div', { class: 'need-row' }, h('span', { class: 'muted small' }, 'Use:'), needs) : null),
+    tick(text) {
+      const low = text.toLowerCase();
+      for (const n of needs) n.classList.toggle('met', low.includes(n.dataset.word.toLowerCase()));
+    },
+  };
 }
 
 function render() {
   const t = S.task;
   clear(S.body);
-  const counter = h('span', { class: 'muted xs' });
-  S.textarea = h('textarea', { class: 'input write-area', rows: '8', placeholder: 'Schreib hier…', autocapitalize: 'sentences', lang: 'de', 'aria-label': 'Your text',
+  const meter = wordMeter(t.words_min || 30, t.words_max || 80);
+  const task = taskCard(t);
+  S.textarea = h('textarea', { class: 'input write-area', name: 'text', rows: '8', placeholder: 'Schreib hier…', autocapitalize: 'sentences', autocomplete: 'off', lang: 'de', 'aria-label': 'Your text',
     onInput: () => { prefs.set('writeDraft', S.textarea.value); update(); } });
   S.textarea.value = prefs.get('writeDraft', '');
-  const submit = h('button', { class: 'btn primary block', type: 'button', onClick: submitText }, 'Get feedback');
+  const submit = h('button', { class: 'btn primary block lg tactile submit-write', type: 'button', onClick: submitText }, 'Get feedback');
   const update = () => {
     const n = words(S.textarea.value);
-    counter.textContent = `${n} words · aim for ${t.words_min}–${t.words_max}`;
+    meter.update(n);
+    task.tick(S.textarea.value);
     submit.disabled = n === 0 || S.pending;
   };
-  S.body.append(taskCard(t, true), S.textarea, h('div', { class: 'row between' }, counter), submit, recentSection());
+  S.body.append(task.el, S.textarea, meter.el, submit, recentSection());
   update();
 }
 
@@ -75,7 +81,7 @@ async function submitText() {
   const text = S.textarea.value.trim();
   if (!text || S.pending) return;
   S.pending = true;
-  const btn = S.body.querySelector('.btn.primary');
+  const btn = S.body.querySelector('.submit-write');
   btn.disabled = true;
   btn.textContent = 'Reading…';
   try {
@@ -94,25 +100,30 @@ async function submitText() {
 function renderResult(text, r) {
   clear(S.body);
   const corrections = r.corrections || [];
-  const stars = '★'.repeat(r.score || 0) + '☆'.repeat(5 - (r.score || 0));
+  const score = Math.max(0, Math.min(5, r.score || 0));
+  const remark = score >= 5 ? ['Sehr gut.', 'Very good. Nothing to fix.'] : score >= 3 ? ['Gut gemacht.', 'Well done. A few things to look at.'] : ['Ein guter Anfang.', 'A good start. The corrections below are the lesson.'];
   const expl = h('div', { class: 'stack' });
   S.body.append(
-    h('div', { class: 'card stack' },
-      h('div', { class: 'row between' }, h('div', { class: 'card-title' }, 'Feedback'), h('span', { class: 'stars', 'aria-label': `${r.score} of 5` }, stars)),
-      r.strengths ? h('p', {}, h('b', {}, 'Good: '), r.strengths) : null,
-      r.next_time ? h('p', {}, h('b', {}, 'Next time: '), r.next_time) : null),
-    h('div', { class: 'card stack' },
-      h('div', { class: 'card-title' }, corrections.length ? `Your text · ${corrections.length} to look at` : 'Your text · nothing to correct'),
+    h('div', { class: 'result-head' },
+      katzeSays(remark[0], { mood: score >= 3 ? 'proud' : 'thinking', lang: 'de', sub: remark[1] }),
+      h('div', { class: 'score-pips', role: 'img', 'aria-label': `${score} of 5` }, Array.from({ length: 5 }, (_, i) => h('i', { class: i < score ? 'on' : '' })),
+        h('span', { class: 'muted small num' }, `${score} of 5`))),
+    (r.strengths || r.next_time) ? h('div', { class: 'fb-list' },
+      r.strengths ? h('div', { class: 'fb-row good' }, icon('check', 18), h('p', {}, h('b', {}, 'What worked. '), r.strengths)) : null,
+      r.next_time ? h('div', { class: 'fb-row next' }, icon('sparkle', 18), h('p', {}, h('b', {}, 'Next time. '), r.next_time)) : null) : null,
+    h('section', { class: 'text-card' },
+      h('div', { class: 'row between' }, h('h2', { class: 'section-h' }, 'Your text'),
+        h('span', { class: 'muted small' }, corrections.length ? `${corrections.length} to look at` : 'nothing to correct')),
       h('p', { class: 'write-text', lang: 'de' }, markCorrections(text, corrections, expl)),
       expl,
       corrections.length ? h('p', { class: 'muted xs' }, 'Tap an underlined part to see why.') : null),
-    r.improved ? h('div', { class: 'card stack' },
-      h('div', { class: 'card-title' }, 'One level up'),
+    r.improved ? h('section', { class: 'text-card' },
+      h('h2', { class: 'section-h' }, 'One level up'),
       h('p', { class: 'write-text', lang: 'de' }, diffWords(text, r.improved)),
       h('p', { class: 'muted xs' }, 'Highlighted: what changed. Tap any word to look it up.')) : null,
     h('div', { class: 'btn-row' },
-      h('button', { class: 'btn', type: 'button', onClick: () => { S.result = null; prefs.set('writeDraft', text); render(); } }, 'Edit & resubmit'),
-      h('button', { class: 'btn primary', type: 'button', onClick: () => newTask() }, 'New task')),
+      h('button', { class: 'btn lg', type: 'button', onClick: () => { S.result = null; prefs.set('writeDraft', text); render(); } }, 'Edit and resubmit'),
+      h('button', { class: 'btn primary lg tactile', type: 'button', onClick: () => newTask() }, 'New task')),
     recentSection());
 }
 
@@ -211,7 +222,7 @@ async function lookup(word, sentence) {
 
 function recentSection() {
   const list = h('div', { class: 'stack' });
-  const det = h('details', { class: 'recent' }, h('summary', {}, 'Recent writings'), list);
+  const det = h('details', { class: 'recent' }, h('summary', {}, h('span', {}, 'Recent writings'), icon('chevronDown', 18)), list);
   det.addEventListener('toggle', async () => {
     if (!det.open || list.childElementCount) return;
     list.append(skeleton(3, { tall: true }));
@@ -220,9 +231,10 @@ function recentSection() {
       clear(list);
       if (!data.items.length) list.append(h('p', { class: 'muted small' }, 'Nothing yet. Your first piece lands here.'));
       for (const w of data.items) {
-        list.append(h('button', { class: 'card recent-row', type: 'button', onClick: () => renderResult(w.text, w.feedback || { corrections: [] }) },
-          h('div', { class: 'row between' }, h('span', { class: 'small' }, fmtDate(w.created_at)), h('span', { class: 'stars small' }, '★'.repeat(w.score || 0))),
-          h('p', { class: 'muted small clamp' }, w.prompt)));
+        list.append(h('button', { class: 'recent-row', type: 'button', onClick: () => renderResult(w.text, w.feedback || { corrections: [] }) },
+          h('span', { class: 'row between' }, h('span', { class: 'small' }, fmtDate(w.created_at)),
+            h('span', { class: 'score-pips sm', 'aria-label': `${w.score || 0} of 5` }, Array.from({ length: 5 }, (_, i) => h('i', { class: i < (w.score || 0) ? 'on' : '' })))),
+          h('span', { class: 'muted small clamp' }, w.prompt)));
       }
     } catch (e) { clear(list).append(errorLine(e)); }
   });

@@ -12,3 +12,7 @@ scratch/
 .claude/
 .cache-probe/
 .venv
+
+# Design skills installed locally with `npx skills add` (not part of the app)
+.agents/
+skills-lock.json

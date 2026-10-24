@@ -17,6 +17,7 @@ from functools import lru_cache
 from typing import Any
 
 from .. import users
+from . import exercises
 from ..config import settings
 from ..db import db
 
@@ -122,7 +123,8 @@ async def complete(unit_id: str) -> dict[str, Any]:
     if lesson is None:
         raise LessonError(f"no lesson for unit {unit_id}")
     now = time.time()
-    last = len(lesson["steps"])
+    # Progress counts the exercises the Learn screen walks, not the authored pages.
+    last = len(exercises.build(lesson))
     await db.execute(
         "INSERT INTO lesson_progress (user_id, unit_id, step, completed, started_at, completed_at) VALUES (?, ?, ?, 1, ?, ?) "
         "ON CONFLICT(user_id, unit_id) DO UPDATE SET step = MAX(step, excluded.step), completed = 1, "
@@ -152,4 +154,4 @@ async def status_for(unit_id: str) -> dict[str, Any]:
         return {"has_lesson": False, "completed": True, "step": 0, "steps": 0, "title": None}
     p = await progress(unit_id)
     return {"has_lesson": True, "completed": p["completed"], "step": p["step"],
-            "steps": len(lesson["steps"]), "title": lesson["title"], "minutes": lesson.get("minutes")}
+            "steps": len(exercises.build(lesson)), "title": lesson["title"], "minutes": lesson.get("minutes")}

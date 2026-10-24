@@ -174,3 +174,38 @@ async def test_a_lesson_can_be_taken_again(fresh_db):
     again = await lessons.restart("a1.1-1")
     assert again["step"] == 0
     assert again["completed"], "restarting must not take away the credit for finishing"
+
+
+@pytest.mark.asyncio
+async def test_status_counts_the_exercises_the_screen_walks(fresh_db):
+    """Progress is saved per exercise, so the step count must be the exercise count too; counting
+    the authored pages made Home say "step 6 of 12" in a 34-step lesson."""
+    from app.services import exercises
+
+    s = await lessons.status_for("a1.1-1")
+    assert s["steps"] == len(exercises.build(lessons.for_unit("a1.1-1")))
+
+
+def test_listening_distractors_are_confusable():
+    """Hearing a whole sentence and choosing between it, "eins" and "zehn" tests nothing. Every
+    distractor is a near-miss: same shape (word count within one), never a swapped first word."""
+    from app.services import exercises
+
+    seen = 0
+    for unit_id in ("a1.1-1", "a1.1-2"):
+        lesson = lessons.for_unit(unit_id)
+        for seed in range(4):
+            for ex in exercises.build(lesson, seed):
+                if ex["type"] != "listen":
+                    continue
+                seen += 1
+                target = ex["audio"].split()
+                for opt in ex["options"]:
+                    if opt == ex["audio"]:
+                        continue
+                    words = opt.split()
+                    assert abs(len(words) - len(target)) <= 1 or len(target) >= 4, (ex["audio"], opt)
+                    if len(words) == len(target) and len(target) > 1 and words[1:] == target[1:]:
+                        raise AssertionError(f"first word swapped: {opt!r} for {ex['audio']!r}")
+                    assert len(set(w.lower() for w in words)) == len(words), f"repeated word in {opt!r}"
+    assert seen > 10

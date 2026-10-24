@@ -8,10 +8,13 @@
      upload keeps the blob in IndexedDB and retries on tap or when connectivity returns
    - the view only auto-scrolls when he was already near the bottom */
 import { api, upload, audioFilename } from './api.js';
-import { h, clear, toast, sheet, errorLine, prefs, tappableWords, spinner, plural, haptic, catChip, setExpanded, de, currentUid } from './ui.js';
+import { h, clear, toast, sheet, errorLine, prefs, tappableWords, plural, haptic, catChip, setExpanded, de, currentUid } from './ui.js';
 import { speak, stop as stopAudio, unlockAudio, setPlaybackListener } from './audio.js';
 import { createHoldToTalk, micIcon } from './mic.js';
 import { store } from './store.js';
+import { katze } from './katze.js';
+import { icon } from './icons.js';
+import { katzeSays } from './kit.js';
 
 const S = {
   screen: null, chat: null, foot: null, input: null, sendBtn: null, mic: null, composerText: null, composerMic: null,
@@ -27,12 +30,14 @@ const S = {
 /* ---- mount / show --------------------------------------------------- */
 export function mount(el) {
   S.screen = el;
-  const head = h('header', { class: 'screen-head' },
+  S.headScenario = h('span', { class: 'scenario-name' }, 'Free conversation');
+  const head = h('header', { class: 'screen-head talk-head' },
     h('h1', {}, 'Talk'),
-    S.headScenario = h('button', { class: 'chip', type: 'button', onClick: openScenarioPicker }, 'Free conversation'),
-    S.enBtn = h('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'Show English meaning', 'aria-pressed': 'false', onClick: toggleEnglish }, 'EN'),
-    S.hideBtn = h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Hide German text', 'aria-pressed': 'false', onClick: toggleHide }, eyeIcon()),
-    h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'End session', onClick: confirmEnd }, stopIcon()));
+    h('button', { class: 'scenario-btn', type: 'button', 'aria-label': 'Choose a scenario', onClick: openScenarioPicker }, S.headScenario, icon('chevronDown', 16)),
+    h('div', { class: 'seg', role: 'group', 'aria-label': 'Reading aids' },
+      S.enBtn = h('button', { class: 'seg-btn', type: 'button', 'aria-label': 'Show English meaning', 'aria-pressed': 'false', onClick: toggleEnglish }, 'EN'),
+      S.hideBtn = h('button', { class: 'seg-btn', type: 'button', 'aria-label': 'Listening mode: hide the German text', 'aria-pressed': 'false', onClick: toggleHide }, icon('eye', 20))),
+    h('button', { class: 'btn small ghost end-btn', type: 'button', onClick: confirmEnd }, 'End'));
   S.chat = h('div', { class: 'chat', id: 'chat', 'aria-live': 'polite' });
   S.foot = h('footer', { class: 'screen-foot talk-foot' });
   buildComposer();
@@ -94,43 +99,55 @@ function setScenarioFromSession(session) {
 /* ---- rendering ------------------------------------------------------ */
 function renderLoading() {
   clear(S.chat).append(
-    h('div', { class: 'msg tutor', 'aria-hidden': 'true' }, h('div', { class: 'bubble skeleton' }, h('i', { class: 'w80' }), h('i', { class: 'w60' }))),
+    h('div', { class: 'msg tutor', 'aria-hidden': 'true' }, h('span', { class: 'msg-avatar' }), h('div', { class: 'msg-body' }, h('div', { class: 'bubble skeleton' }, h('i', { class: 'w80' }), h('i', { class: 'w60' })))),
     h('div', { class: 'msg user', 'aria-hidden': 'true' }, h('div', { class: 'bubble skeleton' }, h('i', { class: 'w40' }))));
 }
 
 function renderStart(err) {
   clear(S.chat);
-  const today = h('p', { class: 'muted xs', hidden: true });
+  const today = h('p', { class: 'talk-today muted small', hidden: true });
   api('/api/progress', { timeout: 8000 }).then((p) => {
     const bits = [];
-    if (p.vocab && p.vocab.due) bits.push(`${p.vocab.due} words due for review`);
+    if (p.vocab && p.vocab.due) bits.push(`${p.vocab.due} ${p.vocab.due === 1 ? 'word' : 'words'} due for review`);
     if (p.streak_days) bits.push(`${p.streak_days}-day streak`);
     if (p.checkpoint && p.checkpoint.available) bits.push('checkpoint open');
     if (bits.length) { today.textContent = bits.join(' · '); today.hidden = false; }
   }).catch(() => {});
-  const card = h('div', { class: 'card start-card stack' },
-    h('h2', {}, S.unit ? de(S.unit.title) : 'Ready when you are'),
+  const view = h('div', { class: 'talk-start' },
+    katzeSays('Worüber reden wir heute?', { sub: 'What shall we talk about today?', lang: 'de', size: 64 }),
+    S.unit ? h('div', { class: 'talk-unit' },
+      h('h2', { class: 'talk-unit-title', lang: 'de' }, S.unit.title),
+      (S.unit.can_do || []).length ? h('p', { class: 'muted small' }, 'This unit: ', S.unit.can_do.slice(0, 2).join(' · ')) : null) : null,
     today,
-    S.unit ? h('p', { class: 'muted small' }, (S.unit.can_do || []).slice(0, 2).join(' · ')) : null,
-    h('p', {}, 'Pick a scenario or just talk. The tutor speaks first; you answer by holding the mic or typing. Mistakes are the point — say it anyway.'),
-    scenarioChips(),
+    scenarioList(),
     err ? errorLine(err, () => load()) : null,
-    h('button', { class: 'btn primary block', type: 'button', onClick: () => startSession() }, 'Start'));
-  S.chat.append(card);
+    h('button', { class: 'btn primary block lg tactile', type: 'button', onClick: () => startSession() }, 'Start talking'),
+    h('p', { class: 'muted xs center' }, 'The tutor speaks first. Answer with the mic or the keyboard. Mistakes are the point: say it anyway.'));
+  S.chat.append(view);
 }
 
-function scenarioChips() {
-  const row = h('div', { class: 'chip-row' });
-  const all = [{ id: null, title: 'Free conversation' }, ...S.scenarios];
+/* Scenario choice as a list of radio rows: the title, and the goal that ends it. */
+function scenarioList() {
+  const list = h('div', { class: 'choice-list', role: 'radiogroup', 'aria-label': 'Scenario' });
+  const all = [{ id: null, title: 'Free conversation', goal: null, setup: 'No fixed goal. Talk about anything.' }, ...S.scenarios];
+  const sync = () => {
+    for (const row of list.children) {
+      const on = row.dataset.id === String((S.scenario && S.scenario.id) || '');
+      row.setAttribute('aria-checked', String(on));
+    }
+  };
   for (const sc of all) {
-    const active = (S.scenario && S.scenario.id) === sc.id || (!S.scenario && sc.id === null);
-    row.append(h('button', { class: `chip ${active ? 'active' : ''}`, type: 'button', onClick: () => {
+    list.append(h('button', { class: 'choice', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: String(sc.id || '') }, onClick: () => {
       S.scenario = sc.id ? sc : null;
       S.headScenario.textContent = sc.title;
-      for (const c of row.children) c.classList.toggle('active', c.textContent === sc.title);
-    } }, sc.title));
+      sync();
+    } },
+      h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
+      h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
+        h('span', { class: 'choice-sub clamp' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
   }
-  return row;
+  sync();
+  return list;
 }
 
 function openScenarioPicker() {
@@ -138,7 +155,7 @@ function openScenarioPicker() {
   const all = [{ id: null, title: 'Free conversation', setup: 'No fixed goal. Talk about anything.' }, ...S.scenarios];
   for (const sc of all) {
     const active = (S.scenario ? S.scenario.id : null) === sc.id;
-    body.append(h('button', { class: `card scenario-card ${active ? 'active' : ''}`, type: 'button', onClick: () => {
+    body.append(h('button', { class: 'choice', type: 'button', role: 'radio', 'aria-checked': String(active), onClick: () => {
       sheet.close();
       if (S.session && !S.session.ended_at && (S.scenario ? S.scenario.id : null) !== sc.id) {
         confirmNewSession(sc);
@@ -147,8 +164,12 @@ function openScenarioPicker() {
         S.headScenario.textContent = sc.title;
         if (!S.session) renderStart();
       }
-    } }, h('strong', {}, sc.title), sc.goal ? h('p', { class: 'muted small' }, 'Goal: ' + sc.goal) : h('p', { class: 'muted small' }, sc.setup)));
+    } }, h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
+      h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
+        h('span', { class: 'choice-sub' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
   }
+  body.setAttribute('role', 'radiogroup');
+  body.classList.add('choice-list');
   sheet.open(body, { title: S.unit ? `Scenarios · ${S.unit.title}` : 'Scenarios' });
 }
 
@@ -184,26 +205,29 @@ function renderHistory(messages) {
 
 function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
   const sentence = h('p', { class: `bubble-text ${S.hideGerman ? 'hidden-text' : ''}` }, tappableWords(text, translateWord));
-  // What it means, in English. Shown by default while he is a beginner: German-only is not
+  // What it means, in English. Shown by default while the learner is a beginner: German-only is not
   // comprehensible input when you know no German, it is noise. Older messages have no meaning
   // stored, so this is always optional.
   const meaningEl = meaning
     ? h('p', { class: 'bubble-meaning', lang: 'en', hidden: !S.showEnglish }, meaning)
     : null;
-  const reveal = h('button', { class: 'btn small ghost reveal', type: 'button', hidden: !S.hideGerman, onClick: () => {
+  const reveal = h('button', { class: 'bubble-tool reveal', type: 'button', hidden: !S.hideGerman, onClick: () => {
     sentence.classList.add('revealed'); reveal.hidden = true;
-  } }, 'Show text');
-  const slowBtn = h('button', { class: 'btn small ghost slow', type: 'button', 'aria-label': 'Play slowly', 'aria-pressed': 'false',
-    onClick: () => playMessage(id, text, 'slow') }, 'Slow');
-  const tools = h('div', { class: 'msg-tools' },
-    h('button', { class: 'btn small ghost play', type: 'button', 'aria-label': 'Play again', onClick: () => playMessage(id, text, 'normal') }, playIcon(), 'Play'),
+  } }, icon('eye', 16), 'Show text');
+  const slowBtn = h('button', { class: 'bubble-tool slow', type: 'button', 'aria-label': 'Play slowly', 'aria-pressed': 'false',
+    onClick: () => playMessage(id, text, 'slow') }, icon('slow', 16), 'Slow');
+  const tools = h('div', { class: 'bubble-foot' },
+    h('button', { class: 'bubble-play play', type: 'button', 'aria-label': 'Play again', onClick: () => playMessage(id, text, 'normal') }, icon('play', 16)),
     slowBtn, reveal);
-  const vocab = newVocab.length ? h('div', { class: 'vocab-chips' }, newVocab.map((v) =>
+  const vocab = newVocab.length ? h('div', { class: 'vocab-chips' }, h('span', { class: 'vocab-label' }, 'New'), newVocab.map((v) =>
     h('button', { class: 'chip small', type: 'button', lang: 'de', onClick: () => translateWord(v.word.split(' (')[0].replace(/^(der|die|das)\s+/i, ''), v.example || text, v) },
       h('b', {}, v.word), ' ', h('span', { class: 'muted', lang: 'en' }, v.translation)))) : null;
   return h('div', { class: 'msg tutor', dataset: { id: String(id) } },
-    h('div', { class: 'bubble' }, sentence, meaningEl,
-      h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))), tools, vocab);
+    h('span', { class: 'msg-avatar', 'aria-hidden': 'true' }, katze({ variant: (window.dtUser || {}).avatar, size: 30 })),
+    h('div', { class: 'msg-body' },
+      h('div', { class: 'bubble' }, sentence, meaningEl, tools,
+        h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))),
+      vocab));
 }
 
 function userBubble({ id, text, transcript, provider, pending = false, duration = null }) {
@@ -212,7 +236,7 @@ function userBubble({ id, text, transcript, provider, pending = false, duration 
   let assistantId = null;
   if (transcript != null) {
     body.append(h('button', { class: 'transcript-label', type: 'button', 'aria-label': 'Transcribed from your voice. Tap to dispute',
-      onClick: () => disputeTranscript(id, assistantId, el) }, micIcon(), 'transcribed', provider ? ` · ${provider}` : ''));
+      onClick: () => disputeTranscript(id, assistantId, el) }, micIcon(), 'what the mic heard', provider ? ` · ${provider}` : ''));
     body.append(h('p', { class: 'bubble-text', lang: 'de' }, transcript));
   } else if (pending && duration) {
     body.append(h('div', { class: 'transcript-label' }, micIcon(), ` ${duration}`), h('p', { class: 'bubble-text muted' }, 'transcribing…'));
@@ -243,23 +267,24 @@ function correctionCard(corrections) {
   const panel = h('div', { class: 'corr-panel', hidden: true }, list);
   const toggle = h('button', { class: 'corr-toggle', type: 'button', 'aria-expanded': 'false',
     onClick: () => setExpanded(toggle, panel, toggle.getAttribute('aria-expanded') !== 'true') },
-    h('span', { class: 'dot', 'aria-hidden': 'true' }), plural(corrections.length, 'correction'), chevron());
+    h('span', { class: 'dot', 'aria-hidden': 'true' }), plural(corrections.length, 'correction'), h('span', { class: 'chev' }, icon('chevronDown', 18)));
   return h('div', { class: 'corr' }, toggle, panel);
 }
 
 function englishHelpCard(eh) {
   const german = eh.german || '';
-  return h('div', { class: 'card help-card' },
-    h('div', { class: 'card-title' }, 'Say it like this'),
+  return h('div', { class: 'help-card' },
+    h('div', { class: 'section-label' }, 'Say it like this'),
     h('p', { class: 'help-german' }, tappableWords(german, translateWord),
-      h('button', { class: 'btn small ghost', type: 'button', 'aria-label': 'Play', onClick: () => playMessage('help', german, 'normal') }, playIcon())),
+      h('button', { class: 'bubble-play', type: 'button', 'aria-label': 'Play', onClick: () => playMessage('help', german, 'normal') }, icon('play', 16))),
     eh.literal ? h('p', { class: 'muted small' }, eh.literal) : null,
     eh.english ? h('p', { class: 'small' }, '“', eh.english, '”') : null);
 }
 
 function scenarioDoneCard() {
-  const card = h('div', { class: 'card done-card stack' },
-    h('p', {}, h('b', {}, 'Scenario complete.'), ' Keep talking, or try the next one.'),
+  const card = h('div', { class: 'done-card' },
+    h('div', { class: 'row' }, katze({ variant: (window.dtUser || {}).avatar, mood: 'proud', size: 44 }),
+      h('p', {}, h('b', {}, 'Scenario complete.'), ' Keep talking, or try the next one.')),
     h('div', { class: 'btn-row' },
       h('button', { class: 'btn', type: 'button', onClick: () => card.remove() }, 'Keep going'),
       h('button', { class: 'btn primary', type: 'button', onClick: async () => { await endSession({ silent: true }); openScenarioPicker(); } }, 'New scenario')));
@@ -268,7 +293,9 @@ function scenarioDoneCard() {
 
 function typingIndicator() {
   const note = h('div', { class: 'thinking-note', hidden: true });
-  const el = h('div', { class: 'msg tutor typing-row' }, h('div', { class: 'bubble' }, h('span', { class: 'typing' }, h('i'), h('i'), h('i'))), note);
+  const el = h('div', { class: 'msg tutor typing-row' },
+    h('span', { class: 'msg-avatar', 'aria-hidden': 'true' }, katze({ variant: (window.dtUser || {}).avatar, mood: 'thinking', size: 30 })),
+    h('div', { class: 'msg-body' }, h('div', { class: 'bubble' }, h('span', { class: 'typing', 'aria-label': 'The tutor is thinking' }, h('i'), h('i'), h('i'))), note));
   el.note = note;
   return el;
 }
@@ -290,7 +317,7 @@ function onPlayback(st) {
     m.classList.toggle('playing', on);
     const line = m.querySelector('.audio-line > i');
     if (line) line.style.width = on ? `${Math.round((st.progress || 0) * 100)}%` : '0%';
-    const slow = m.querySelector('.btn.slow');
+    const slow = m.querySelector('.bubble-tool.slow');
     if (slow) { slow.classList.toggle('active', on && st.speed === 'slow'); slow.setAttribute('aria-pressed', String(on && st.speed === 'slow')); }
   }
 }
@@ -303,7 +330,7 @@ async function playMessage(id, text, speed, { auto = false } = {}) {
   } catch (e) {
     if (e && e.name === 'NotAllowedError') {
       // iOS refused autoplay: swap in a tap-to-play on that message instead of failing silently.
-      const m = S.chat.querySelector(`.msg.tutor[data-id="${id}"] .msg-tools`);
+      const m = S.chat.querySelector(`.msg.tutor[data-id="${id}"] .bubble-foot`);
       if (m && !m.querySelector('.tap-play')) {
         const b = h('button', { class: 'btn small primary tap-play', type: 'button', onClick: () => { b.remove(); playMessage(id, text, speed); } }, 'Tap to play');
         m.prepend(b);
@@ -350,14 +377,16 @@ async function endSession({ silent = false } = {}) {
   S.session = null;
   prefs.set('talkSession', null);
   stopAudio();
-  if (!silent) clear(S.chat).append(h('div', { class: 'card stack' }, h('div', { class: 'card-title' }, 'Session summary'), spinner('Summarising…')));
+  if (!silent) clear(S.chat).append(h('div', { class: 'talk-summary' }, katzeSays('Moment, ich fasse zusammen…', { mood: 'thinking', sub: 'Summarising the conversation…', lang: 'de' })));
   try {
     const res = await api(`/api/talk/session/${id}/end`, { method: 'POST', timeout: 90000 });
     if (!silent) {
-      clear(S.chat).append(h('div', { class: 'card stack' },
-        h('div', { class: 'card-title' }, 'Session summary'),
-        h('p', {}, res.summary || (res.analyzed ? 'Nothing new to summarise.' : 'Saved. The analysis runs later — the tutor was busy.')),
-        h('button', { class: 'btn primary block', type: 'button', onClick: () => renderStart() }, 'New conversation')));
+      clear(S.chat).append(h('div', { class: 'talk-summary' },
+        katzeSays('Gut gemacht.', { mood: 'proud', sub: 'Well done. Here is what stood out.', lang: 'de' }),
+        h('div', { class: 'summary-card' },
+          h('h2', { class: 'section-h' }, 'Summary'),
+          h('p', {}, res.summary || (res.analyzed ? 'Nothing new to summarise.' : 'Saved. The analysis runs later, because the tutor was busy.'))),
+        h('button', { class: 'btn primary block lg tactile', type: 'button', onClick: () => renderStart() }, 'New conversation')));
     } else if (!res.analyzed) {
       toast('Session saved; analysis postponed.');
     }
@@ -483,10 +512,12 @@ function buildComposer() {
   S.input = h('textarea', { class: 'input composer-input', rows: '1', placeholder: 'Schreib auf Deutsch…', enterkeyhint: 'send', lang: 'de',
     autocapitalize: 'sentences', autocomplete: 'off', 'aria-label': 'Your message', onInput: autosize,
     onKeydown: (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); } } });
-  S.sendBtn = h('button', { class: 'btn icon primary', type: 'button', 'aria-label': 'Send', onClick: sendText }, sendIcon());
-  const toMic = h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Switch to voice', onClick: () => setMode('mic') }, micIcon());
+  // Pressing Send keeps the focus (and the keyboard) in the field, so the next line can follow.
+  S.sendBtn = h('button', { class: 'btn icon primary send-btn', type: 'button', 'aria-label': 'Send', onClick: sendText,
+    onPointerdown: (e) => { if (document.activeElement === S.input) e.preventDefault(); } }, icon('send', 22));
+  const toMic = h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Switch to voice', onClick: () => setMode('mic') }, icon('mic', 22));
   S.composerText = h('div', { class: 'composer', hidden: true }, toMic, S.input, S.sendBtn);
-  const toText = h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Switch to typing', onClick: () => setMode('text') }, keyboardIcon());
+  const toText = h('button', { class: 'btn icon mic-alt', type: 'button', 'aria-label': 'Switch to typing', onClick: () => setMode('text') }, icon('keyboard', 22));
   S.mic = createHoldToTalk({
     onStart: async () => { if (S.pending) return false; if (!S.session) { await startSession(); } return !!S.session; },
     onResult: (result) => sendRecording(result),
@@ -537,7 +568,7 @@ async function uploadRecording(rec) {
 function showQueued(rec) {
   if (S.chat.querySelector(`.queued[data-rec="${rec.id}"]`)) return;
   const el = h('div', { class: 'msg user queued', dataset: { rec: String(rec.id) } },
-    h('div', { class: 'bubble' }, h('p', { class: 'bubble-text' }, micIcon(), ` Voice message ${fmtDuration(rec.durationMs)} — not sent yet`),
+    h('div', { class: 'bubble' }, h('p', { class: 'bubble-text' }, micIcon(16), ` Voice message ${fmtDuration(rec.durationMs)}, not sent yet`),
       h('div', { class: 'btn-row' },
         h('button', { class: 'btn small primary', type: 'button', onClick: () => { el.remove(); uploadRecording(rec); } }, 'Retry'),
         h('button', { class: 'btn small ghost', type: 'button', onClick: async () => { await store.remove('recordings', rec.id); el.remove(); } }, 'Discard'))));
@@ -598,6 +629,7 @@ function toggleHide() {
 function syncHideButton() {
   S.hideBtn.classList.toggle('active', S.hideGerman);
   S.hideBtn.setAttribute('aria-pressed', String(S.hideGerman));
+  S.hideBtn.replaceChildren(icon(S.hideGerman ? 'eyeOff' : 'eye', 20));
 }
 
 /* ---- tap a word → translation sheet --------------------------------- */
@@ -610,7 +642,7 @@ async function translateWord(word, sentence, known = null) {
   const addBtn = h('button', { class: 'btn primary block', type: 'button', disabled: true }, 'Add to vocab');
   const body = h('div', { class: 'stack' },
     h('div', { class: 'row between' }, h('div', {}, lemma, pos),
-      h('button', { class: 'btn icon', type: 'button', 'aria-label': 'Hear it', onClick: () => playMessage('w', lemma.textContent, 'normal') }, playIcon())),
+      h('button', { class: 'btn icon', type: 'button', 'aria-label': 'Hear it', onClick: () => playMessage('w', lemma.textContent, 'normal') }, icon('speaker', 20))),
     translation, note, addBtn);
   sheet.open(body, { title: null });
   let data;
@@ -637,12 +669,3 @@ async function translateWord(word, sentence, known = null) {
     } catch (e) { addBtn.disabled = false; toast(e.detail || 'Could not add.', { kind: 'err' }); }
   });
 }
-
-/* ---- icons (inline SVG keeps the CSP happy; no icon font) ----------- */
-function svg(d) { return h('span', { class: 'ico', html: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>` }); }
-function playIcon() { return svg('M8 5v14l11-7z'); }
-function sendIcon() { return svg('M3 11.5 21 3l-7 18-2.5-7.5z'); }
-function eyeIcon() { return svg('M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7zm0 3.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5z'); }
-function stopIcon() { return svg('M6 6h12v12H6z'); }
-function keyboardIcon() { return svg('M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm2 3v2h2V9zm4 0v2h2V9zm4 0v2h2V9zm4 0v2h2V9zM5 13v2h2v-2zm4 0v2h6v-2zm8 0v2h2v-2z'); }
-function chevron() { return h('span', { class: 'ico chev', html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6z"/></svg>' }); }

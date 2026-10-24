@@ -96,6 +96,9 @@ setUnauthorizedHandler(() => {
 export function switchTo(name, opts = {}) {
   if (!screens[name]) return;
   if (current && current !== name) screens[current].hide && screens[current].hide();
+  // A session's focus mode (tab bar aside) belongs to the screen that set it; the next one decides.
+  $('#app').classList.remove('focus');
+  if (current && current !== name) window.dtBack = current;
   for (const sec of $$('.screen')) sec.hidden = sec.id !== `screen-${name}`;
   const lit = PARENT[name] || name;
   for (const tab of $$('.tab')) {
@@ -130,19 +133,44 @@ async function boot() {
 
   // iOS keeps the layout viewport under the keyboard; size #app to the visual viewport so the
   // composer stays glued above the keys and the last message stays visible (DESIGN.md §3).
+  // When the keyboard goes, everything must return exactly: iOS fires its last resize mid-animation
+  // and can leave the page scrolled, which left the shell short and the tab bar floating above a
+  // gap. So: re-measure after the keyboard settles, never size the shell when no keyboard is up
+  // (CSS `inset: 0` does that), and scroll the window back to the top.
   const vv = window.visualViewport;
-  if (vv) {
-    const app = $('#app');
-    const sync = () => {
-      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      app.style.height = kb > 80 ? `${vv.height}px` : '';
-      app.style.top = kb > 80 ? `${vv.offsetTop}px` : '';
-      app.classList.toggle('keyboard', kb > 80);
-      document.dispatchEvent(new CustomEvent('dt:viewport', { detail: { keyboard: kb > 80 } }));
-    };
-    vv.addEventListener('resize', sync);
-    vv.addEventListener('scroll', sync);
-  }
+  const app = $('#app');
+  const editing = () => {
+    const a = document.activeElement;
+    return !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !/^(button|checkbox|radio|range|submit)$/.test(a.type)) || a.isContentEditable);
+  };
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  let wasKeyboard = false;
+  const syncViewport = () => {
+    const kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    const sized = kb > 80;
+    // Android resizes the layout viewport itself (interactive-widget=resizes-content), so there the
+    // keyboard shows up only as a focused field.
+    const keyboard = sized || (coarse && editing());
+    app.style.height = sized ? `${vv.height}px` : '';
+    app.style.top = sized ? `${vv.offsetTop}px` : '';
+    app.style.bottom = sized ? 'auto' : '';
+    if (keyboard !== wasKeyboard) {
+      wasKeyboard = keyboard;
+      app.classList.toggle('keyboard', keyboard);
+      document.dispatchEvent(new CustomEvent('dt:viewport', { detail: { keyboard } }));
+    }
+    if (!sized && (window.scrollY || document.documentElement.scrollTop)) window.scrollTo(0, 0);
+  };
+  const settle = () => { syncViewport(); for (const ms of [60, 250, 500, 900]) setTimeout(syncViewport, ms); };
+  if (vv) { vv.addEventListener('resize', syncViewport); vv.addEventListener('scroll', syncViewport); }
+  window.addEventListener('resize', settle);
+  window.addEventListener('orientationchange', settle);
+  window.addEventListener('pageshow', settle);
+  document.addEventListener('focusin', settle);
+  // Not at once on blur: tapping Send blurs the field first, and moving the layout under the finger
+  // in that instant made the tap miss. The keyboard animation takes about this long anyway.
+  document.addEventListener('focusout', () => { for (const ms of [250, 500, 900]) setTimeout(syncViewport, ms); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) settle(); });
 
   const offline = $('#offline');
   const sync = () => { offline.hidden = navigator.onLine !== false; };
