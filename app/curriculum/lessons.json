@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Hand-written coursework, one lesson per unit, keyed by unit id from units.json. Deliberately not model-generated: a beginner's first contact with a language should be the same every time, correct, and free of quota. Step types: 'sounds' (pronunciation), 'words' (vocabulary, each spoken), 'grammar' (explained in English with examples and an optional table), 'check' (one question, graded on the device). Keep every explanation shorter than it wants to be.",
+  "_comment": "Hand-written coursework, one lesson per unit, keyed by unit id from units.json. Deliberately not model-generated: a beginner's first contact with a language should be the same every time, correct, and free of quota. Step types: 'sounds' (pronunciation), 'words' (vocabulary, each spoken), 'grammar' (explained in English with examples and an optional table), 'check' (one question, graded on the device). Keep every explanation shorter than it wants to be. Text may use the persona placeholders of units.json ({{name}}, {{role_de}}, {{he}}, …); app.services.curriculum.lesson_for_user renders them for whoever is logged in, so never write a learner's name here.",
 
   "a1.1-1": {
     "title": "Hallo und Tschüss",
@@ -41,7 +41,7 @@
           {"de": "Wie heißt du?", "en": "What's your name?", "note": "to a colleague"},
           {"de": "Wie heißen Sie?", "en": "What's your name?", "note": "to an official"}
         ],
-        "note": "At work in Germany, software teams are usually du. The Ausländerbehörde is definitely Sie."
+        "note": "Colleagues in German tech teams are usually du, and so are fellow students at a German university. The Ausländerbehörde is definitely Sie."
       },
       {
         "type": "grammar",
@@ -57,25 +57,25 @@
           ]
         },
         "examples": [
-          {"de": "Ich bin Ahmad.", "en": "I am Ahmad."},
+          {"de": "Ich bin {{name}}.", "en": "I am {{name}}."},
           {"de": "Ich bin aus Jordanien.", "en": "I am from Jordan."},
           {"de": "Sie sind Frau Keller?", "en": "You are Mrs Keller?"}
         ]
       },
       {
         "type": "check",
-        "question": "You meet your new neighbour. How do you say 'I am Ahmad'?",
-        "options": ["Ich bin Ahmad.", "Du bist Ahmad.", "Ich ist Ahmad."],
+        "question": "You meet your new neighbour. How do you say 'I am {{name}}'?",
+        "options": ["Ich bin {{name}}.", "Du bist {{name}}.", "Ich ist {{name}}."],
         "answer": 0,
-        "why": "'ich' always goes with 'bin'. 'du bist' would be telling her that she is Ahmad."
+        "why": "'ich' always goes with 'bin'. 'du bist' would be telling her that she is {{name}}."
       },
       {
         "type": "words",
         "title": "Saying who you are",
         "body": "Two ways to give your name. 'Ich heiße' is the more German-sounding one, and it is what you will hear back.",
         "items": [
-          {"de": "Ich heiße Ahmad.", "en": "My name is Ahmad.", "note": "literally: I am called Ahmad"},
-          {"de": "Ich bin Ahmad.", "en": "I am Ahmad."},
+          {"de": "Ich heiße {{name}}.", "en": "My name is {{name}}.", "note": "literally: I am called {{name}}"},
+          {"de": "Ich bin {{name}}.", "en": "I am {{name}}."},
           {"de": "Ich komme aus Jordanien.", "en": "I come from Jordan."},
           {"de": "Ich wohne in Amman.", "en": "I live in Amman."},
           {"de": "Ich spreche Arabisch und Englisch.", "en": "I speak Arabic and English."},
@@ -89,10 +89,10 @@
         "table": {
           "head": ["Question", "Means", "Answer"],
           "rows": [
-            ["Wie heißt du?", "What's your name?", "Ich heiße Ahmad."],
+            ["Wie heißt du?", "What's your name?", "Ich heiße {{name}}."],
             ["Woher kommst du?", "Where are you from?", "Ich komme aus Jordanien."],
             ["Wo wohnst du?", "Where do you live?", "Ich wohne in Amman."],
-            ["Was machst du?", "What do you do?", "Ich arbeite als DevOps-Ingenieur."]
+            ["Was machst du?", "What do you do?", "Ich bin {{role_de}}."]
           ]
         },
         "note": "woher = where from, wo = where. One letter, and it is the difference between your country and your street."
@@ -154,7 +154,7 @@
 
   "a1.1-2": {
     "title": "Zahlen, Zeit, Termine",
-    "intro": "Numbers, the clock and arranging a time. This is the unit that makes you useful in a standup and at a counter.",
+    "intro": "Numbers, the clock and arranging a time. This is the unit that gets you through planning a call and paying at a counter.",
     "minutes": 12,
     "steps": [
       {
@@ -264,7 +264,7 @@
           ]
         },
         "examples": [
-          {"de": "Ich arbeite remote.", "en": "I work remotely."},
+          {"de": "Ich arbeite heute bis fünf.", "en": "I am working until five today."},
           {"de": "Wann fangen wir an?", "en": "When do we start?"}
         ]
       },
@@ -276,6 +276,6 @@
         "why": "A yes/no question puts the verb first: Hast du …?"
       }
     ],
-    "outro": "Now arrange a time out loud. Open Talk and pick the standup scenario — you will need 'um … Uhr' and 'Hast du Zeit?' within the first minute."
+    "outro": "Now arrange a time out loud. Open Talk and pick the first scenario — you will need 'um … Uhr' and 'Hast du Zeit?' within the first minute."
   }
 }

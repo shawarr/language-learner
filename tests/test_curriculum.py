@@ -6,6 +6,7 @@ import re
 import pytest
 
 from app.services import curriculum, profile
+from tests.conftest import login
 
 
 def test_curriculum_loads_and_is_well_formed():
@@ -46,7 +47,9 @@ def test_navigation_helpers():
     assert curriculum.unit("nope") is None
     assert curriculum.unit_position(first["id"]) == (1, len(curriculum.phases()[0]["units"]))
     u, sc = curriculum.scenario(first["scenarios"][0]["id"])
-    assert u == first and sc == first["scenarios"][0]
+    # scenario() hands out the copy rendered for the current learner; the raw tree keeps its placeholders.
+    assert u == curriculum.render_for_user(first) and sc == u["scenarios"][0]
+    assert sc["id"] == first["scenarios"][0]["id"] and "{{" not in sc["setup"]
     assert curriculum.scenario("nope") is None
     assert curriculum.first_unit_of_level("B1.1")["id"].startswith("b1.1-")
     assert curriculum.first_unit_of_level("Z9")["id"] == first["id"]
@@ -73,7 +76,7 @@ async def test_advance_moves_and_clears_review_focus(fresh_db):
 
 def test_curriculum_routes(client):
     assert client.get("/api/curriculum").status_code == 401
-    client.post("/api/auth/login", json={"username": "ahmad", "password": "test-password"})
+    login(client, "ahmad")
     tree = client.get("/api/curriculum").json()
     assert [p["id"] for p in tree["phases"]] == curriculum.PHASE_ORDER
     assert tree["current"]["unit_id"] == "a1.1-1" and "checkpoint" not in tree["phases"][0]["units"][0]
