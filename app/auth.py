@@ -1,4 +1,4 @@
-"""Single-password login -> signed, long-lived httpOnly cookie. No accounts."""
+"""Login -> signed, long-lived httpOnly cookie that names the user. Two accounts, no registration."""
 from __future__ import annotations
 
 import hashlib
@@ -8,6 +8,7 @@ import time
 
 from fastapi import HTTPException, Request, Response
 
+from . import users
 from .config import settings
 from .db import db
 
@@ -33,35 +34,30 @@ def _sign(payload: str) -> str:
     return hmac.new(_secret, payload.encode(), hashlib.sha256).hexdigest()
 
 
-def make_token() -> str:
+def make_token(uid: int) -> str:
     exp = int(time.time()) + settings.session_days * 86400
-    payload = f"{exp}.{secrets.token_hex(8)}"
+    payload = f"{uid}.{exp}.{secrets.token_hex(8)}"
     return f"{payload}.{_sign(payload)}"
 
 
-def verify_token(token: str | None) -> bool:
-    if not token or token.count(".") != 2:
-        return False
-    exp, nonce, sig = token.split(".")
-    payload = f"{exp}.{nonce}"
+def verify_token(token: str | None) -> int | None:
+    """The user id the cookie names, or None when it is missing, forged or expired."""
+    if not token or token.count(".") != 3:
+        return None
+    uid, exp, nonce, sig = token.split(".")
+    payload = f"{uid}.{exp}.{nonce}"
     if not hmac.compare_digest(sig, _sign(payload)):
-        return False
+        return None
     try:
-        return int(exp) > time.time()
+        return int(uid) if int(exp) > time.time() else None
     except ValueError:
-        return False
+        return None
 
 
-def check_password(password: str) -> bool:
-    if not settings.app_password:
-        return False
-    return hmac.compare_digest(password.encode(), settings.app_password.encode())
-
-
-def set_cookie(response: Response) -> None:
+def set_cookie(response: Response, uid: int) -> None:
     response.set_cookie(
         COOKIE,
-        make_token(),
+        make_token(uid),
         max_age=settings.session_days * 86400,
         httponly=True,
         secure=settings.cookie_secure,
@@ -74,7 +70,12 @@ def clear_cookie(response: Response) -> None:
     response.delete_cookie(COOKIE, path="/")
 
 
-async def require_auth(request: Request) -> None:
-    """FastAPI dependency. Every /api route except login/health uses it."""
-    if not verify_token(request.cookies.get(COOKIE)):
+async def require_auth(request: Request) -> dict:
+    """FastAPI dependency. Every /api route except login/health uses it. Sets the current user for
+    the request (see app.users) and returns the row."""
+    uid = verify_token(request.cookies.get(COOKIE))
+    user = await users.get(uid) if uid is not None else None
+    if user is None:
         raise HTTPException(status_code=401, detail="not authenticated")
+    users.set_current(user)
+    return user

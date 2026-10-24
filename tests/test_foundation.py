@@ -20,8 +20,9 @@ def test_protected_route_rejects_anonymous(client):
 
 
 def test_login_sets_cookie_and_unlocks(client):
-    assert client.post("/api/auth/login", json={"password": "wrong"}).status_code == 401
-    r = client.post("/api/auth/login", json={"password": "test-password"})
+    assert client.post("/api/auth/login", json={"username": "ahmad", "password": "wrong"}).status_code == 401
+    assert client.post("/api/auth/login", json={"username": "nobody", "password": "test-password"}).status_code == 401
+    r = client.post("/api/auth/login", json={"username": "ahmad", "password": "test-password"})
     assert r.status_code == 200
     assert "dt_session" in r.cookies or client.cookies.get("dt_session")
     assert client.get("/api/auth/me").status_code == 200
@@ -30,10 +31,13 @@ def test_login_sets_cookie_and_unlocks(client):
 
 
 def test_tampered_cookie_is_rejected(client):
-    client.post("/api/auth/login", json={"password": "test-password"})
+    client.post("/api/auth/login", json={"username": "ahmad", "password": "test-password"})
     token = client.cookies.get("dt_session")
-    exp, nonce, sig = token.split(".")
-    client.cookies.set("dt_session", f"{int(exp) + 86400}.{nonce}.{sig}")
+    uid, exp, nonce, sig = token.split(".")
+    client.cookies.set("dt_session", f"{uid}.{int(exp) + 86400}.{nonce}.{sig}")
+    assert client.get("/api/auth/me").status_code == 401
+    # Naming another user in a validly signed-looking token is a forgery too.
+    client.cookies.set("dt_session", f"{int(uid) + 1}.{exp}.{nonce}.{sig}")
     assert client.get("/api/auth/me").status_code == 401
 
 
@@ -53,13 +57,16 @@ async def test_schema_and_singleton_profile():
     try:
         tables = {r["name"] for r in await d.fetchall("SELECT name FROM sqlite_master WHERE type='table'")}
         assert {"profile", "sessions", "messages", "mistakes", "vocab", "checkpoints", "activity"} <= tables
-        rows = await d.fetchall("SELECT * FROM profile")
-        assert len(rows) == 1 and rows[0]["level"] == "A1.1"
-        await d.connect()  # reconnecting must not duplicate the profile row
-        assert len(await d.fetchall("SELECT * FROM profile")) == 1
-        await d.bump_activity("talk_turn", 2)
-        await d.bump_activity("talk_turn", 3)
-        assert (await d.fetchone("SELECT count FROM activity WHERE kind='talk_turn'"))["count"] == 5
+        assert {"users", "badges", "lesson_progress"} <= tables
+        assert await d.fetchall("SELECT * FROM profile") == [], "profile rows come from users.seed(), not connect()"
+        await d.connect()  # reconnecting is harmless
+        for uid, name in ((7, "seven"), (8, "eight")):
+            await d.execute("INSERT INTO users (id, username, name, created_at) VALUES (?, ?, ?, 0)", (uid, name, name))
+        await d.bump_activity("talk_turn", 2, user_id=7)
+        await d.bump_activity("talk_turn", 3, user_id=7)
+        await d.bump_activity("talk_turn", 1, user_id=8)
+        assert (await d.fetchone("SELECT count FROM activity WHERE kind='talk_turn' AND user_id=7"))["count"] == 5
+        assert (await d.fetchone("SELECT count FROM activity WHERE kind='talk_turn' AND user_id=8"))["count"] == 1
     finally:
         await d.close()
 

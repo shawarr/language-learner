@@ -1,5 +1,8 @@
 """SQLite access via aiosqlite. One connection, WAL mode, schema created on startup.
 
+Two learners share the file: every learner table carries `user_id`, and services always filter on
+the current user (`app.users.user_id()`). `translations` and `kv` are the only shared tables.
+
 Schema changes: `CREATE TABLE IF NOT EXISTS` never adds columns to an existing table.
 Add idempotent `ALTER TABLE ... ADD COLUMN` statements to MIGRATIONS for new columns.
 """
@@ -19,9 +22,21 @@ CREATE TABLE IF NOT EXISTS kv (
   value TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,              -- login name, lowercase
+  name TEXT NOT NULL,                         -- display name
+  gender TEXT NOT NULL DEFAULT 'x',           -- m | f | x: the tutor needs it for German forms
+  about TEXT NOT NULL DEFAULT '',             -- the paragraph the tutor is told (personas.json)
+  avatar TEXT NOT NULL DEFAULT 'katze-1',     -- one of the mascot variants
+  password_hash TEXT,                         -- pbkdf2, set from USER_<NAME>_PASSWORD; never clear text
+  created_at REAL NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS profile (
-  id INTEGER PRIMARY KEY CHECK (id = 1),
-  name TEXT NOT NULL DEFAULT 'Ahmad',
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+  name TEXT NOT NULL DEFAULT '',
   level TEXT NOT NULL DEFAULT 'A1.1',
   unit_id TEXT NOT NULL DEFAULT 'a1.1-1',
   skills TEXT NOT NULL DEFAULT '{}',          -- json: speaking/listening/writing/grammar/vocab 0-100
@@ -35,6 +50,7 @@ CREATE TABLE IF NOT EXISTS profile (
 
 CREATE TABLE IF NOT EXISTS sessions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
   mode TEXT NOT NULL,                         -- talk | placement | checkpoint
   scenario_id TEXT,
   scenario_title TEXT,
@@ -64,6 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
 
 CREATE TABLE IF NOT EXISTS mistakes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
   category TEXT NOT NULL,
   pattern TEXT NOT NULL,                      -- short description of the recurring error
   count INTEGER NOT NULL DEFAULT 1,
@@ -72,11 +89,12 @@ CREATE TABLE IF NOT EXISTS mistakes (
   first_seen REAL NOT NULL,
   last_seen REAL NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_mistakes_cat ON mistakes(category);
+CREATE INDEX IF NOT EXISTS idx_mistakes_cat ON mistakes(user_id, category);
 
 CREATE TABLE IF NOT EXISTS vocab (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  word TEXT NOT NULL UNIQUE,                  -- lemma incl. article for nouns, e.g. "der Termin"
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  word TEXT NOT NULL,                         -- lemma incl. article for nouns, e.g. "der Termin"
   translation TEXT NOT NULL,
   example TEXT NOT NULL DEFAULT '',
   notes TEXT NOT NULL DEFAULT '',
@@ -88,7 +106,8 @@ CREATE TABLE IF NOT EXISTS vocab (
   ease REAL NOT NULL DEFAULT 2.5,
   reps INTEGER NOT NULL DEFAULT 0,
   lapses INTEGER NOT NULL DEFAULT 0,
-  last_review REAL
+  last_review REAL,
+  UNIQUE (user_id, word)
 );
 
 CREATE TABLE IF NOT EXISTS vocab_reviews (
@@ -106,6 +125,7 @@ CREATE TABLE IF NOT EXISTS translations (
 
 CREATE TABLE IF NOT EXISTS writings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
   unit_id TEXT,
   prompt TEXT NOT NULL,
   text TEXT NOT NULL,
@@ -116,6 +136,7 @@ CREATE TABLE IF NOT EXISTS writings (
 
 CREATE TABLE IF NOT EXISTS drills (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
   categories TEXT NOT NULL,                   -- json list
   items TEXT NOT NULL,                        -- json list
   answers TEXT,                               -- json list (user answers)
@@ -127,6 +148,7 @@ CREATE TABLE IF NOT EXISTS drills (
 
 CREATE TABLE IF NOT EXISTS checkpoints (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id),
   unit_id TEXT NOT NULL,
   tasks TEXT NOT NULL,                        -- json {speaking:{...}, writing:{...}}
   speaking_transcript TEXT,
@@ -138,20 +160,31 @@ CREATE TABLE IF NOT EXISTS checkpoints (
 );
 
 CREATE TABLE IF NOT EXISTS lesson_progress (
-  unit_id TEXT PRIMARY KEY,                   -- matches curriculum/units.json
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  unit_id TEXT NOT NULL,                      -- matches curriculum/units.json
   step INTEGER NOT NULL DEFAULT 0,            -- furthest step reached, so he resumes where he stopped
   completed INTEGER NOT NULL DEFAULT 0,
   checks_right INTEGER NOT NULL DEFAULT 0,
   checks_total INTEGER NOT NULL DEFAULT 0,
   started_at REAL,
-  completed_at REAL
+  completed_at REAL,
+  PRIMARY KEY (user_id, unit_id)
 );
 
 CREATE TABLE IF NOT EXISTS activity (
+  user_id INTEGER NOT NULL REFERENCES users(id),
   day TEXT NOT NULL,                          -- YYYY-MM-DD, UTC
-  kind TEXT NOT NULL,                         -- talk_turn | review | drill | write | checkpoint
+  kind TEXT NOT NULL,                         -- talk_turn | review | drill | write | checkpoint | lesson
   count INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (day, kind)
+  PRIMARY KEY (user_id, day, kind)
+);
+
+CREATE TABLE IF NOT EXISTS badges (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  badge_id TEXT NOT NULL,                     -- catalogue in app/services/game.py
+  earned_at REAL NOT NULL,
+  seen INTEGER NOT NULL DEFAULT 0,            -- 0 until the client has shown the moment once
+  PRIMARY KEY (user_id, badge_id)
 );
 """
 
@@ -187,12 +220,15 @@ class Database:
             cols = [r["name"] for r in await self.fetchall(f"PRAGMA table_info({table})")]
             if column not in cols:
                 await self._conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
-        now = time.time()
-        await self._conn.execute(
-            "INSERT OR IGNORE INTO profile (id, skills, created_at, updated_at) VALUES (1, ?, ?, ?)",
-            (json.dumps(DEFAULT_SKILLS), now, now),
-        )
         await self._conn.commit()
+        # A database from the single-learner version has no user_id anywhere. It cannot be migrated
+        # in place (every row would need an owner), and the owner asked for a clean start anyway.
+        profile_cols = [r["name"] for r in await self.fetchall("PRAGMA table_info(profile)")]
+        if "user_id" not in profile_cols:
+            raise RuntimeError(
+                f"{settings.db_path} is from the single-learner version. Run scripts/reset_data.py "
+                "(it wipes the database and the caches) and start again.")
+        # Accounts and their profile rows are created by app.users.seed(), after connect().
 
     async def close(self) -> None:
         if self._conn:
@@ -225,12 +261,16 @@ class Database:
             (key, value),
         )
 
-    async def bump_activity(self, kind: str, n: int = 1) -> None:
+    async def bump_activity(self, kind: str, n: int = 1, user_id: int | None = None) -> None:
+        """Per-day, per-user counters: the progress page, the streak and the XP all derive from them."""
+        if user_id is None:
+            from .users import user_id as current_user_id  # late import: users imports db
+            user_id = current_user_id()
         day = time.strftime("%Y-%m-%d", time.gmtime())
         await self.execute(
-            "INSERT INTO activity (day, kind, count) VALUES (?, ?, ?) "
-            "ON CONFLICT(day, kind) DO UPDATE SET count = count + excluded.count",
-            (day, kind, n),
+            "INSERT INTO activity (user_id, day, kind, count) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(user_id, day, kind) DO UPDATE SET count = count + excluded.count",
+            (user_id, day, kind, n),
         )
 
 

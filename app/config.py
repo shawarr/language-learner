@@ -100,6 +100,10 @@ class Settings:
     # A talk session with no new turn for this long counts as abandoned and is closed, analysed and
     # swept. On a phone the usual way out of a conversation is switching apps, not tapping "end".
     session_stale_minutes: int = field(default_factory=lambda: int(_env("SESSION_STALE_MINUTES", "45")))
+    # The learners. Usernames only; names, genders and the tutor's paragraph about each come from
+    # app/curriculum/personas.json, passwords from USER_<USERNAME>_PASSWORD (hashed on boot, never
+    # stored in clear). APP_PASSWORD is only a fallback for an account that has no hash yet.
+    users: str = field(default_factory=lambda: _env("USERS", "ahmad,maryan"))
 
 
 settings = Settings()

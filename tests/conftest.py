@@ -13,7 +13,10 @@ import pytest
 _TMP = tempfile.mkdtemp(prefix="tutor-test-")
 os.environ.update(
     DATA_DIR=_TMP,
-    APP_PASSWORD="test-password",
+    USERS="ahmad,maryan",
+    USER_AHMAD_PASSWORD="test-password",
+    USER_MARYAN_PASSWORD="maryan-password",
+    APP_PASSWORD="",
     SESSION_SECRET="test-secret",
     COOKIE_SECURE="0",
     LLM_PRIMARY="fake:fake",
@@ -41,11 +44,20 @@ def client():
         yield c
 
 
+PASSWORDS = {"ahmad": "test-password", "maryan": "maryan-password"}
+
+
+def login(client, username="ahmad"):
+    """Log the TestClient in as one of the two seeded learners."""
+    r = client.post("/api/auth/login", json={"username": username, "password": PASSWORDS[username]})
+    assert r.status_code == 200, r.text
+    return r.json()["user"]
+
+
 @pytest.fixture
 def auth_client(client):
-    """A TestClient that has already logged in (session cookie set)."""
-    r = client.post("/api/auth/login", json={"password": "test-password"})
-    assert r.status_code == 200, r.text
+    """A TestClient logged in as Ahmad (session cookie set)."""
+    login(client, "ahmad")
     return client
 
 
@@ -61,15 +73,30 @@ def reset_fake():
 
 @pytest.fixture
 async def fresh_db():
-    """A connected `app.db.db` on a brand-new file, for service-level async tests (no HTTP)."""
+    """A connected `app.db.db` on a brand-new file with both learners seeded, for service-level
+    async tests (no HTTP). The current user is Ahmad; use `as_user("maryan")` to switch."""
     import uuid
 
+    from app import users
     from app.config import settings
     from app.db import db
 
     settings.db_path = Path(_TMP) / f"svc-{uuid.uuid4().hex}.db"
     await db.connect()
+    await users.seed()
+    token = users.set_current(await users.get_by_username("ahmad"))
     try:
         yield db
     finally:
+        users.reset_current(token)
         await db.close()
+
+
+async def as_user(username: str) -> dict:
+    """Switch the current user in a service-level test."""
+    from app import users
+
+    user = await users.get_by_username(username)
+    assert user, username
+    users.set_current(user)
+    return user

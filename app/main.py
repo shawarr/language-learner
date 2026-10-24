@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import auth
+from . import auth, users
 from .config import settings
 from .db import db
 from .providers.base import ProviderError
@@ -22,9 +22,8 @@ log = logging.getLogger("app")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await db.connect()
+    await users.seed()
     await auth.init_secret()
-    if not settings.app_password:
-        log.error("APP_PASSWORD is not set: nobody can log in")
     log.info("llm primary=%s fallback=%s fast=%s | stt=%s | tts=%s voice=%s",
              settings.llm_primary, settings.llm_fallback, settings.llm_fast,
              settings.stt_provider, settings.tts_provider, settings.tts_voice)
