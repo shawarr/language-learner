@@ -26,6 +26,19 @@ Shapes marked **(spec)** are copied from `docs/TASKS.md` verbatim.
 `unit = {"id","title","can_do":[…],"grammar":[…],"vocab_themes":[…],"scenarios":[…]}` (checkpoint
 tasks are stripped). `scenario = {"id","title","setup","goal"}`.
 
+### Placeholders and variants
+
+`units.json` and `lessons.json` never name a learner. Their text says `{{name}}`, `{{work}}`,
+`{{role_de}}`, `{{city}}` and `{{he}}`/`{{him}}`/`{{his}}`/`{{himself}}`, which render from the
+persona's gender (she/her/her/herself for Maryan); a capitalised token (`{{He}}`) capitalises the
+value, and any other placeholder fails validation at startup. A scenario or checkpoint task that
+only fits one kind of learner carries `"variants": {"student": {…}}`, keyed by the persona's `kind`
+in `personas.json`: a scenario variant needs `title`, `setup` and `goal`; a task variant needs
+`prompt` and may add `hint`. Everything above is rendered for the logged-in user — placeholders
+filled, the matching variant's fields over the defaults, the `variants` key dropped — so the shapes
+do not change and a scenario keeps its `id` for both learners. Lessons follow the same rules via
+`curriculum.lesson_for_user`.
+
 ## Talk (A2, V1)
 
 - `POST /talk/session` `{"scenario_id": "a1.1-1-smalltalk"?}` → `{"session": session, "opening_turn": turn}`

@@ -417,7 +417,7 @@
             {
               "id": "a1.2-1-frage-an-chefin",
               "title": "Eine kurze Frage an die Chefin",
-              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} joins a short call because {{he}} has a question about a task. Ask what the problem is and give {{him}} one clear instruction. Check at the end that {{he}} knows what to do next. Use Sie; she is friendly but busy.",
+              "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} joins a short call because {{he}} has a question about a task. Ask what the problem is and give {{him}} one clear instruction. Check at the end that {{he}} knows what to do next. Use Sie; you are friendly but busy.",
               "goal": "{{He}} explains {{his}} question, says {{he}} does or does not understand your instruction, and repeats what {{he}} will do next.",
               "variants": {
                 "student": {
@@ -1553,7 +1553,7 @@
               "variants": {
                 "student": {
                   "title": "Fragen der Professorin zur Ursache",
-                  "setup": "You are Frau Prof. Dr. Sommer, who supervises the group project whose prototype broke in the final test. After the review you want to understand the root cause, not the symptoms. Ask why the weak point in the design was not caught, who had checked the drawing, why the problem showed up so late, and what exactly will change in the next project. Use Sie; you are calm and precise.",
+                  "setup": "You are Frau Prof. Dr. Sommer, who supervises the group project whose prototype broke in the final test. After the review you want to understand the root cause, not the symptoms. Ask {{name}} why the weak point in the design was not caught, who had checked the drawing, why the problem showed up so late, and what exactly will change in the next project. Use Sie; you are calm and precise.",
                   "goal": "{{He}} explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
                 }
               }
