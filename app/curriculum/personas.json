@@ -2,6 +2,9 @@
   "ahmad": {
     "name": "Ahmad",
     "gender": "m",
+    "kind": "engineer",
+    "city": "Amman",
+    "home_country": "Jordan",
     "about": "Ahmad is a DevOps engineer in Amman, Jordan, working remotely for a German company. He is learning German for daily life and a possible move to Germany. Speaking and understanding matter; exams do not.",
     "work": "a DevOps engineer working remotely for a German company",
     "role_de": "DevOps-Ingenieur"
@@ -9,6 +12,16 @@
   "maryan": {
     "name": "Maryan",
     "gender": "f",
+    "kind": "student",
+    "city": "Amman",
+    "home_country": "Jordan",
+    "interests": [
+      "mechanical engineering: mechanics, thermodynamics, materials",
+      "lab sessions and measurement rigs",
+      "CAD and 3D printing",
+      "a part-time job on the side",
+      "planning a semester or an internship in Germany"
+    ],
     "about": "Maryan is a mechanical engineering student in Amman, Jordan, at a basic level. She is learning German for her studies, for everyday life and possibly for working in Germany later. She uses the app on her phone in the evenings. When she talks about herself, feminine forms are the correct ones (Studentin, Ingenieurin, müde — not müder).",
     "work": "a mechanical engineering student",
     "role_de": "Maschinenbau-Studentin"
