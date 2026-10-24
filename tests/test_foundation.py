@@ -49,9 +49,11 @@ def test_status_never_leaks_keys(auth_client):
 
 # --- schema -----------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_schema_and_singleton_profile():
+async def test_schema_and_singleton_profile(tmp_path, monkeypatch):
+    from app.config import settings
     from app.db import Database
 
+    monkeypatch.setattr(settings, "db_path", tmp_path / "schema.db")
     d = Database()
     await d.connect()
     try:
