@@ -8,7 +8,7 @@
      upload keeps the blob in IndexedDB and retries on tap or when connectivity returns
    - the view only auto-scrolls when he was already near the bottom */
 import { api, upload, audioFilename } from './api.js';
-import { h, clear, toast, sheet, errorLine, prefs, tappableWords, spinner, plural, haptic, catChip, setExpanded, de } from './ui.js';
+import { h, clear, toast, sheet, errorLine, prefs, tappableWords, spinner, plural, haptic, catChip, setExpanded, de, currentUid } from './ui.js';
 import { speak, stop as stopAudio, unlockAudio, setPlaybackListener } from './audio.js';
 import { createHoldToTalk, micIcon } from './mic.js';
 import { store } from './store.js';
@@ -56,7 +56,7 @@ async function load() {
   renderLoading();
   await loadScenarios();
   const saved = prefs.get('talkSession', null);
-  const queued = await store.all('recordings');
+  const queued = await myRecordings();
   const resumeId = (queued[0] && queued[0].sessionId) || saved;
   if (resumeId) {
     try {
@@ -511,10 +511,16 @@ function autosize() {
   el.style.height = Math.min(120, el.scrollHeight) + 'px';
 }
 
+/* Only this learner's unsent recordings: on a shared phone the other one's must never be sent
+   into this account. Recordings saved before accounts existed carry no owner and are skipped. */
+async function myRecordings() {
+  return (await store.all('recordings')).filter((r) => String(r.userId) === currentUid());
+}
+
 /* V3: the blob goes into IndexedDB before the upload and is deleted only after a 2xx. */
 async function sendRecording({ blob, mime, durationMs }) {
   const sessionId = S.session.id;
-  const stored = await store.add('recordings', { sessionId, blob, mime, createdAt: Date.now(), durationMs });
+  const stored = await store.add('recordings', { userId: currentUid(), sessionId, blob, mime, createdAt: Date.now(), durationMs });
   await uploadRecording({ id: stored, sessionId, blob, mime, durationMs });
 }
 
@@ -548,7 +554,7 @@ async function renderQueued(list) {
 
 async function retryQueued() {
   if (!S.session || S.pending) return;
-  const list = await store.all('recordings');
+  const list = await myRecordings();
   for (const rec of list) {
     const el = S.chat.querySelector(`.queued[data-rec="${rec.id}"]`);
     if (el) el.remove();

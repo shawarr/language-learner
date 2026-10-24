@@ -37,7 +37,7 @@ export function hide() {}
 function leave() {
   if (S.session && !window.confirm('Leave the placement? Your answers so far are kept on the server; you can start again later.')) return;
   S.session = null;
-  window.dtSwitchTo(S.rerun ? 'progress' : 'talk');
+  window.dtSwitchTo(S.rerun ? 'you' : 'home');
 }
 
 function renderIntro(err) {
@@ -160,5 +160,5 @@ function renderResult(r) {
 function finishUp() {
   S.session = null;
   document.dispatchEvent(new CustomEvent('dt:profile-changed'));
-  window.dtSwitchTo('talk');
+  window.dtSwitchTo('home');
 }

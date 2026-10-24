@@ -10,7 +10,7 @@ export function mount(el) {
   S.root = el;
   S.body = h('div', { class: 'screen-body' });
   clear(el).append(h('header', { class: 'screen-head' }, h('h1', {}, 'Checkpoint'), h('span', { class: 'grow' }),
-    h('button', { class: 'btn small ghost', type: 'button', onClick: () => window.dtSwitchTo('progress') }, 'Back')), S.body);
+    h('button', { class: 'btn small ghost', type: 'button', onClick: () => window.dtSwitchTo('you') }, 'Back')), S.body);
 }
 
 export async function show() { await load(); }
@@ -115,6 +115,6 @@ function renderResult(r) {
       h('div', { class: 'chip-row wrap' }, r.review_focus.map((f) => h('span', { class: 'chip small' }, f)))) : null,
     r.speaking_transcript ? h('details', {}, h('summary', { class: 'muted small' }, 'What the transcriber heard'), h('p', { class: 'small', lang: 'de' }, r.speaking_transcript)) : null,
     h('div', { class: 'btn-row' },
-      h('button', { class: 'btn', type: 'button', onClick: () => window.dtSwitchTo('progress') }, 'Progress'),
+      h('button', { class: 'btn', type: 'button', onClick: () => window.dtSwitchTo('you') }, 'You'),
       h('button', { class: 'btn primary', type: 'button', onClick: () => window.dtSwitchTo('talk') }, 'Talk')));
 }

@@ -3,7 +3,7 @@
    the next interval underneath, audio on reveal, a queue progress bar on top. Ratings made offline
    queue in IndexedDB and flush when the connection is back. */
 import { api } from './api.js';
-import { h, clear, toast, sheet, errorLine, prefs, skeleton, fmtDate, fmtDays, haptic, de } from './ui.js';
+import { h, clear, toast, sheet, errorLine, prefs, skeleton, fmtDate, fmtDays, haptic, de, currentUid } from './ui.js';
 import { speak, stop as stopAudio, unlockAudio } from './audio.js';
 import { store } from './store.js';
 
@@ -108,7 +108,7 @@ async function rate(rating) {
     await api(`/api/vocab/${card.id}/review`, { method: 'POST', body: { rating }, timeout: 15000 });
   } catch (e) {
     if (e.status === 404) return;
-    await store.add('ratings', { vocabId: card.id, rating, at: Date.now() });
+    await store.add('ratings', { userId: currentUid(), vocabId: card.id, rating, at: Date.now() });
     toast('Saved on this phone — syncs when you are back online.');
   }
 }
@@ -118,7 +118,7 @@ async function flushRatings() {
   if (flushing) return;
   flushing = true;
   try {
-    const list = await store.all('ratings');
+    const list = (await store.all('ratings')).filter((r) => String(r.userId) === currentUid());
     for (const r of list) {
       try {
         await api(`/api/vocab/${r.vocabId}/review`, { method: 'POST', body: { rating: r.rating }, timeout: 15000 });

@@ -1,12 +1,18 @@
-/* Progress screen: where he is on the CEFR path, five skill meters (animate from 0 on first paint),
-   a 30-day activity strip, recurring mistakes with their trend, vocab counts, the checkpoint
-   call-to-action and the placement re-run. Honest about thin data (docs/DESIGN.md §5). */
+/* Progress: where the learner is on the CEFR path, five skill meters (animate from 0 on first
+   paint), a 30-day activity strip, recurring mistakes with their trend, vocab counts, the checkpoint
+   call-to-action and the placement re-run. Honest about thin data (docs/DESIGN.md §5). Rendered as
+   a section of the You screen (embedded), or on its own with a header. */
 import { api } from './api.js';
 import { h, clear, sheet, errorLine, skeleton, fmtDate, catChip, de } from './ui.js';
 
 const S = { body: null, data: null };
 
-export function mount(el) {
+export function mount(el, { embedded = false } = {}) {
+  if (embedded) {
+    S.body = h('div', { class: 'stack' });
+    clear(el).append(S.body);
+    return;
+  }
   const head = h('header', { class: 'screen-head' }, h('h1', {}, 'Progress'), h('span', { class: 'grow' }),
     h('button', { class: 'btn small ghost', type: 'button', onClick: load }, 'Refresh'));
   S.body = h('div', { class: 'screen-body' });

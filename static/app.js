@@ -1,53 +1,82 @@
-/* Deutsch Tutor — the shell. Auth gate, tabs, service worker, offline banner.
-   Screens live in /js/*.js and expose mount(el) / show() / hide(). */
+/* Deutsch Tutor — the shell. Login picker, tabs, service worker, offline banner.
+   Screens live in /js/*.js and expose mount(el) / show() / hide().
+
+   Two learners can share a phone, so everything this device remembers (drafts, the unsent-recording
+   queue, offline ratings, toggles) is keyed by user id. Modules read some of it at import time, so a
+   login that changes who is using the device reloads the page once with the new id in place. */
 import { api, setUnauthorizedHandler } from './js/api.js';
-import { $, $$, toast, prefs } from './js/ui.js';
+import { $, $$, h, clear, toast, prefs, currentUid, setCurrentUid } from './js/ui.js';
 import { unlockAudio } from './js/audio.js';
+import { katze } from './js/katze.js';
+import * as home from './js/home.js';
 import * as learn from './js/learn.js';
 import * as talk from './js/talk.js';
-import * as write from './js/write.js';
-import * as drill from './js/drill.js';
+import * as practice from './js/practice.js';
+import * as you from './js/you.js';
 import * as review from './js/review.js';
-import * as progress from './js/progress.js';
+import * as drill from './js/drill.js';
+import * as write from './js/write.js';
 import * as placement from './js/placement.js';
 import * as checkpoint from './js/checkpoint.js';
 
-/* Where a session should start. Practice assumes you were taught, so an unfinished lesson for the
-   current unit wins over whatever tab was last open. */
-async function firstTab() {
-  try {
-    const s = await api('/api/lesson/status');
-    if (s.has_lesson && !s.completed) return 'learn';
-  } catch { /* fall through to whatever was open last */ }
-  return prefs.get('tab', 'talk');
-}
-
-const screens = { learn, talk, write, drill, review, progress, placement, checkpoint };
-const TABS = ['learn', 'talk', 'write', 'drill', 'review', 'progress'];
+const screens = { home, learn, talk, practice, you, review, drill, write, placement, checkpoint };
+const TABS = ['home', 'learn', 'talk', 'practice', 'you'];
+// Screens reached from a tab keep that tab lit, so the bar always says where you are.
+const PARENT = { review: 'practice', drill: 'practice', write: 'practice', checkpoint: 'you', placement: 'you' };
 let current = null;
 let mounted = false;
-let pendingAfterLogin = null;
+let picked = null;
 
-/* ---- auth gate ------------------------------------------------------ */
-function showLogin() {
+/* ---- login picker --------------------------------------------------- */
+async function showLogin({ keep = false } = {}) {
   $('#login').hidden = false;
   $('#login-error').hidden = true;
-  setTimeout(() => $('#pw').focus(), 50);
+  clear($('#login-cat')).append(katze({ mood: 'proud', size: 96, label: 'Katze, the app’s cat' }));
+  let list = [];
+  try { list = (await api('/api/auth/users', { timeout: 8000 })).users || []; } catch { /* offline: the form still works for the last user */ }
+  const box = clear($('#login-users'));
+  const last = prefs.global('lastUser', null);
+  for (const u of list) {
+    const btn = h('button', { class: 'login-user', type: 'button', 'aria-pressed': 'false', dataset: { username: u.username } },
+      katze({ variant: u.avatar, size: 72 }), h('span', { class: 'login-name' }, u.name));
+    btn.addEventListener('click', () => pick(u));
+    box.append(btn);
+  }
+  const preselect = keep && window.dtUser ? list.find((u) => u.id === window.dtUser.id) : list.find((u) => u.username === last);
+  if (preselect) pick(preselect, false);
+}
+
+function pick(user, focus = true) {
+  picked = user;
+  for (const b of $$('.login-user')) b.setAttribute('aria-pressed', String(b.dataset.username === user.username));
+  $('#login-form').hidden = false;
+  $('#login-username').value = user.username;
+  $('#pw-label').textContent = `Password for ${user.name}`;
+  $('#login-error').hidden = true;
+  if (focus) setTimeout(() => $('#pw').focus(), 30);
 }
 
 async function onLogin(e) {
   e.preventDefault();
+  if (!picked) return;
   unlockAudio();
   const err = $('#login-error');
   const btn = $('#login-form button');
   btn.disabled = true;
   err.hidden = true;
   try {
-    await api('/api/auth/login', { method: 'POST', body: { password: $('#pw').value } });
+    const r = await api('/api/auth/login', { method: 'POST', body: { username: picked.username, password: $('#pw').value } });
     $('#pw').value = '';
+    prefs.setGlobal('lastUser', r.user.username);
+    if (String(r.user.id) !== currentUid()) {
+      // A different person on this device: start clean so nothing of the previous user lingers.
+      setCurrentUid(r.user.id);
+      location.reload();
+      return;
+    }
+    window.dtUser = r.user;
     $('#login').hidden = true;
     await showApp();
-    if (pendingAfterLogin) { const fn = pendingAfterLogin; pendingAfterLogin = null; fn(); }
   } catch (ex) {
     err.textContent = ex.status === 401 ? 'Wrong password.' : (ex.detail || 'Login failed.');
     err.hidden = false;
@@ -57,10 +86,10 @@ async function onLogin(e) {
 }
 
 setUnauthorizedHandler(() => {
-  // The login overlay sits on top of the current screen, so nothing typed or recorded is lost.
+  // The picker sits on top of the current screen, so nothing typed or recorded is lost.
   if (!$('#login').hidden) return;
   if (mounted) toast('Session expired. Log in again.');
-  showLogin();
+  showLogin({ keep: true });
 });
 
 /* ---- screens -------------------------------------------------------- */
@@ -68,7 +97,12 @@ export function switchTo(name, opts = {}) {
   if (!screens[name]) return;
   if (current && current !== name) screens[current].hide && screens[current].hide();
   for (const sec of $$('.screen')) sec.hidden = sec.id !== `screen-${name}`;
-  for (const tab of $$('.tab')) tab.classList.toggle('active', tab.dataset.tab === name);
+  const lit = PARENT[name] || name;
+  for (const tab of $$('.tab')) {
+    const on = tab.dataset.tab === lit;
+    tab.classList.toggle('active', on);
+    if (on) tab.setAttribute('aria-current', 'page'); else tab.removeAttribute('aria-current');
+  }
   current = name;
   if (TABS.includes(name)) prefs.set('tab', name);
   screens[name].show && screens[name].show(opts);
@@ -84,7 +118,7 @@ async function showApp() {
   // First launch: the placement flow takes over until it is done or skipped.
   const gated = await placement.gate().catch(() => false);
   if (gated) { switchTo('placement'); return; }
-  if (!current || current === 'placement') switchTo(await firstTab());
+  if (!current || current === 'placement') switchTo('home');
 }
 
 /* ---- boot ----------------------------------------------------------- */
@@ -103,6 +137,7 @@ async function boot() {
       const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       app.style.height = kb > 80 ? `${vv.height}px` : '';
       app.style.top = kb > 80 ? `${vv.offsetTop}px` : '';
+      app.classList.toggle('keyboard', kb > 80);
       document.dispatchEvent(new CustomEvent('dt:viewport', { detail: { keyboard: kb > 80 } }));
     };
     vv.addEventListener('resize', sync);
@@ -129,13 +164,17 @@ async function boot() {
   }
 
   try {
-    await api('/api/auth/me', { timeout: 8000 });
+    const me = await api('/api/auth/me', { timeout: 8000 });
+    window.dtUser = me.user;
+    if (String(me.user.id) !== currentUid()) { setCurrentUid(me.user.id); location.reload(); return; }
     await showApp();
   } catch (e) {
     if (e.status === 401) { showLogin(); return; }
-    // Offline or server down: open the shell anyway; every call will surface its own error.
+    // Offline or server down: open the shell for the last user; every call surfaces its own error.
+    window.dtUser = prefs.get('me', null);
     await showApp();
   }
+  if (window.dtUser) prefs.set('me', window.dtUser);
 }
 
 boot();

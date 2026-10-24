@@ -146,11 +146,22 @@ export function fmtDays(days) {
 export function plural(n, one, many) { return `${n} ${n === 1 ? one : many || one + 's'}`; }
 
 /* Persisted per-device preferences (never anything the server needs to know). */
+/* Two learners may share a phone, so per-device preferences and drafts are keyed by user id.
+   The id is set at login (the shell reloads when it changes), so module-level reads are right. */
+export function currentUid() { try { return localStorage.getItem('dt:uid') || '0'; } catch { return '0'; } }
+export function setCurrentUid(id) { try { localStorage.setItem('dt:uid', String(id)); } catch { /* private mode */ } }
+
+function readKey(k, fallback) {
+  try { const v = localStorage.getItem(k); return v == null ? fallback : JSON.parse(v); } catch { return fallback; }
+}
+function writeKey(k, value) { try { localStorage.setItem(k, JSON.stringify(value)); } catch { /* private mode */ } }
+
 export const prefs = {
-  get(key, fallback) {
-    try { const v = localStorage.getItem(`dt:${key}`); return v == null ? fallback : JSON.parse(v); } catch { return fallback; }
-  },
-  set(key, value) { try { localStorage.setItem(`dt:${key}`, JSON.stringify(value)); } catch { /* private mode */ } },
+  get(key, fallback) { return readKey(`dt:${currentUid()}:${key}`, fallback); },
+  set(key, value) { writeKey(`dt:${currentUid()}:${key}`, value); },
+  /* Device-wide, not per user: only for the login picker's "last user". */
+  global(key, fallback) { return readKey(`dt:${key}`, fallback); },
+  setGlobal(key, value) { writeKey(`dt:${key}`, value); },
 };
 
 /* Split German text into tappable word spans (lang="de"). Tap targets are whole words; punctuation

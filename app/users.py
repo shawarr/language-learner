@@ -101,7 +101,7 @@ async def seed() -> None:
     a changed USER_*_PASSWORD in .env rotates the hash, nothing else about the learner is touched."""
     people = personas()
     now = time.time()
-    for username in configured_usernames():
+    for i, username in enumerate(configured_usernames()):
         p = people.get(username, {})
         name = p.get("name") or username.capitalize()
         gender = p.get("gender") or "x"
@@ -110,7 +110,7 @@ async def seed() -> None:
         if row is None:
             await db.execute(
                 "INSERT INTO users (username, name, gender, about, avatar, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (username, name, gender, about, AVATARS[0], now))
+                (username, name, gender, about, AVATARS[i % len(AVATARS)], now))
             row = await db.fetchone("SELECT * FROM users WHERE username=?", (username,))
         else:
             await db.execute("UPDATE users SET name=?, gender=?, about=? WHERE id=?", (name, gender, about, row["id"]))
