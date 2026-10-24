@@ -36,25 +36,50 @@
               "id": "a1.1-1-kollege",
               "title": "Der neue Kollege",
               "setup": "You are Jonas, a developer on {{name}}'s team in Berlin, and this is your first video call with {{him}}. Use du, like German tech teams do. Say hi, introduce yourself in one sentence and ask where {{he}} is calling from.",
-              "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or work."
+              "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or work.",
+              "variants": {
+                "student": {
+                  "title": "Der Tandempartner",
+                  "setup": "You are Jonas, a mechanical engineering student in Berlin and {{name}}'s new language-tandem partner, and this is your first video call with {{him}}. Use du, like German students do. Say hi, introduce yourself in one sentence and ask where {{he}} is calling from.",
+                  "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or study."
+                }
+              }
             },
             {
               "id": "a1.1-1-empfang",
               "title": "Am Empfang",
               "setup": "You are the receptionist at the company's office in Berlin. {{name}} is visiting for the first time. Use Sie. Ask for {{his}} name, which team {{he}} belongs to and spell-check {{his}} name by asking {{him}} to spell it (Wie schreibt man das?).",
-              "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} team or the person {{he}} is visiting."
+              "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} team or the person {{he}} is visiting.",
+              "variants": {
+                "student": {
+                  "title": "Im International Office",
+                  "setup": "You are the receptionist at the International Office of a technical university in Berlin. {{name}} is visiting for the first time to ask about an exchange semester. Use Sie. Ask for {{his}} name, what {{he}} studies and spell-check {{his}} name by asking {{him}} to spell it (Wie schreibt man das?).",
+                  "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} subject or the person {{he}} is visiting."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Introduce yourself to a new German colleague in six to eight sentences: your name, where you come from, where you live, what you do, which languages you speak. Finish with one question for them.",
-              "hint": "Ich heiße … Ich komme aus … Ich wohne in … Ich bin … von Beruf. Ich spreche … Und du?"
+              "hint": "Ich heiße … Ich komme aus … Ich wohne in … Ich bin … von Beruf. Ich spreche … Und du?",
+              "variants": {
+                "student": {
+                  "prompt": "Introduce yourself to a German fellow student in six to eight sentences: your name, where you come from, where you live, what you study, which languages you speak. Finish with one question for them.",
+                  "hint": "Ich heiße … Ich komme aus … Ich wohne in … Ich studiere … Ich spreche … Und du?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a short message for your team's chat channel to introduce yourself on your first day. Say who you are, where you are, what you do and one thing you like. Greet at the start and say goodbye at the end.",
               "hint": "Hallo zusammen! Ich bin … / Viele Grüße",
               "words_min": 30,
-              "words_max": 60
+              "words_max": 60,
+              "variants": {
+                "student": {
+                  "prompt": "Write a short message for your course's group chat to introduce yourself on the first day of a German summer school. Say who you are, where you are from, what you study and one thing you like. Greet at the start and say goodbye at the end."
+                }
+              }
             }
           }
         },
@@ -82,13 +107,27 @@
               "id": "a1.1-2-standup-zeit",
               "title": "Wann ist das Standup?",
               "setup": "You are Lena, the scrum master of {{name}}'s team. The daily standup time has to move and you need to find a slot that works for {{name}} in Amman (one hour ahead of Berlin). Ask when {{he}} starts work, suggest a time and check it fits. Use du.",
-              "goal": "{{He}} says when {{he}} starts and finishes work and agrees on a concrete time for the standup."
+              "goal": "{{He}} says when {{he}} starts and finishes work and agrees on a concrete time for the standup.",
+              "variants": {
+                "student": {
+                  "title": "Wann ist die Lerngruppe?",
+                  "setup": "You are Lena, a German exchange student who runs an online study group for students in Berlin and Amman. The weekly meeting has to move and you need to find a slot that works for {{name}} in Amman (one hour ahead of Berlin). Ask when {{his}} lectures start and finish, suggest a time and check it fits. Use du.",
+                  "goal": "{{He}} says when {{his}} lectures start and finish and agrees on a concrete time for the study group."
+                }
+              }
             },
             {
               "id": "a1.1-2-personalabteilung",
               "title": "Anruf von der Personalabteilung",
               "setup": "You are Frau Berger from HR. You phone {{name}} to complete {{his}} employee file: you need {{his}} phone number, {{his}} date of birth and {{his}} email address, and you want to confirm the start date of {{his}} contract. Use Sie and read numbers back to {{him}} so {{he}} can confirm.",
-              "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date."
+              "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date.",
+              "variants": {
+                "student": {
+                  "title": "Anruf vom International Office",
+                  "setup": "You are Frau Berger from the International Office of a technical university in Berlin. You phone {{name}} to complete {{his}} application for a summer school: you need {{his}} phone number, {{his}} date of birth and {{his}} email address, and you want to confirm the start date of the course. Use Sie and read numbers back to {{him}} so {{he}} can confirm.",
+                  "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date."
+                }
+              }
             },
             {
               "id": "a1.1-2-kiosk",
@@ -100,13 +139,24 @@
           "checkpoint": {
             "speaking": {
               "prompt": "Describe your typical working week: which days you work, when you start, when the standup is, when you have lunch and when you stop. Then say your phone number and your birthday in German.",
-              "hint": "Ich arbeite von Montag bis Freitag. Ich fange um … Uhr an. Das Standup ist um …"
+              "hint": "Ich arbeite von Montag bis Freitag. Ich fange um … Uhr an. Das Standup ist um …",
+              "variants": {
+                "student": {
+                  "prompt": "Describe your typical week at university: which days you have lectures, when you start, when the lab or the study group is, when you have lunch and when you finish. Then say your phone number and your birthday in German.",
+                  "hint": "Ich habe von Montag bis Donnerstag Vorlesungen. Ich fange um … Uhr an. Die Lerngruppe ist um …"
+                }
+              }
             },
             "writing": {
               "prompt": "A colleague in Berlin asks when you are available for a call this week. Reply with two possible days and times in Amman time, say how long the call can be, and ask which one suits them.",
               "hint": "Am Dienstag habe ich von … bis … Zeit. Passt das?",
               "words_min": 30,
-              "words_max": 60
+              "words_max": 60,
+              "variants": {
+                "student": {
+                  "prompt": "Your German tandem partner in Berlin asks when you are available for a video call this week. Reply with two possible days and times in Amman time, say how long the call can be, and ask which one suits them."
+                }
+              }
             }
           }
         },
@@ -134,31 +184,64 @@
               "id": "a1.1-3-standup",
               "title": "Das Daily Standup",
               "setup": "You are Lena, the scrum master, running the daily standup. Ask {{name}} in very simple German what {{he}} is doing today and whether {{he}} needs help. If {{he}} answers in English, give {{him}} the German and ask again. Use du.",
-              "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not."
+              "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not.",
+              "variants": {
+                "student": {
+                  "title": "In der Lerngruppe",
+                  "setup": "You are Lena, a German exchange student, opening the study group with a quick round in which everyone says what they are doing today. Ask {{name}} in very simple German what {{he}} is doing today and whether {{he}} needs help. If {{he}} answers in English, give {{him}} the German and ask again. Use du.",
+                  "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not."
+                }
+              }
             },
             {
               "id": "a1.1-3-videocall",
               "title": "Vor dem Meeting",
               "setup": "You are Jonas, a colleague. You are both early in a video call waiting for the others. Make small talk: ask how {{he}} is, how {{his}} morning was and what time it is in Amman now. Use du and short sentences.",
-              "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day."
+              "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day.",
+              "variants": {
+                "student": {
+                  "title": "Vor dem Online-Seminar",
+                  "setup": "You are Jonas, a student in Berlin who takes the same online seminar as {{name}}. You are both early in the video call waiting for the others. Make small talk: ask how {{he}} is, how {{his}} morning was and what time it is in Amman now. Use du and short sentences.",
+                  "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day."
+                }
+              }
             },
             {
               "id": "a1.1-3-tagesablauf",
               "title": "Ein Tag in Amman",
               "setup": "You are Mira, a new colleague who is curious how remote work from Amman looks. Ask {{name}} about {{his}} day from getting up to finishing work: when {{he}} gets up, when {{he}} starts, when {{he}} eats, when {{he}} stops. Use du.",
-              "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly."
+              "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly.",
+              "variants": {
+                "student": {
+                  "title": "Ein Tag an der Uni",
+                  "setup": "You are Mira, a German student who is curious what student life in Amman looks like. Ask {{name}} about {{his}} day from getting up to the evening: when {{he}} gets up, when the first lecture starts, when {{he}} eats, when {{he}} goes home, and whether {{he}} also has a job on the side (Ich arbeite als … bei …). Use du.",
+                  "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Give a standup update in German: what you did yesterday is not needed yet, just say what you are working on today, who you are working with, and whether you have a problem. Then describe your working day from getting up to finishing.",
-              "hint": "Heute arbeite ich an … Ich stehe um … auf. Ich fange um … an."
+              "hint": "Heute arbeite ich an … Ich stehe um … auf. Ich fange um … an.",
+              "variants": {
+                "student": {
+                  "prompt": "Tell your study group in German what you are doing today: what you are working on, who you are working with, and whether you have a problem. Then describe your day at university from getting up to going home.",
+                  "hint": "Heute lerne ich für … Ich stehe um … auf. Die Vorlesung fängt um … an."
+                }
+              }
             },
             "writing": {
               "prompt": "Write a message to your manager describing your normal working day: start time, standup, what you usually do, lunch, end of the day. Mention one thing you like about your work.",
               "hint": "Mein Arbeitstag beginnt um … Ich mache … / Ich finde … gut.",
               "words_min": 40,
-              "words_max": 70
+              "words_max": 70,
+              "variants": {
+                "student": {
+                  "prompt": "Write a message to your German tandem partner describing a normal day at university: when you start, your lectures or lab, what you usually do, lunch, the end of the day. Mention one thing you like about your studies.",
+                  "hint": "Mein Tag beginnt um … Um zehn Uhr habe ich … / Ich finde … gut."
+                }
+              }
             }
           }
         },
@@ -192,7 +275,14 @@
               "id": "a1.1-4-teamessen",
               "title": "Mittagessen mit dem Team",
               "setup": "You are the waiter at an Italian restaurant where {{name}} is having lunch with colleagues. Hand {{him}} the menu, ask what {{he}} wants to drink, then what {{he}} wants to eat. When {{he}} asks, explain simply what a dish contains. {{He}} does not eat pork, so be ready for that question. Use Sie.",
-              "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork."
+              "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork.",
+              "variants": {
+                "student": {
+                  "title": "Mittagessen in der Mensa",
+                  "setup": "You are the woman behind the counter in the Mensa of a university in Berlin, where {{name}} is having lunch with other students on the first day of a summer school. Tell {{him}} the two dishes of the day, ask what {{he}} wants to eat and whether {{he}} wants a drink. When {{he}} asks, explain simply what a dish contains. {{He}} does not eat pork, so be ready for that question. Use Sie.",
+                  "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork."
+                }
+              }
             },
             {
               "id": "a1.1-4-supermarkt",
@@ -210,7 +300,12 @@
               "prompt": "Write a message to a colleague who is organising a team dinner. Say what you like to eat, what you do not eat, which drink you want, and ask what time and where the dinner is.",
               "hint": "Ich esse gern … Ich esse kein … Wann und wo ist das Essen?",
               "words_min": 40,
-              "words_max": 70
+              "words_max": 70,
+              "variants": {
+                "student": {
+                  "prompt": "Write a message to a fellow student who is organising a dinner for your study group. Say what you like to eat, what you do not eat, which drink you want, and ask what time and where the dinner is."
+                }
+              }
             }
           }
         },
@@ -244,7 +339,14 @@
               "id": "a1.1-5-buero",
               "title": "Im Bürogebäude",
               "setup": "You are Jonas showing {{name}} around the Berlin office on {{his}} first visit. Walk {{him}} through: the kitchen, the toilets, the meeting room Mars, {{his}} desk. Ask {{him}} afterwards where each thing is to check {{he}} remembers. Use du.",
-              "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
+              "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber.",
+              "variants": {
+                "student": {
+                  "title": "Auf dem Campus",
+                  "setup": "You are Jonas, a student showing {{name}} around the mechanical engineering building of a university in Berlin on the first day of {{his}} exchange semester. Walk {{him}} through: the Mensa, the library, the materials lab, lecture hall H1. Ask {{him}} afterwards where each thing is to check {{he}} remembers. Use du.",
+                  "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
+                }
+              }
             },
             {
               "id": "a1.1-5-hauptbahnhof",
@@ -262,7 +364,13 @@
               "prompt": "A colleague is visiting Amman and asks how to get from the airport to your office. Write a message with simple directions: taxi or bus, how long it takes, and where the office is (next to what, which floor).",
               "hint": "Nimm ein Taxi. Das dauert … Minuten. Das Büro ist im … Stock, neben …",
               "words_min": 40,
-              "words_max": 80
+              "words_max": 80,
+              "variants": {
+                "student": {
+                  "prompt": "A German exchange student is visiting Amman and asks how to get from the airport to your university. Write a message with simple directions: taxi or bus, how long it takes, and where your faculty building is (next to what, which floor).",
+                  "hint": "Nimm ein Taxi. Das dauert … Minuten. Die Fakultät ist neben … Mein Labor ist im … Stock."
+                }
+              }
             }
           }
         }
@@ -297,31 +405,63 @@
               "id": "a1.2-1-review",
               "title": "Bitte um ein Code-Review",
               "setup": "You are Mira, a senior developer on {{name}}'s team. {{He}} is going to ask you to review {{his}} pull request. Ask what the change does, how big it is and by when {{he}} needs the review. Agree only if {{he}} gives you a time. Use du.",
-              "goal": "{{He}} asks for a review, says in simple words what the change does, and names a deadline."
+              "goal": "{{He}} asks for a review, says in simple words what the change does, and names a deadline.",
+              "variants": {
+                "student": {
+                  "title": "Kannst du meinen Laborbericht lesen?",
+                  "setup": "You are Mira, a Master's student who tutors the lab course {{name}} is taking. {{He}} is going to ask you to read {{his}} lab report before {{he}} hands it in. Ask what the experiment was, how long the report is and by when {{he}} needs your feedback. Agree only if {{he}} gives you a time. Use du.",
+                  "goal": "{{He}} asks for feedback, says in simple words what the report is about, and names a deadline."
+                }
+              }
             },
             {
               "id": "a1.2-1-frage-an-chefin",
               "title": "Eine kurze Frage an die Chefin",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} joins a short call because {{he}} has a question about a task. Ask what the problem is and give {{him}} one clear instruction. Check at the end that {{he}} knows what to do next. Use Sie; she is friendly but busy.",
-              "goal": "{{He}} explains {{his}} question, says {{he}} does or does not understand your instruction, and repeats what {{he}} will do next."
+              "goal": "{{He}} explains {{his}} question, says {{he}} does or does not understand your instruction, and repeats what {{he}} will do next.",
+              "variants": {
+                "student": {
+                  "title": "Eine kurze Frage an die Professorin",
+                  "setup": "You are Frau Prof. Dr. Sommer, who teaches {{name}}'s course on machine elements. {{He}} comes to your office hours (Sprechstunde) because {{he}} has a question about an assignment. Ask what the problem is and give {{him}} one clear instruction. Check at the end that {{he}} knows what to do next. Use Sie; you are friendly but busy.",
+                  "goal": "{{He}} explains {{his}} question, says {{he}} does or does not understand your instruction, and repeats what {{he}} will do next."
+                }
+              }
             },
             {
               "id": "a1.2-1-onboarding",
               "title": "Dem neuen Kollegen helfen",
               "setup": "You are Tom, a new junior on the team. You cannot get access to the staging cluster and you ask {{name}} for help. Say what you tried, ask what you have to do, and ask follow-up questions when {{he}} explains. Use du.",
-              "goal": "{{He}} gives you at least two concrete instructions using müssen or the du imperative."
+              "goal": "{{He}} gives you at least two concrete instructions using müssen or the du imperative.",
+              "variants": {
+                "student": {
+                  "title": "Dem neuen Kommilitonen helfen",
+                  "setup": "You are Tom, a first-semester student in the CAD lab. You cannot log in to the CAD program and your model will not open, so you ask {{name}} for help. Say what you tried, ask what you have to do, and ask follow-up questions when {{he}} explains. Use du.",
+                  "goal": "{{He}} gives you at least two concrete instructions using müssen or the du imperative."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "You need a colleague to review a change today. Explain what the change does in simple words, say why it is urgent, and ask them to look at it by a specific time. Then say one thing you do not understand in their feedback and ask them to explain it.",
-              "hint": "Kannst du bitte meinen Pull Request anschauen? Ich muss das heute deployen. Was bedeutet …?"
+              "hint": "Kannst du bitte meinen Pull Request anschauen? Ich muss das heute deployen. Was bedeutet …?",
+              "variants": {
+                "student": {
+                  "prompt": "You need a fellow student to read your lab report today. Explain what the report is about in simple words, say why it is urgent, and ask them to look at it by a specific time. Then say one thing you do not understand in their feedback and ask them to explain it.",
+                  "hint": "Kannst du bitte meinen Laborbericht lesen? Ich muss ihn morgen abgeben. Was bedeutet …?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a chat message to your team: you have a problem with a ticket, explain what you want to do, what does not work, and ask one person for help by a certain time.",
               "hint": "Ich habe ein Problem mit … Ich will …, aber … Kannst du mir bis … Uhr helfen?",
               "words_min": 40,
-              "words_max": 80
+              "words_max": 80,
+              "variants": {
+                "student": {
+                  "prompt": "Write a chat message to your project group: you have a problem with your part of the project, explain what you want to do, what does not work, and ask one person for help by a certain time."
+                }
+              }
             }
           }
         },
@@ -349,7 +489,14 @@
               "id": "a1.2-2-montag",
               "title": "Montagmorgen",
               "setup": "You are Jonas, waiting with {{name}} for the others to join the Monday standup. Ask about {{his}} weekend, tell {{him}} about yours in simple sentences (you went hiking), and ask what {{he}} likes doing in {{his}} free time. Use du.",
-              "goal": "{{He}} says what {{he}} likes doing in {{his}} free time with gern or lieber and asks you about your hobbies."
+              "goal": "{{He}} says what {{he}} likes doing in {{his}} free time with gern or lieber and asks you about your hobbies.",
+              "variants": {
+                "student": {
+                  "title": "Montagmorgen",
+                  "setup": "You are Jonas, a German exchange student, waiting with {{name}} for the Monday lecture to begin. Ask about {{his}} weekend, tell {{him}} about yours in simple sentences (you went hiking), and ask what {{he}} likes doing in {{his}} free time. Use du.",
+                  "goal": "{{He}} says what {{he}} likes doing in {{his}} free time with gern or lieber and asks you about your hobbies."
+                }
+              }
             },
             {
               "id": "a1.2-2-fitnessstudio",
@@ -401,7 +548,14 @@
               "id": "a1.2-3-standup-gestern",
               "title": "Standup: gestern, heute, Blocker",
               "setup": "You are Lena, the scrum master, running the standup. Ask {{name}} the three standup questions one at a time: what {{he}} did yesterday, what {{he}} is doing today, whether anything is blocking {{him}}. If {{he}} answers yesterday in the present tense, repeat it back in the Perfekt as a question (Du hast den Server neu gestartet?). Use du.",
-              "goal": "{{He}} answers all three questions and uses the Perfekt correctly for at least two things {{he}} did yesterday."
+              "goal": "{{He}} answers all three questions and uses the Perfekt correctly for at least two things {{he}} did yesterday.",
+              "variants": {
+                "student": {
+                  "title": "Projekttreffen: gestern, heute, Probleme",
+                  "setup": "You are Lena, a fellow student, opening the weekly meeting of your group project. Ask {{name}} three questions one at a time: what {{he}} did for the project yesterday, what {{he}} is doing today, whether anything is blocking {{him}}. If {{he}} answers yesterday in the present tense, repeat it back in the Perfekt as a question (Du hast das Modell gezeichnet?). Use du.",
+                  "goal": "{{He}} answers all three questions and uses the Perfekt correctly for at least two things {{he}} did yesterday."
+                }
+              }
             },
             {
               "id": "a1.2-3-wochenende",
@@ -413,19 +567,38 @@
               "id": "a1.2-3-verspaetung",
               "title": "Das Ticket ist noch nicht fertig",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. A task {{he}} promised for Friday is not finished. Ask calmly what happened, what {{he}} did, and when it will be ready now. Use Sie; you are not angry, you want facts.",
-              "goal": "{{He}} explains in the Perfekt what {{he}} did and what went wrong, and names a new date."
+              "goal": "{{He}} explains in the Perfekt what {{he}} did and what went wrong, and names a new date.",
+              "variants": {
+                "student": {
+                  "title": "Der Laborbericht ist noch nicht fertig",
+                  "setup": "You are Herr Dr. Krüger, head of the materials lab, who supervises {{name}}'s lab course. A lab report {{he}} promised for Friday is not finished. Ask calmly what happened, what {{he}} did, and when it will be ready now. Use Sie; you are not angry, you want facts.",
+                  "goal": "{{He}} explains in the Perfekt what {{he}} did and what went wrong, and names a new date."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Give a full standup update for a real day last week: what you did yesterday (at least four things in the Perfekt), what you are doing today, and one blocker. Then say what you did last weekend.",
-              "hint": "Gestern habe ich … getestet und … geschrieben. Ich bin um … aufgestanden. Heute mache ich …"
+              "hint": "Gestern habe ich … getestet und … geschrieben. Ich bin um … aufgestanden. Heute mache ich …",
+              "variants": {
+                "student": {
+                  "prompt": "Tell your study group about a real day last week: what you did yesterday (at least four things in the Perfekt), what you are doing today, and one problem. Then say what you did last weekend.",
+                  "hint": "Gestern habe ich … gelernt und … geschrieben. Ich bin um … aufgestanden. Heute mache ich …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a short message to your manager explaining why a task is late: what you did on Monday and Tuesday, what problem you found, and when the task will be finished now.",
               "hint": "Am Montag habe ich … Dann habe ich ein Problem gefunden: … Das Ticket ist am … fertig.",
               "words_min": 40,
-              "words_max": 80
+              "words_max": 80,
+              "variants": {
+                "student": {
+                  "prompt": "Write a short message to your lab supervisor explaining why your lab report is late: what you did on Monday and Tuesday, what problem you found, and when the report will be finished now.",
+                  "hint": "Am Montag habe ich … Dann habe ich ein Problem gefunden: … Der Bericht ist am … fertig."
+                }
+              }
             }
           }
         },
@@ -477,7 +650,12 @@
               "prompt": "You are travelling to the Berlin office. Write a message to a colleague who will pick you up: which train you take, when it leaves and arrives, and what to do if the train is late.",
               "hint": "Ich nehme den Zug um … Er kommt um … in Berlin an. Wenn der Zug Verspätung hat, …",
               "words_min": 40,
-              "words_max": 80
+              "words_max": 80,
+              "variants": {
+                "student": {
+                  "prompt": "You are travelling to a summer school at a university in Berlin. Write a message to your German tandem partner who will pick you up: which train you take, when it leaves and arrives, and what to do if the train is late."
+                }
+              }
             }
           }
         },
@@ -576,13 +754,26 @@
               "id": "a2.1-1-verschieben",
               "title": "Können wir das Meeting verschieben?",
               "setup": "You are Mira, a colleague. {{name}} has a 1:1 with you tomorrow at ten but something has come up. Let {{him}} explain, ask for a reason, and negotiate a new time; you are busy before lunch all week. Use du.",
-              "goal": "{{He}} asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time."
+              "goal": "{{He}} asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time.",
+              "variants": {
+                "student": {
+                  "title": "Können wir das Treffen verschieben?",
+                  "setup": "You are Mira, a fellow student. You and {{name}} meet tomorrow at ten to prepare your group presentation, but something has come up for {{him}}. Let {{him}} explain, ask for a reason, and negotiate a new time; you are in the lab before lunch all week. Use du.",
+                  "goal": "{{He}} asks to move the meeting with a polite form, gives a reason using mit/bei/seit, and agrees on a new time."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Phone a dentist's practice: ask for an appointment, say since when you have had the problem, say which days and times you can, and confirm the appointment. Then call a colleague and move your meeting to another day with a reason.",
-              "hint": "Ich hätte gern einen Termin. Ich habe seit einer Woche … Nach dem Standup kann ich. Könnten wir das Meeting auf Donnerstag verschieben?"
+              "hint": "Ich hätte gern einen Termin. Ich habe seit einer Woche … Nach dem Standup kann ich. Könnten wir das Meeting auf Donnerstag verschieben?",
+              "variants": {
+                "student": {
+                  "prompt": "Phone a dentist's practice: ask for an appointment, say since when you have had the problem, say which days and times you can, and confirm the appointment. Then call a fellow student and move your study meeting to another day with a reason.",
+                  "hint": "Ich hätte gern einen Termin. Ich habe seit einer Woche … Nach der Vorlesung kann ich. Könnten wir unser Treffen auf Donnerstag verschieben?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write an email to the Bürgeramt or to a practice: you have to cancel your appointment on a certain date, give the reason, and ask for a new one. Say which days and times you are free.",
@@ -616,7 +807,14 @@
               "id": "a2.1-2-krankmeldung",
               "title": "Ich bin krank",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. {{He}} calls in the morning because {{he}} is ill. Ask what is wrong, how long {{he}} thinks {{he}} will be off, whether anything urgent needs handing over, and remind {{him}} {{he}} needs a doctor's note (Krankschreibung) from the third day. Use Sie, warm and brief.",
-              "goal": "{{He}} says what is wrong using a dative expression, estimates how long {{he}} will be away, and names one task someone must take over."
+              "goal": "{{He}} says what is wrong using a dative expression, estimates how long {{he}} will be away, and names one task someone must take over.",
+              "variants": {
+                "student": {
+                  "title": "Ich bin krank",
+                  "setup": "You are Herr Dr. Krüger, head of the materials lab. {{name}} calls in the morning because {{he}} is ill and cannot come to today's lab session. Ask what is wrong, how long {{he}} thinks {{he}} will be away, who in {{his}} lab group can take over {{his}} part of the measurements, and remind {{him}} that {{he}} needs a doctor's note (ärztliches Attest) to make up the session later. Use Sie, warm and brief.",
+                  "goal": "{{He}} says what is wrong using a dative expression, estimates how long {{he}} will be away, and names one task someone must take over."
+                }
+              }
             },
             {
               "id": "a2.1-2-beim-arzt",
@@ -634,13 +832,25 @@
           "checkpoint": {
             "speaking": {
               "prompt": "Call your manager and say you are ill: what is wrong, since when, how long you will be away, who takes over. Then you are at the doctor: describe your symptoms in detail and ask whether you may work from home.",
-              "hint": "Mir geht es nicht gut. Ich habe seit gestern Fieber und … Ich bleibe heute zu Hause. Darf ich im Homeoffice arbeiten?"
+              "hint": "Mir geht es nicht gut. Ich habe seit gestern Fieber und … Ich bleibe heute zu Hause. Darf ich im Homeoffice arbeiten?",
+              "variants": {
+                "student": {
+                  "prompt": "Call your lab supervisor and say you are ill: what is wrong, since when, how long you will be away, who in your group takes over your part. Then you are at the doctor: describe your symptoms in detail and ask whether you may go to your lectures.",
+                  "hint": "Mir geht es nicht gut. Ich habe seit gestern Fieber und … Ich bleibe heute zu Hause. Darf ich morgen in die Vorlesung gehen?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a message to your team: you are ill, say roughly what is wrong, what you will not manage today, which tasks are urgent and who should take them, and when you expect to be back.",
               "hint": "Hallo zusammen, ich bin krank und bleibe heute zu Hause. Mir tut … weh. Das Deployment muss … Ich melde mich am …",
               "words_min": 60,
-              "words_max": 100
+              "words_max": 100,
+              "variants": {
+                "student": {
+                  "prompt": "Write a message to your project group: you are ill, say roughly what is wrong, what you will not manage today, which tasks are urgent and who should take them, and when you expect to be back.",
+                  "hint": "Hallo zusammen, ich bin krank und bleibe heute zu Hause. Mir tut … weh. Die Präsentation muss … Ich melde mich am …"
+                }
+              }
             }
           }
         },
@@ -720,7 +930,14 @@
               "id": "a2.1-4-bank",
               "title": "Ein Konto eröffnen",
               "setup": "You are a bank adviser in Berlin. {{name}} wants to open a current account for {{his}} salary. Ask for {{his}} passport, {{his}} registration (Meldebescheinigung) and {{his}} employer, explain the monthly fee and that the card comes by post, and ask whether {{he}} wants online banking. Use Sie.",
-              "goal": "{{He}} says what {{he}} needs, asks about fees and the card, and answers your document questions."
+              "goal": "{{He}} says what {{he}} needs, asks about fees and the card, and answers your document questions.",
+              "variants": {
+                "student": {
+                  "title": "Ein Konto eröffnen",
+                  "setup": "You are a bank adviser in Berlin. {{name}} has just started an exchange semester and wants to open a current account for {{his}} rent and {{his}} student job. Ask for {{his}} passport, {{his}} registration (Meldebescheinigung) and {{his}} certificate of enrolment (Immatrikulationsbescheinigung), explain that the student account is free but the card costs a small fee and comes by post, and ask whether {{he}} wants online banking. Use Sie.",
+                  "goal": "{{He}} says what {{he}} needs, asks about fees and the card, and answers your document questions."
+                }
+              }
             },
             {
               "id": "a2.1-4-handyvertrag",
@@ -772,31 +989,64 @@
               "id": "a2.1-5-deploy-kaputt",
               "title": "Das Deployment ist kaputt",
               "setup": "You are Lena, the scrum master. Yesterday evening a deployment by {{name}} broke the staging environment for an hour. In the standup, ask {{him}} what happened, step by step: what {{he}} did first, what went wrong, how {{he}} noticed, what {{he}} did then. Ask for the cause. Use du.",
-              "goal": "{{He}} narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb."
+              "goal": "{{He}} narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb.",
+              "variants": {
+                "student": {
+                  "title": "Der Versuch ist schiefgegangen",
+                  "setup": "You are Lena, a fellow student in {{name}}'s lab group. Yesterday afternoon a test on the tensile testing machine went wrong while {{name}} was running it, and the group lost an hour. In today's meeting, ask {{him}} what happened, step by step: what {{he}} did first, what went wrong, how {{he}} noticed, what {{he}} did then. Ask for the cause. Use du.",
+                  "goal": "{{He}} narrates the incident in order with at least four steps, uses the Perfekt and Präteritum correctly, and names a cause with weil or deshalb."
+                }
+              }
             },
             {
               "id": "a2.1-5-chefin-erklaeren",
               "title": "Erklärung für die Chefin",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. A customer complained about an outage. Ask {{name}} to explain what happened, why, how long it took, and what {{he}} will do so it does not happen again. Ask one critical follow-up question. Use Sie.",
-              "goal": "{{He}} explains the cause with weil, says how long the outage lasted, and names one concrete measure for the future."
+              "goal": "{{He}} explains the cause with weil, says how long the outage lasted, and names one concrete measure for the future.",
+              "variants": {
+                "student": {
+                  "title": "Erklärung für den Laborleiter",
+                  "setup": "You are Herr Dr. Krüger, head of the materials lab. A test rig was out of use for a whole day after {{name}}'s group worked on it, and another group had to cancel their measurements. Ask {{name}} to explain what happened, why, how long it took, and what {{he}} will do so it does not happen again. Ask one critical follow-up question. Use Sie.",
+                  "goal": "{{He}} explains the cause with weil, says how long the rig was out of use, and names one concrete measure for the future."
+                }
+              }
             },
             {
               "id": "a2.1-5-problem-geloest",
               "title": "Ein Problem, das ich gelöst habe",
               "setup": "You are Tom, a junior colleague. {{name}} solved a tricky problem last week (slow database, full disk, broken pipeline, whatever {{he}} chooses). Ask {{him}} to tell you the story: what the problem was, how {{he}} found the cause, what {{he}} tried, what finally worked. Ask what you can learn from it. Use du.",
-              "goal": "{{He}} tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked."
+              "goal": "{{He}} tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked.",
+              "variants": {
+                "student": {
+                  "title": "Ein Problem, das ich gelöst habe",
+                  "setup": "You are Tom, a first-semester student. Last week {{name}} solved a tricky problem in a project (a 3D print that kept failing, a CAD assembly that would not fit together, a sensor with wrong values, whatever {{he}} chooses). Ask {{him}} to tell you the story: what the problem was, how {{he}} found the cause, what {{he}} tried, what finally worked. Ask what you can learn from it. Use du.",
+                  "goal": "{{He}} tells the story in order with the Präteritum of sein/haben/modals and the Perfekt for actions, and says what finally worked."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Tell the story of a real incident or problem at work: what happened first, how you noticed, what the cause was, what you tried, what worked in the end, and how long it took. Use at least six steps and say why the problem happened.",
-              "hint": "Zuerst habe ich … deployt. Dann war der Server nicht erreichbar. Das Problem war …, weil … Deshalb habe ich …"
+              "hint": "Zuerst habe ich … deployt. Dann war der Server nicht erreichbar. Das Problem war …, weil … Deshalb habe ich …",
+              "variants": {
+                "student": {
+                  "prompt": "Tell the story of a real problem in a lab, a workshop or a project: what happened first, how you noticed, what the cause was, what you tried, what worked in the end, and how long it took. Use at least six steps and say why the problem happened.",
+                  "hint": "Zuerst habe ich die Maschine kalibriert. Dann war der Sensor kaputt. Das Problem war …, weil … Deshalb habe ich …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a short incident message for your team channel about an outage: what happened, when it started and ended, what the cause was, what you did, and what the next step is.",
               "hint": "Gestern um … Uhr war … nicht erreichbar. Die Ursache war … Ich habe … zurückgesetzt. Nächster Schritt: …",
               "words_min": 60,
-              "words_max": 110
+              "words_max": 110,
+              "variants": {
+                "student": {
+                  "prompt": "Write a short message for your project group's chat about a test that went wrong: what happened, when it started and ended, what the cause was, what you did, and what the next step is.",
+                  "hint": "Gestern um … Uhr hat … nicht funktioniert. Die Ursache war … Ich habe … neu gestartet. Nächster Schritt: …"
+                }
+              }
             }
           }
         }
@@ -831,31 +1081,64 @@
               "id": "a2.2-1-ziele",
               "title": "Ziele für das Quartal",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager, in your monthly 1:1. Ask how the last month went, what went well, what was difficult, and what {{he}} wants to learn or achieve next quarter. Offer one piece of feedback ({{his}} documentation is good, {{his}} estimates are too optimistic). Use Sie.",
-              "goal": "{{He}} describes how the month went with at least two dass clauses and names one concrete goal for next quarter."
+              "goal": "{{He}} describes how the month went with at least two dass clauses and names one concrete goal for next quarter.",
+              "variants": {
+                "student": {
+                  "title": "Ziele für das Semester",
+                  "setup": "You are Frau Prof. Dr. Sommer, {{name}}'s academic adviser, in your meeting in the middle of the semester. Ask how the semester is going, what went well, what was difficult, and what {{he}} wants to learn or achieve next semester. Offer one piece of feedback ({{his}} lab reports are clear, {{his}} time planning is too optimistic). Use Sie.",
+                  "goal": "{{He}} describes how the semester is going with at least two dass clauses and names one concrete goal for next semester."
+                }
+              }
             },
             {
               "id": "a2.2-1-urlaub",
               "title": "Urlaub beantragen",
               "setup": "You are Frau Dr. Sommer. {{name}} wants two weeks off in a period that overlaps with a release. Ask when exactly, why then, who covers {{his}} on-call duty, and propose a compromise. Use Sie; you want to say yes but need the release covered.",
-              "goal": "{{He}} asks for the holiday with an indirect question (ob), gives a reason, and agrees on who covers {{his}} tasks."
+              "goal": "{{He}} asks for the holiday with an indirect question (ob), gives a reason, and agrees on who covers {{his}} tasks.",
+              "variants": {
+                "student": {
+                  "title": "Zwei Wochen frei",
+                  "setup": "You are Frau Prof. Dr. Sommer, who supervises {{name}}'s group project. {{He}} wants two weeks away for a family wedding, but the dates overlap with the group's final presentation. Ask when exactly, why then, who presents {{his}} part, and propose a compromise. Use Sie; you want to say yes but need the presentation covered.",
+                  "goal": "{{He}} asks for the time off with an indirect question (ob), gives a reason, and agrees on who covers {{his}} part."
+                }
+              }
             },
             {
               "id": "a2.2-1-zu-viel",
               "title": "Zu viele Tickets",
               "setup": "You are Frau Dr. Sommer. {{name}} has too much on {{his}} plate and wants to talk about priorities. Ask {{him}} to list what {{he}} is working on, then ask which tasks {{he}} thinks are most important and which can wait. Decide together. Use Sie.",
-              "goal": "{{He}} lists at least three tasks, says which {{he}} thinks are most important using finden/glauben + dass, and proposes what to drop or delay."
+              "goal": "{{He}} lists at least three tasks, says which {{he}} thinks are most important using finden/glauben + dass, and proposes what to drop or delay.",
+              "variants": {
+                "student": {
+                  "title": "Zu viele Abgaben",
+                  "setup": "You are Frau Prof. Dr. Sommer, {{name}}'s academic adviser. {{He}} has too much on {{his}} plate this semester and wants to talk about priorities. Ask {{him}} to list what {{he}} is working on, then ask which tasks {{he}} thinks are most important and which can wait. Decide together. Use Sie.",
+                  "goal": "{{He}} lists at least three tasks, says which {{he}} thinks are most important using finden/glauben + dass, and proposes what to drop or delay."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Prepare your side of a 1:1: say how the last month went, what you are satisfied with and what was hard, what you want to learn next quarter, and ask whether you can take holiday in a specific week. Use dass, ob and wenn.",
-              "hint": "Ich finde, dass … gut gelaufen ist. Ich weiß nicht, ob … Wenn ich im Dezember Urlaub nehme, …"
+              "hint": "Ich finde, dass … gut gelaufen ist. Ich weiß nicht, ob … Wenn ich im Dezember Urlaub nehme, …",
+              "variants": {
+                "student": {
+                  "prompt": "Prepare your side of a meeting with your academic adviser: say how the semester is going, what you are satisfied with and what is hard, what you want to learn next semester, and ask whether you can do an internship in a specific semester. Use dass, ob and wenn.",
+                  "hint": "Ich finde, dass … gut gelaufen ist. Ich weiß nicht, ob … Wenn ich im Sommer ein Praktikum mache, …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write an email to your manager before your 1:1: three topics you want to discuss, your opinion on each in one or two sentences, and a question about holiday or working hours.",
               "hint": "Liebe Frau Dr. Sommer, ich möchte im 1:1 über … sprechen. Ich glaube, dass … Außerdem möchte ich fragen, ob …",
               "words_min": 70,
-              "words_max": 120
+              "words_max": 120,
+              "variants": {
+                "student": {
+                  "prompt": "Write an email to your academic adviser before your meeting: three topics you want to discuss, your opinion on each in one or two sentences, and a question about your exams or an internship.",
+                  "hint": "Sehr geehrte Frau Prof. Dr. Sommer, ich möchte im Gespräch über … sprechen. Ich glaube, dass … Außerdem möchte ich fragen, ob …"
+                }
+              }
             }
           }
         },
@@ -935,13 +1218,27 @@
               "id": "a2.2-3-teamessen",
               "title": "Das Teamessen",
               "setup": "You are Jonas, sitting next to {{name}} at a team dinner in Berlin. Chat: ask what {{he}} thinks of the food, tell {{him}} about a German dish, ask whether people eat out a lot in Amman, and invite {{him}} to a football match on Saturday. Use du, relaxed.",
-              "goal": "{{He}} keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason."
+              "goal": "{{He}} keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason.",
+              "variants": {
+                "student": {
+                  "title": "Essen mit der Lerngruppe",
+                  "setup": "You are Jonas, sitting next to {{name}} at a dinner with {{his}} study group in Berlin. Chat: ask what {{he}} thinks of the food, tell {{him}} about a German dish, ask whether students eat out a lot in Amman, and invite {{him}} to a football match on Saturday. Use du, relaxed.",
+                  "goal": "{{He}} keeps the conversation going for at least six turns, uses an adjective with an ending correctly, and accepts or declines the invitation with a reason."
+                }
+              }
             },
             {
               "id": "a2.2-3-ramadan",
               "title": "Fragen über den Ramadan",
               "setup": "You are Mira, a colleague who is curious and a bit worried about doing something wrong. Ramadan is starting. Ask {{name}} what it means for {{him}}, whether it is okay to eat in front of {{him}} in calls, whether meeting times should change, and what Eid is like with {{his}} family. Use du.",
-              "goal": "{{He}} explains Ramadan and Eid in simple sentences, says what {{he}} needs or does not need at work, and uses deshalb or trotzdem at least once."
+              "goal": "{{He}} explains Ramadan and Eid in simple sentences, says what {{he}} needs or does not need at work, and uses deshalb or trotzdem at least once.",
+              "variants": {
+                "student": {
+                  "title": "Fragen über den Ramadan",
+                  "setup": "You are Mira, a fellow student in {{name}}'s project group, who is curious and a bit worried about doing something wrong. Ramadan is starting. Ask {{name}} what it means for {{him}}, whether it is okay to eat in front of {{him}} in group meetings, whether the meeting times should change, and what Eid is like with {{his}} family. Use du.",
+                  "goal": "{{He}} explains Ramadan and Eid in simple sentences, says what {{he}} needs or does not need in the group, and uses deshalb or trotzdem at least once."
+                }
+              }
             },
             {
               "id": "a2.2-3-einladung",
@@ -953,13 +1250,24 @@
           "checkpoint": {
             "speaking": {
               "prompt": "You are at a team dinner in Germany. Describe a typical Jordanian dinner with your family, explain one tradition (for example Ramadan or hospitality), say what surprises you about German work culture, and invite a colleague to visit Amman.",
-              "hint": "Bei uns isst die ganze Familie zusammen. Wir essen … Im Ramadan fasten wir, deshalb … Hättest du Lust, nach Amman zu kommen?"
+              "hint": "Bei uns isst die ganze Familie zusammen. Wir essen … Im Ramadan fasten wir, deshalb … Hättest du Lust, nach Amman zu kommen?",
+              "variants": {
+                "student": {
+                  "prompt": "You are at a dinner with German exchange students. Describe a typical Jordanian dinner with your family, explain one tradition (for example Ramadan or hospitality), say what surprises you about German students or German universities, and invite one of them to visit Amman."
+                }
+              }
             },
             "writing": {
               "prompt": "Write a message to your team to invite them to an online dinner or a get-together when you visit Berlin: when, where, what you plan, what you will bring from Jordan, and ask who is coming and what they do not eat.",
               "hint": "Liebes Team, ich bin vom … bis … in Berlin. Hättet ihr Lust auf …? Ich bringe … mit. Wer kommt mit?",
               "words_min": 70,
-              "words_max": 120
+              "words_max": 120,
+              "variants": {
+                "student": {
+                  "prompt": "Write a message to your summer-school group to invite them to a get-together: when, where, what you plan, what you will bring from Jordan, and ask who is coming and what they do not eat.",
+                  "hint": "Liebe alle, am … koche ich … Hättet ihr Lust auf …? Ich bringe … mit. Wer kommt mit?"
+                }
+              }
             }
           }
         },
@@ -987,31 +1295,64 @@
               "id": "a2.2-4-pipeline",
               "title": "Wie funktioniert unsere Pipeline?",
               "setup": "You are Tom, a junior developer who has never seen the deployment pipeline. Ask {{name}} to explain what happens when {{he}} pushes code: step by step, until it is live. Ask why each step exists and what happens when a test fails. Use du.",
-              "goal": "{{He}} explains at least five steps in order using man and zuerst/dann, and explains the purpose of one step with um … zu."
+              "goal": "{{He}} explains at least five steps in order using man and zuerst/dann, and explains the purpose of one step with um … zu.",
+              "variants": {
+                "student": {
+                  "title": "Wie funktioniert eine Scheibenbremse?",
+                  "setup": "You are Tom, a first-semester student who has never looked inside a car's disc brake. Ask {{name}} to explain what happens from the moment the driver presses the pedal until the car stops, step by step. Ask why each part is there and what happens when the brake gets too hot. Use du.",
+                  "goal": "{{He}} explains at least five steps in order using man and zuerst/dann, and explains the purpose of one part with um … zu."
+                }
+              }
             },
             {
               "id": "a2.2-4-rollback",
               "title": "Warum brauchen wir ein Rollback?",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager, who is not technical. {{name}} wants budget for a better rollback mechanism. Ask what a rollback is in plain words, why it matters, what happens today without it, and what it costs. Use Sie.",
-              "goal": "{{He}} explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it."
+              "goal": "{{He}} explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it.",
+              "variants": {
+                "student": {
+                  "title": "Warum brauchen wir einen Sicherheitsfaktor?",
+                  "setup": "You are Frau Hoffmann, who manages the faculty's budget for student projects and is not an engineer. {{name}}'s project group wants money for a stronger, more expensive part because of the safety factor. Ask what a safety factor is in plain words, why it matters, what could happen without it, and what it costs. Use Sie.",
+                  "goal": "{{He}} explains the concept in plain words with an infinitive with zu or um … zu, and gives one concrete example of what goes wrong without it."
+                }
+              }
             },
             {
               "id": "a2.2-4-vergleich",
               "title": "Zwei Lösungen",
               "setup": "You are Mira, a senior colleague. The team must choose between two solutions for logging (a hosted service versus running it yourselves). Ask {{name}} for the advantages and disadvantages of each and a recommendation. Challenge one of {{his}} points. Use du.",
-              "goal": "{{He}} names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason."
+              "goal": "{{He}} names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason.",
+              "variants": {
+                "student": {
+                  "title": "Zwei Lösungen",
+                  "setup": "You are Mira, a Master's student who supervises {{name}}'s group project. The group must decide how to make a small bracket for their prototype: print it on the 3D printer or have it milled from aluminium in the workshop. Ask {{name}} for the advantages and disadvantages of each and a recommendation. Challenge one of {{his}} points. Use du.",
+                  "goal": "{{He}} names at least two advantages and one disadvantage for each option, uses a superlative, and recommends one with a reason."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Explain to a non-technical colleague how a change gets from your laptop to production, in at least five steps, and why two of the steps exist. Then compare two tools or approaches you know and recommend one.",
-              "hint": "Zuerst schreibt man den Code. Dann … Wir testen, um Fehler zu finden. Die beste Lösung ist …, weil …"
+              "hint": "Zuerst schreibt man den Code. Dann … Wir testen, um Fehler zu finden. Die beste Lösung ist …, weil …",
+              "variants": {
+                "student": {
+                  "prompt": "Explain to a friend who is not an engineer how a machine or a mechanism works (a disc brake, a gearbox, a 3D printer), in at least five steps, and why two of the parts are there. Then compare two ways of making a part (3D printing and milling, for example) and recommend one.",
+                  "hint": "Zuerst tritt man auf das Pedal. Dann … Man braucht …, um … zu … Die beste Lösung ist …, weil …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a short how-to for a new colleague: how to deploy a service to the staging environment in five to seven steps. Use man or the imperative, say what is important, and say what to do if something fails.",
               "hint": "Zuerst muss man … Es ist wichtig, … zu … Wenn der Test fehlschlägt, …",
               "words_min": 70,
-              "words_max": 120
+              "words_max": 120,
+              "variants": {
+                "student": {
+                  "prompt": "Write a short how-to for a new student: how to print a part on the lab's 3D printer in five to seven steps. Use man or the imperative, say what is important, and say what to do if something fails.",
+                  "hint": "Zuerst muss man … Es ist wichtig, … zu … Wenn der Druck fehlschlägt, …"
+                }
+              }
             }
           }
         },
@@ -1039,7 +1380,14 @@
               "id": "a2.2-5-relocation",
               "title": "Gespräch mit der Personalabteilung",
               "setup": "You are Frau Berger from HR. The company wants to move {{name}} to Berlin next year. Explain what the company pays for (flights, one month of temporary housing, the visa lawyer) and ask about {{his}} timeline, whether {{he}} comes alone, and what worries {{him}}. Use Sie.",
-              "goal": "{{He}} asks at least three questions about the relocation, says when {{he}} could move using werden or the present tense, and names one thing {{he}} is worried about or looking forward to."
+              "goal": "{{He}} asks at least three questions about the relocation, says when {{he}} could move using werden or the present tense, and names one thing {{he}} is worried about or looking forward to.",
+              "variants": {
+                "student": {
+                  "title": "Gespräch mit dem International Office",
+                  "setup": "You are Frau Berger from the International Office of a technical university in Berlin. {{name}} has been accepted for an exchange semester next year. Explain what the programme offers (a room in a student residence for the first months, a free German course, a buddy) and ask about {{his}} timeline, whether {{he}} has applied for the student visa yet, and what worries {{him}}. Use Sie.",
+                  "goal": "{{He}} asks at least three questions about the exchange semester, says when {{he}} could come using werden or the present tense, and names one thing {{he}} is worried about or looking forward to."
+                }
+              }
             },
             {
               "id": "a2.2-5-erste-wochen",
@@ -1063,7 +1411,13 @@
               "prompt": "Write an email to HR about your relocation: your preferred timeline, three questions (visa, temporary housing, insurance), what you are already preparing, and what you need from them by when.",
               "hint": "Sehr geehrte Frau Berger, ich plane, im … nach Berlin zu ziehen. Ich bereite mich gerade auf … vor. Könnten Sie mir sagen, ob …",
               "words_min": 70,
-              "words_max": 120
+              "words_max": 120,
+              "variants": {
+                "student": {
+                  "prompt": "Write an email to the International Office of a German university about your exchange semester: your preferred timeline, three questions (visa, student housing, insurance), what you are already preparing, and what you need from them by when.",
+                  "hint": "Sehr geehrte Frau Berger, ich plane, im … nach Berlin zu kommen. Ich bereite mich gerade auf … vor. Könnten Sie mir sagen, ob …"
+                }
+              }
             }
           }
         }
@@ -1098,31 +1452,63 @@
               "id": "b1.1-1-architektur",
               "title": "Kubernetes oder Serverless?",
               "setup": "You are Mira, a senior developer, in an architecture discussion. You argue for moving a service to a serverless platform; {{name}} is sceptical. Make two arguments (less operations work, cheaper at low traffic), listen to {{his}} arguments, concede one point and hold the other. Use du.",
-              "goal": "{{He}} states {{his}} opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not."
+              "goal": "{{He}} states {{his}} opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not.",
+              "variants": {
+                "student": {
+                  "title": "Aluminium oder Stahl?",
+                  "setup": "You are Mira, a fellow student in {{name}}'s design project. You argue for building the frame of your prototype from aluminium instead of steel; {{name}} is sceptical. Make two arguments (much lighter, easier to machine), listen to {{his}} arguments, concede one point and hold the other. Use du.",
+                  "goal": "{{He}} states {{his}} opinion with an opinion phrase, gives at least two arguments, uses obwohl or zwar … aber, and either agrees to a compromise or explains why not."
+                }
+              }
             },
             {
               "id": "b1.1-1-review-streit",
               "title": "Ich sehe das anders",
               "setup": "You are Tom, a colleague who left a review comment asking {{name}} to rewrite {{his}} deployment script in a different way. Defend your comment with one good reason and one weak one. Let {{him}} disagree politely and look for a middle way. Use du.",
-              "goal": "{{He}} disagrees politely, explains why {{he}} made {{his}} choice, accepts the good reason and rejects the weak one, and proposes a middle way."
+              "goal": "{{He}} disagrees politely, explains why {{he}} made {{his}} choice, accepts the good reason and rejects the weak one, and proposes a middle way.",
+              "variants": {
+                "student": {
+                  "title": "Ich sehe das anders",
+                  "setup": "You are Tom, a fellow student who left a comment on {{name}}'s CAD drawing asking {{him}} to redesign a part in a different way before the group hands it in. Defend your comment with one good reason and one weak one. Let {{him}} disagree politely and look for a middle way. Use du.",
+                  "goal": "{{He}} disagrees politely, explains why {{he}} made {{his}} choice, accepts the good reason and rejects the weak one, and proposes a middle way."
+                }
+              }
             },
             {
               "id": "b1.1-1-homeoffice",
               "title": "Homeoffice oder Büro?",
               "setup": "You are Jonas, a colleague who thinks the whole team should be in the Berlin office at least three days a week. {{name}} works fully remote from Amman. Ask what {{he}} thinks, give your arguments (spontaneous exchange, team feeling), and ask {{him}} to weigh both sides honestly. Use du.",
-              "goal": "{{He}} weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons."
+              "goal": "{{He}} weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons.",
+              "variants": {
+                "student": {
+                  "title": "Hörsaal oder online?",
+                  "setup": "You are Jonas, a German exchange student who thinks lectures should only happen in the lecture hall again, with no online option. {{name}} likes being able to watch recordings in the evening. Ask what {{he}} thinks, give your arguments (questions on the spot, meeting other students), and ask {{him}} to weigh both sides honestly. Use du.",
+                  "goal": "{{He}} weighs both sides with einerseits … andererseits or a two-part connector and reaches a clear conclusion with reasons."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Take a position on a real technical question in your team (for example: should you adopt a new tool, should everything be in Kubernetes). State your opinion, give three arguments, admit one argument against, and say what you would decide. Speak for about two minutes.",
-              "hint": "Meiner Meinung nach sollten wir … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …"
+              "hint": "Meiner Meinung nach sollten wir … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …",
+              "variants": {
+                "student": {
+                  "prompt": "Take a position on a real question from your studies (for example: should exams be online, should every student do an internship abroad, which CAD program the faculty should teach). State your opinion, give three arguments, admit one argument against, and say what you would decide. Speak for about two minutes.",
+                  "hint": "Meiner Meinung nach sollte die Uni … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a comment for a team discussion thread: the team must decide between two tools or approaches. Weigh both sides (at least two points each), take a position and explain your recommendation.",
               "hint": "Einerseits ist … einfacher, andererseits … Ich bin der Meinung, dass wir … Nicht nur …, sondern auch …",
               "words_min": 90,
-              "words_max": 150
+              "words_max": 150,
+              "variants": {
+                "student": {
+                  "prompt": "Write a comment for your project group's discussion thread: the group must decide between two designs or two materials. Weigh both sides (at least two points each), take a position and explain your recommendation."
+                }
+              }
             }
           }
         },
@@ -1150,31 +1536,64 @@
               "id": "b1.1-2-vorstellen",
               "title": "Das Postmortem vorstellen",
               "setup": "You are Lena, facilitating a blameless postmortem meeting. Ask {{name}} to walk the team through the timeline of last week's outage: what had happened before, when the alarm went off, what was done and by whom, when the service was restored. Interrupt twice with a precise question about times and causes. Use du.",
-              "goal": "{{He}} narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once."
+              "goal": "{{He}} narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once.",
+              "variants": {
+                "student": {
+                  "title": "Der Projektrückblick",
+                  "setup": "You are Lena, a Master's student who leads the review meeting after your group project went wrong: the prototype broke in the final test in front of the professor. Ask {{name}} to walk the group through the last two weeks: what had happened before, when the problem was noticed, what was done and by whom, how the prototype was repaired. Interrupt twice with a precise question about dates and causes. Use du; the review is about causes, not about blame.",
+                  "goal": "{{He}} narrates the timeline with at least six events in order, uses the Passiv at least twice and nachdem or bevor at least once."
+                }
+              }
             },
             {
               "id": "b1.1-2-ursache",
               "title": "Fragen der Chefin zur Ursache",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. After the postmortem you want to understand the root cause, not the symptoms. Ask why the configuration change was not caught, who had reviewed it, why the alarm came late, and what exactly will change. Use Sie; you are calm and precise.",
-              "goal": "{{He}} explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
+              "goal": "{{He}} explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures.",
+              "variants": {
+                "student": {
+                  "title": "Fragen der Professorin zur Ursache",
+                  "setup": "You are Frau Prof. Dr. Sommer, who supervises the group project whose prototype broke in the final test. After the review you want to understand the root cause, not the symptoms. Ask why the weak point in the design was not caught, who had checked the drawing, why the problem showed up so late, and what exactly will change in the next project. Use Sie; you are calm and precise.",
+                  "goal": "{{He}} explains the root cause with cause-and-effect connectors, says what had happened before with the Plusquamperfekt, and names two concrete measures."
+                }
+              }
             },
             {
               "id": "b1.1-2-kunde",
               "title": "Erklärung für den Kunden",
               "setup": "You are Herr Brandt, a customer's IT manager. Your users had no access for two hours yesterday. Ask {{name}} on a call what happened, whether data was lost, what was done, and how you can be sure it will not happen again. Use Sie, polite but demanding.",
-              "goal": "{{He}} explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure."
+              "goal": "{{He}} explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure.",
+              "variants": {
+                "student": {
+                  "title": "Erklärung für die Partnerfirma",
+                  "setup": "You are Herr Brandt from the marketing department of the machine-building company that sponsors {{name}}'s student project. The prototype you wanted to show at a trade fair broke during the final test. Ask {{name}} on a call what happened, whether the parts your company supplied were damaged, what was done, and how you can be sure it will not happen again. Use Sie, polite but demanding.",
+                  "goal": "{{He}} explains the incident in non-technical German using the Passiv, confirms what was and was not affected, and gives a credible measure."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Present a postmortem of a real or realistic incident: the timeline with at least six events, what had happened before, how it was detected, what was done and by whom, the root cause, and two measures. Speak for two to three minutes.",
-              "hint": "Um 14:05 Uhr wurde der Alarm ausgelöst. Davor hatte ein Kollege die Konfiguration geändert. Nachdem wir … hatten, … Als Maßnahme werden wir …"
+              "hint": "Um 14:05 Uhr wurde der Alarm ausgelöst. Davor hatte ein Kollege die Konfiguration geändert. Nachdem wir … hatten, … Als Maßnahme werden wir …",
+              "variants": {
+                "student": {
+                  "prompt": "Present the review of a real or realistic project that went wrong (a failed experiment, a prototype that broke, a missed deadline): the timeline with at least six events, what had happened before, how it was noticed, what was done and by whom, the root cause, and two measures. Speak for two to three minutes.",
+                  "hint": "Am Montag wurde der Prototyp getestet. Davor hatte jemand die Zeichnung geändert. Nachdem wir … hatten, … Als Maßnahme werden wir …"
+                }
+              }
             },
             "writing": {
               "prompt": "Write the written postmortem for your team wiki: summary, timeline, root cause, impact, what went well, what went badly, and the measures with an owner each. Use the Passiv where it fits.",
               "hint": "Zusammenfassung: … Zeitstrahl: … Ursache: Die Änderung wurde nicht getestet, weil … Maßnahmen: …",
               "words_min": 100,
-              "words_max": 160
+              "words_max": 160,
+              "variants": {
+                "student": {
+                  "prompt": "Write the written review (Projektrückblick) of a project that went wrong, for your course: summary, timeline, root cause, impact, what went well, what went badly, and the measures with a person responsible for each. Use the Passiv where it fits.",
+                  "hint": "Zusammenfassung: … Zeitstrahl: … Ursache: Das Bauteil wurde nicht geprüft, weil … Maßnahmen: …"
+                }
+              }
             }
           }
         },
@@ -1202,7 +1621,14 @@
               "id": "b1.1-3-deadline",
               "title": "Die Deadline ist nicht realistisch",
               "setup": "You are Sabine, the product manager. You need a feature by the end of the month because sales promised it. {{name}} thinks it needs two more weeks. Push back once, ask what could be delivered on time, and accept a reduced scope if {{he}} argues well. Use du.",
-              "goal": "{{He}} explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date."
+              "goal": "{{He}} explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date.",
+              "variants": {
+                "student": {
+                  "title": "Die Frist ist nicht realistisch",
+                  "setup": "You are Sabine, the engineer at a partner company who supervises {{name}}'s student project. You need the finished design by the end of the month because your boss wants to show it to a customer. {{name}} thinks the group needs two more weeks. Push back once, ask what could be delivered on time, and accept a reduced scope if {{he}} argues well. Use du.",
+                  "goal": "{{He}} explains why the deadline does not work, proposes two alternatives using Konjunktiv II, and agrees on a concrete reduced scope or new date."
+                }
+              }
             },
             {
               "id": "b1.1-3-vermieter",
@@ -1214,13 +1640,25 @@
               "id": "b1.1-3-rat",
               "title": "Was würdest du machen?",
               "setup": "You are Tom, a junior colleague. You are on call this weekend for the first time and you are nervous; also you think the on-call rota is unfair because you are on it twice as often as others. Ask {{name}} for advice on both things. Use du.",
-              "goal": "{{He}} gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause."
+              "goal": "{{He}} gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause.",
+              "variants": {
+                "student": {
+                  "title": "Was würdest du machen?",
+                  "setup": "You are Tom, a younger student. Next week you have your first oral exam and you are nervous; also you think the work in your project group is unfair because you do twice as much as the others. Ask {{name}} for advice on both things. Use du.",
+                  "goal": "{{He}} gives advice with an deiner Stelle würde ich or sollte for both problems and uses at least one unreal wenn clause."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Negotiate with a product manager who wants a feature too early: explain the problem, propose two alternatives, and say what you would do in their place. Then call your landlord about a repair that is overdue and set a polite but firm deadline.",
-              "hint": "Könnten wir den Umfang reduzieren? Wenn wir zwei Wochen mehr hätten, könnten wir … Ich wäre Ihnen dankbar, wenn der Handwerker bis Freitag käme."
+              "hint": "Könnten wir den Umfang reduzieren? Wenn wir zwei Wochen mehr hätten, könnten wir … Ich wäre Ihnen dankbar, wenn der Handwerker bis Freitag käme.",
+              "variants": {
+                "student": {
+                  "prompt": "Negotiate with a professor or a project partner who wants your group's report too early: explain the problem, propose two alternatives, and say what you would do in their place. Then call your landlord about a repair that is overdue and set a polite but firm deadline."
+                }
+              }
             },
             "writing": {
               "prompt": "Write an email to your landlord: the heating has been broken for two weeks despite two calls. Describe the problem, set a deadline, say what you will do if it is not fixed (rent reduction), and stay polite.",
@@ -1254,13 +1692,27 @@
               "id": "b1.1-4-aufenthaltstitel",
               "title": "Termin bei der Ausländerbehörde",
               "setup": "You are Frau Nowak, a case worker at the Berlin Ausländerbehörde. {{name}} has an appointment for {{his}} Blue Card. Ask for {{his}} passport, contract, salary statement and health insurance proof. One document is missing (the Meldebescheinigung). Explain what {{he}} must do within two weeks and what {{he}} gets today. Use Sie, formal, not unfriendly.",
-              "goal": "{{He}} explains {{his}} situation, hands over the documents, asks what {{he}} must do about the missing one and by when, and repeats the next steps back correctly."
+              "goal": "{{He}} explains {{his}} situation, hands over the documents, asks what {{he}} must do about the missing one and by when, and repeats the next steps back correctly.",
+              "variants": {
+                "student": {
+                  "title": "Termin bei der Ausländerbehörde",
+                  "setup": "You are Frau Nowak, a case worker at the Berlin Ausländerbehörde. {{name}} has an appointment for {{his}} residence permit for study purposes. Ask for {{his}} passport, the university's letter of admission, proof of financial resources (the blocked account, Sperrkonto) and health insurance proof. One document is missing (the Meldebescheinigung). Explain what {{he}} must do within two weeks and what {{he}} gets today. Use Sie, formal, not unfriendly.",
+                  "goal": "{{He}} explains {{his}} situation, hands over the documents, asks what {{he}} must do about the missing one and by when, and repeats the next steps back correctly."
+                }
+              }
             },
             {
               "id": "b1.1-4-krankenkasse",
               "title": "Welche Krankenkasse?",
               "setup": "You are an adviser at a public health insurance company (gesetzliche Krankenkasse). {{name}} calls to join. Explain what the contribution depends on, what is covered, that the employer pays half, and ask about {{his}} salary, start date and family. Use Sie.",
-              "goal": "{{He}} asks at least three questions using a relative clause or a genitive, and gives the information you need to enrol {{him}}."
+              "goal": "{{He}} asks at least three questions using a relative clause or a genitive, and gives the information you need to enrol {{him}}.",
+              "variants": {
+                "student": {
+                  "title": "Welche Krankenkasse?",
+                  "setup": "You are an adviser at a public health insurance company (gesetzliche Krankenkasse). {{name}} calls to join as a student before {{his}} exchange semester. Explain the student rate and what it depends on, what is covered, and that the university needs proof of insurance before enrolment, and ask about {{his}} age, start date and whether {{he}} will have a student job. Use Sie.",
+                  "goal": "{{He}} asks at least three questions using a relative clause or a genitive, and gives the information you need to insure {{him}}."
+                }
+              }
             },
             {
               "id": "b1.1-4-abgelehnt",
@@ -1272,7 +1724,13 @@
           "checkpoint": {
             "speaking": {
               "prompt": "Explain to a case worker at the Ausländerbehörde who you are, what you are applying for, which documents you have brought and which one is missing and why. Ask what happens next and by when. Use relative clauses and at least one genitive.",
-              "hint": "Ich bin der Mitarbeiter, dessen Vertrag Sie hier sehen. Das Dokument, das fehlt, ist … Wegen des Umzugs habe ich … Innerhalb welcher Frist muss ich …?"
+              "hint": "Ich bin der Mitarbeiter, dessen Vertrag Sie hier sehen. Das Dokument, das fehlt, ist … Wegen des Umzugs habe ich … Innerhalb welcher Frist muss ich …?",
+              "variants": {
+                "student": {
+                  "prompt": "Explain to a case worker at the Ausländerbehörde who you are, that you are applying for a residence permit for your studies, which documents you have brought and which one is missing and why. Ask what happens next and by when. Use relative clauses and at least one genitive.",
+                  "hint": "Das ist der Zulassungsbescheid, den ich von der Universität bekommen habe. Das Dokument, das fehlt, ist … Wegen des Umzugs habe ich … Innerhalb welcher Frist muss ich …?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a formal letter to the Ausländerbehörde: refer to your appointment and application, explain which document you are sending now and why it was missing, and ask for a confirmation that your application is complete.",
@@ -1306,7 +1764,14 @@
               "id": "b1.1-5-direktheit",
               "title": "Sind die Deutschen wirklich so direkt?",
               "setup": "You are Jonas, a colleague, at a beer after work. {{name}} has had a misunderstanding: a colleague's blunt review comment felt rude to {{him}}. Ask what happened, explain how it was meant, and ask how feedback works in Jordan. Compare honestly. Use du.",
-              "goal": "{{He}} describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means."
+              "goal": "{{He}} describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means.",
+              "variants": {
+                "student": {
+                  "title": "Sind die Deutschen wirklich so direkt?",
+                  "setup": "You are Jonas, a German exchange student, over tea after a seminar. {{name}} has had a misunderstanding: a German lecturer's blunt comment on {{his}} presentation felt rude to {{him}}. Ask what happened, explain how it was meant, and ask how feedback works at universities in Jordan. Compare honestly. Use du.",
+                  "goal": "{{He}} describes the misunderstanding, compares feedback culture in both countries with at least one je … desto or comparative with ending, and asks what one expression means."
+                }
+              }
             },
             {
               "id": "b1.1-5-stadtvergleich",
@@ -1365,31 +1830,64 @@
               "id": "b1.2-1-migration",
               "title": "Der Migrationsplan",
               "setup": "You are Lena, facilitating a planning meeting. {{name}} presents {{his}} plan to migrate the services to a new cluster. Let {{him}} present without interruption, then ask about the order of steps, the downtime, what has already been done and what the biggest risk is. Use du.",
-              "goal": "{{He}} presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions."
+              "goal": "{{He}} presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions.",
+              "variants": {
+                "student": {
+                  "title": "Der Projektplan",
+                  "setup": "You are Lena, a Master's student facilitating the planning meeting of your design project. {{name}} presents the plan for building and testing the group's prototype, a small conveyor belt for the university workshop. Let {{him}} present without interruption, then ask about the order of steps, how long the test stand will be blocked, what has already been done and what the biggest risk is. Use du.",
+                  "goal": "{{He}} presents with a clear structure (goal, current state, steps, risks), uses the Passiv with a modal verb and the Passiv Perfekt at least once each, and answers all four questions."
+                }
+              }
             },
             {
               "id": "b1.2-1-stakeholder",
               "title": "Kritische Fragen",
               "setup": "You are Herr Brandt, the customer's IT manager. {{name}} has presented a change that affects your systems. Ask what it means for you concretely, how long the downtime will be, what happens if it fails, and why you should trust the timeline. Be sceptical but fair. Use Sie.",
-              "goal": "{{He}} answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what {{he}} does not know yet and when {{he}} will know."
+              "goal": "{{He}} answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what {{he}} does not know yet and when {{he}} will know.",
+              "variants": {
+                "student": {
+                  "title": "Kritische Fragen",
+                  "setup": "You are Herr Becker, production manager at the Mittelstand machine builder where {{name}} is doing {{his}} internship. {{He}} has presented a change to one of your assembly stations. Ask what it means for your workers concretely, how long the station will be stopped, what happens if it fails, and why you should trust the timeline. Be sceptical but fair. Use Sie.",
+                  "goal": "{{He}} answers each question calmly, uses participles as adjectives or nominalisations, and says clearly what {{he}} does not know yet and when {{he}} will know."
+                }
+              }
             },
             {
               "id": "b1.2-1-quartal",
               "title": "Was haben wir im Quartal geschafft?",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. In the quarterly review, ask {{him}} to summarise what {{his}} team delivered, what was postponed and why, which numbers improved, and what {{he}} proposes for next quarter. Push for honesty about what did not work. Use Sie.",
-              "goal": "{{He}} summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next quarter."
+              "goal": "{{He}} summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next quarter.",
+              "variants": {
+                "student": {
+                  "title": "Was haben wir im Semester geschafft?",
+                  "setup": "You are Frau Prof. Dr. Sommer, who supervises {{name}}'s project group. In the end-of-semester review, ask {{him}} to summarise what the group delivered, what was postponed and why, which test results improved, and what {{he}} proposes for next semester. Push for honesty about what did not work. Use Sie.",
+                  "goal": "{{He}} summarises results with the Passiv Perfekt and nominalisations, explains one postponed item honestly, and proposes two priorities for next semester."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Present a project you are working on or planning: the goal, the current state, what has already been done, what must still be done and by whom, the biggest risk, and the next step. Structure it clearly and speak for about three minutes.",
-              "hint": "Ich gebe euch zuerst einen Überblick. Ziel ist die Umstellung auf … Der erste Schritt ist bereits abgeschlossen worden. Die Datenbank muss noch migriert werden."
+              "hint": "Ich gebe euch zuerst einen Überblick. Ziel ist die Umstellung auf … Der erste Schritt ist bereits abgeschlossen worden. Die Datenbank muss noch migriert werden.",
+              "variants": {
+                "student": {
+                  "prompt": "Present a project from your studies or your internship: the goal, the current state, what has already been done, what must still be done and by whom, the biggest risk, and the next step. Structure it clearly and speak for about three minutes.",
+                  "hint": "Ich gebe euch zuerst einen Überblick. Ziel ist die Konstruktion eines … Der erste Prototyp ist bereits gedruckt worden. Die Bauteile müssen noch getestet werden."
+                }
+              }
             },
             "writing": {
               "prompt": "Write a project status update for your manager and a non-technical stakeholder: summary, what has been completed, what is in progress, what is blocked and why, risks, and the decision you need from them.",
               "hint": "Zusammenfassung: … Abgeschlossen: Der Dienst ist auf … umgestellt worden. In Arbeit: … Blockiert: … Entscheidung nötig: …",
               "words_min": 110,
-              "words_max": 170
+              "words_max": 170,
+              "variants": {
+                "student": {
+                  "prompt": "Write a project status update for your supervising professor and the company that sponsors the project: summary, what has been completed, what is in progress, what is blocked and why, risks, and the decision you need from them.",
+                  "hint": "Zusammenfassung: … Abgeschlossen: Die Zeichnungen sind fertiggestellt worden. In Arbeit: … Blockiert: … Entscheidung nötig: …"
+                }
+              }
             }
           }
         },
@@ -1417,31 +1915,63 @@
               "id": "b1.2-2-feedback-geben",
               "title": "Feedback für Tom",
               "setup": "You are Tom, a junior developer. {{name}} is your mentor and needs to tell you that your pull requests are too big and rarely tested, which costs the team time. React a little defensively at first, then ask what exactly {{he}} expects. Use du.",
-              "goal": "{{He}} gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you."
+              "goal": "{{He}} gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you.",
+              "variants": {
+                "student": {
+                  "title": "Feedback für Tom",
+                  "setup": "You are Tom, a younger student in {{name}}'s project group. {{name}} needs to tell you that your parts of the CAD model are often late and never checked against the drawing, which costs the group time. React a little defensively at first, then ask what exactly {{he}} expects. Use du.",
+                  "goal": "{{He}} gives concrete feedback with examples, softens with modal particles, uses Konjunktiv II of the past at least once, and agrees two concrete changes with you."
+                }
+              }
             },
             {
               "id": "b1.2-2-feedback-bekommen",
               "title": "Kritik von der Chefin",
               "setup": "You are Frau Dr. Sommer, {{name}}'s manager. In a review you tell {{him}} that {{his}} communication during incidents is too quiet: the team hears about problems too late. Give one concrete example. Then listen to how {{he}} takes it. Use Sie.",
-              "goal": "{{He}} asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what {{he}} would have done differently, and proposes a concrete change."
+              "goal": "{{He}} asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what {{he}} would have done differently, and proposes a concrete change.",
+              "variants": {
+                "student": {
+                  "title": "Kritik von der Professorin",
+                  "setup": "You are Frau Prof. Dr. Sommer, who supervises {{name}}'s project group. In a review you tell {{him}} that {{he}} says too little when the group has a problem: you heard about the last delay too late. Give one concrete example. Then listen to how {{he}} takes it. Use Sie.",
+                  "goal": "{{He}} asks what exactly is meant with an indirect question, acknowledges the point without excuses, says what {{he}} would have done differently, and proposes a concrete change."
+                }
+              }
             },
             {
               "id": "b1.2-2-wer-war-das",
               "title": "Wer hat die Pipeline kaputt gemacht?",
               "setup": "You are Mira, a colleague, annoyed. A change in the pipeline broke everyone's builds this morning and you think it was {{name}}'s commit. Say so directly. In fact both of you changed the same file; let {{him}} find that out. Use du.",
-              "goal": "{{He}} stays calm, clears up the facts with sich einigen auf or klären, takes {{his}} share of the responsibility, apologises for {{his}} part, and proposes how to avoid it next time."
+              "goal": "{{He}} stays calm, clears up the facts with sich einigen auf or klären, takes {{his}} share of the responsibility, apologises for {{his}} part, and proposes how to avoid it next time.",
+              "variants": {
+                "student": {
+                  "title": "Wer hat die Zeichnung geändert?",
+                  "setup": "You are Mira, a fellow student, annoyed. The parts that came back from the workshop this morning do not fit, and you think it is because {{name}} changed the shared CAD drawing. Say so directly. In fact both of you changed the same drawing; let {{him}} find that out. Use du.",
+                  "goal": "{{He}} stays calm, clears up the facts with sich einigen auf or klären, takes {{his}} share of the responsibility, apologises for {{his}} part, and proposes how to avoid it next time."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Two situations: first, give a junior colleague critical feedback about their work, concretely and kindly, and agree on a change. Second, a colleague blames you for an outage that was partly your fault. Clear it up, take your share, apologise and propose a fix.",
-              "hint": "Mir ist aufgefallen, dass … Ich hätte das vielleicht früher ansprechen sollen. Das war doch nicht so gemeint. Lass uns darauf einigen, dass …"
+              "hint": "Mir ist aufgefallen, dass … Ich hätte das vielleicht früher ansprechen sollen. Das war doch nicht so gemeint. Lass uns darauf einigen, dass …",
+              "variants": {
+                "student": {
+                  "prompt": "Two situations: first, give a younger student in your project group critical feedback about their work, concretely and kindly, and agree on a change. Second, a group member blames you for a failed test that was partly your fault. Clear it up, take your share, apologise and propose a fix."
+                }
+              }
             },
             "writing": {
               "prompt": "Write a message to a colleague after a conflict about a broken build: say what happened from your view, what you should have done differently, apologise for your part, and propose a concrete way to avoid it in future.",
               "hint": "Ehrlich gesagt hätte ich den Branch vorher testen sollen. Es tut mir leid, dass … Ich schlage vor, dass wir in Zukunft …",
               "words_min": 110,
-              "words_max": 170
+              "words_max": 170,
+              "variants": {
+                "student": {
+                  "prompt": "Write a message to a group member after a conflict about parts that did not fit: say what happened from your view, what you should have done differently, apologise for your part, and propose a concrete way to avoid it in future.",
+                  "hint": "Ehrlich gesagt hätte ich die Zeichnung vorher prüfen sollen. Es tut mir leid, dass … Ich schlage vor, dass wir in Zukunft …"
+                }
+              }
             }
           }
         },
@@ -1521,31 +2051,64 @@
               "id": "b1.2-4-interview",
               "title": "Das Gespräch mit dem Teamleiter",
               "setup": "You are Herr Krüger, team lead of the platform team in Munich. {{name}} is interviewing for an internal transfer to your team. Ask about {{his}} career so far, a difficult situation {{he}} solved, a weakness, why {{he}} wants to move, and what {{he}} expects from you. Use Sie, professional and curious.",
-              "goal": "{{He}} narrates {{his}} career with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions."
+              "goal": "{{He}} narrates {{his}} career with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions.",
+              "variants": {
+                "student": {
+                  "title": "Vorstellungsgespräch fürs Praktikum",
+                  "setup": "You are Herr Wagner, head of development at a Mittelstand company near Stuttgart that builds packaging machines. {{name}} is interviewing for a six-month internship in your team. Ask about {{his}} studies so far, a project or problem {{he}} solved, a weakness, why {{he}} wants to come to Germany, and what {{he}} expects from the internship. Use Sie, professional and curious.",
+                  "goal": "{{He}} narrates {{his}} studies and projects with Präteritum and Plusquamperfekt, names a genuine strength and weakness with an example, and asks you at least two questions."
+                }
+              }
             },
             {
               "id": "b1.2-4-gehalt",
               "title": "Gehalt und Umzug",
               "setup": "You are Frau Berger from HR. You make {{name}} an offer for the Munich position: a salary below what {{he}} hoped, thirty days of holiday, a relocation bonus. Let {{him}} negotiate; you have some room on salary and more on the relocation package. Use Sie.",
-              "goal": "{{He}} states {{his}} expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing."
+              "goal": "{{He}} states {{his}} expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing.",
+              "variants": {
+                "student": {
+                  "title": "Vergütung und Umzug",
+                  "setup": "You are Frau Schmitt from HR at a Mittelstand company near Stuttgart that builds packaging machines. You offer {{name}} a six-month internship: monthly pay below what {{he}} hoped, a start date earlier than {{he}} wanted, and help finding a room. Let {{him}} negotiate; you have a little room on the pay and more on the start date and a travel allowance. Use Sie.",
+                  "goal": "{{He}} states {{his}} expectation with reasons, negotiates at least one condition up using Konjunktiv II and a connector, and asks for the offer in writing."
+                }
+              }
             },
             {
               "id": "b1.2-4-meetup",
               "title": "Beim DevOps-Meetup",
               "setup": "You are Katja, an engineer at a Berlin DevOps meetup. You get talking to {{name}} over pizza. Ask what {{he}} does, what stack {{he}} works with, what {{he}} is proud of, and tell {{him}} your company is hiring. Keep it natural and informal. Use du.",
-              "goal": "{{He}} describes {{his}} work and one project {{he}} is proud of in some detail, asks about your work, and reacts to the hiring hint with a question or a polite deferral."
+              "goal": "{{He}} describes {{his}} work and one project {{he}} is proud of in some detail, asks about your work, and reacts to the hiring hint with a question or a polite deferral.",
+              "variants": {
+                "student": {
+                  "title": "Auf der Messe",
+                  "setup": "You are Katja, an engineer at your robotics company's stand at a trade fair in Germany. You get talking to {{name}} over coffee. Ask what {{he}} studies, which project {{he}} is proud of, what {{he}} wants to do after {{his}} degree, and tell {{him}} your company offers internships. Keep it natural and informal. Use du.",
+                  "goal": "{{He}} describes {{his}} studies and one project {{he}} is proud of in some detail, asks about your work, and reacts to the internship hint with a question or a polite deferral."
+                }
+              }
             }
           ],
           "checkpoint": {
             "speaking": {
               "prompt": "Imagine an interview for a position in Germany: introduce your career so far (what you had done before your current job, what you did, what you learned), describe a difficult problem you solved, name a strength and a weakness with examples, and ask the interviewer two questions. Speak for three minutes.",
-              "hint": "Bevor ich zu … kam, hatte ich … gearbeitet. Eine schwierige Situation war … Ich lasse mir gern Dinge erklären. Wie sieht ein typischer Tag im Team aus?"
+              "hint": "Bevor ich zu … kam, hatte ich … gearbeitet. Eine schwierige Situation war … Ich lasse mir gern Dinge erklären. Wie sieht ein typischer Tag im Team aus?",
+              "variants": {
+                "student": {
+                  "prompt": "Imagine an interview for an internship at a German engineering company: tell the story of your studies so far (what you had done before university, what you studied, what you learned), describe a difficult problem you solved in a project, name a strength and a weakness with examples, and ask the interviewer two questions. Speak for three minutes.",
+                  "hint": "Bevor ich mit dem Studium anfing, hatte ich … Eine schwierige Situation war … Ich lasse mir gern Dinge erklären. Wie sieht ein typischer Tag im Team aus?"
+                }
+              }
             },
             "writing": {
               "prompt": "Write a cover letter (Anschreiben) for an internal position in Germany: why you are applying, what you bring with you (two concrete achievements), what you want to learn, and your availability. Formal letter structure.",
               "hint": "Sehr geehrter Herr Krüger, mit großem Interesse habe ich … Seit … bin ich für … verantwortlich. Dabei habe ich … Ich könnte ab … anfangen.",
               "words_min": 120,
-              "words_max": 180
+              "words_max": 180,
+              "variants": {
+                "student": {
+                  "prompt": "Write a cover letter (Anschreiben) for an internship at a German engineering company (a large one like Bosch or Siemens, or a Mittelstand machine builder): why you are applying, what you bring with you (two concrete achievements from your studies), what you want to learn, and your availability. Formal letter structure.",
+                  "hint": "Sehr geehrter Herr Wagner, mit großem Interesse habe ich … Seit … studiere ich Maschinenbau an der … Dabei habe ich … Ich könnte ab … anfangen."
+                }
+              }
             }
           }
         },
