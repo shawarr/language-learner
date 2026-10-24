@@ -3,14 +3,23 @@
 Loaded once and validated hard at first use, so a typo in the JSON fails at startup rather than
 mid-conversation. A unit id stored in the DB that the JSON no longer has falls back to the first
 unit of the profile's level (and logs it) — the app must never crash on stale state.
+
+One curriculum, two learners. The JSON on disk never names anyone: it says `{{name}}`, `{{he}}`,
+`{{work}}`, and a scenario that only makes sense for one kind of learner carries a `variants`
+block with the other kind's version. `render_for_user` resolves both against the current user's
+persona (app/curriculum/personas.json), so everything that leaves this module through
+`current_unit`, `scenario`, `public_unit` or `lesson_for_user` reads as if it had been written for
+whoever is logged in. The raw accessors (`load`, `unit`, `all_units`) keep the placeholders.
 """
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import re
 from functools import lru_cache
 
+from .. import users
 from ..config import settings
 from . import profile as profile_svc
 
@@ -19,9 +28,59 @@ log = logging.getLogger(__name__)
 PHASE_ORDER = ["a1.1", "a1.2", "a2.1", "a2.2", "b1.1", "b1.2"]
 _ID = re.compile(r"^[a-z0-9.\-]+$")
 
+# The only placeholders content may use. The pronouns are named after their masculine form but
+# render from the persona's gender; a capitalised token ({{He}}) capitalises the value.
+PLACEHOLDERS = ("name", "work", "role_de", "city", "he", "him", "his", "himself")
+_PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
+_PRONOUNS = {"m": ("he", "him", "his", "himself"),
+             "f": ("she", "her", "her", "herself"),
+             "x": ("they", "them", "their", "themselves")}
+VARIANT_KINDS = ("engineer", "student")
+_SCENARIO_VARIANT_KEYS = ("title", "setup", "goal")
+_TASK_VARIANT_KEYS = ("prompt", "hint")
+
+# Used when no user is current (a script, a job without request context). Reads a little flat but
+# never crashes; nothing user-facing should reach it.
+NEUTRAL_PERSONA = {"name": "the learner", "gender": "x", "kind": None, "work": "a learner of German",
+                   "role_de": "Deutschlerner", "city": "Amman"}
+
 
 class CurriculumError(ValueError):
     pass
+
+
+def _check_placeholders(node: object, where: str) -> None:
+    """Only the known placeholders, anywhere in the tree: a typo like {{nmae}} would otherwise reach
+    the tutor prompt verbatim."""
+    if isinstance(node, str):
+        for token in _PLACEHOLDER.findall(node):
+            if token.lower() not in PLACEHOLDERS:
+                raise CurriculumError(f"{where}: unknown placeholder {{{{{token}}}}}")
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            _check_placeholders(v, f"{where}.{k}")
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            _check_placeholders(v, f"{where}[{i}]")
+
+
+def _check_variants(owner: dict, where: str, required: tuple[str, ...], allowed: tuple[str, ...]) -> None:
+    variants = owner.get("variants")
+    if variants is None:
+        return
+    if not isinstance(variants, dict) or not variants:
+        raise CurriculumError(f"{where}: variants must be a non-empty object")
+    for kind, variant in variants.items():
+        if kind not in VARIANT_KINDS:
+            raise CurriculumError(f"{where}: unknown variant kind {kind!r} (expected one of {VARIANT_KINDS})")
+        if not isinstance(variant, dict):
+            raise CurriculumError(f"{where}: variant {kind} must be an object")
+        for key in required:
+            if not isinstance(variant.get(key), str) or not variant[key].strip():
+                raise CurriculumError(f"{where}: variant {kind} needs {key}")
+        extra = set(variant) - set(allowed)
+        if extra:
+            raise CurriculumError(f"{where}: variant {kind} has unexpected keys {sorted(extra)}")
 
 
 def validate(data: dict) -> None:
@@ -65,10 +124,14 @@ def validate(data: dict) -> None:
                 for key in ("title", "setup", "goal"):
                     if not isinstance(sc.get(key), str) or not sc[key].strip():
                         raise CurriculumError(f"scenario {sid} needs {key}")
+                _check_variants(sc, f"scenario {sid}", _SCENARIO_VARIANT_KEYS, _SCENARIO_VARIANT_KEYS)
             cp = unit.get("checkpoint")
             if not isinstance(cp, dict) or not all(isinstance(cp.get(k), dict) and cp[k].get("prompt")
                                                    for k in ("speaking", "writing")):
                 raise CurriculumError(f"unit {uid} needs checkpoint.speaking.prompt and checkpoint.writing.prompt")
+            for task in ("speaking", "writing"):
+                _check_variants(cp[task], f"unit {uid} checkpoint.{task}", ("prompt",), _TASK_VARIANT_KEYS)
+    _check_placeholders(data, "curriculum")
 
 
 @lru_cache(maxsize=1)
@@ -86,6 +149,82 @@ def reload() -> dict:
 
 def phases() -> list[dict]:
     return load()["phases"]
+
+
+# -- personas and rendering -------------------------------------------------------------------
+@lru_cache(maxsize=1)
+def _personas() -> dict[str, dict]:
+    return users.personas()
+
+
+def persona_for(user: dict | None) -> dict:
+    """The persona of a user row: personas.json by username, else the row's name and gender over the
+    neutral defaults (an account with no persona entry still gets its own name)."""
+    if user is None:
+        return dict(NEUTRAL_PERSONA)
+    p = _personas().get(str(user.get("username") or "").lower())
+    if p:
+        return {**NEUTRAL_PERSONA, **p}
+    return {**NEUTRAL_PERSONA, "name": user.get("name") or NEUTRAL_PERSONA["name"],
+            "gender": user.get("gender") or "x"}
+
+
+def current_persona() -> dict:
+    try:
+        return persona_for(users.current())
+    except RuntimeError:
+        return dict(NEUTRAL_PERSONA)
+
+
+def _persona_values(persona: dict) -> dict[str, str]:
+    he, him, his, himself = _PRONOUNS.get(persona.get("gender") or "x", _PRONOUNS["x"])
+    return {"name": str(persona.get("name") or NEUTRAL_PERSONA["name"]),
+            "work": str(persona.get("work") or NEUTRAL_PERSONA["work"]),
+            "role_de": str(persona.get("role_de") or NEUTRAL_PERSONA["role_de"]),
+            "city": str(persona.get("city") or NEUTRAL_PERSONA["city"]),
+            "he": he, "him": him, "his": his, "himself": himself}
+
+
+def render_text(text: str, persona: dict) -> str:
+    """Substitute the supported placeholders; an unknown one is left exactly as written."""
+    values = _persona_values(persona)
+
+    def sub(m: re.Match) -> str:
+        token = m.group(1)
+        value = values.get(token.lower())
+        if value is None:
+            return m.group(0)
+        return value[:1].upper() + value[1:] if token[:1].isupper() else value
+
+    return _PLACEHOLDER.sub(sub, text)
+
+
+def render_for_user(obj, persona: dict | None = None):
+    """A deep copy of any JSON-ish tree with placeholders rendered in every string and each
+    `variants` block resolved: the persona's kind wins over the default fields, and the key is
+    dropped so the API shape stays `{"id","title","setup","goal"}`."""
+    persona = persona if persona is not None else current_persona()
+    kind = persona.get("kind")
+
+    def walk(node):
+        if isinstance(node, str):
+            return render_text(node, persona)
+        if isinstance(node, list):
+            return [walk(v) for v in node]
+        if isinstance(node, dict):
+            variants = node.get("variants")
+            base = {k: v for k, v in node.items() if k != "variants"}
+            if isinstance(variants, dict) and isinstance(variants.get(kind), dict):
+                base.update(variants[kind])
+            return {k: walk(v) for k, v in base.items()}
+        return copy.deepcopy(node)
+
+    return walk(obj)
+
+
+def lesson_for_user(lesson: dict) -> dict:
+    """lessons.json teaches with the learner's own name in its examples; same rules as the units."""
+    return render_for_user(lesson)
 
 
 def all_units() -> list[dict]:
@@ -123,18 +262,19 @@ def unit_position(unit_id: str) -> tuple[int, int]:
 
 
 def scenarios_for(unit_id: str) -> list[dict]:
+    """The unit's scenarios as the current learner should see them."""
     u = unit(unit_id)
-    return list(u["scenarios"]) if u else []
+    return render_for_user(u["scenarios"]) if u else []
 
 
 def scenario(scenario_id: str | None) -> tuple[dict, dict] | None:
-    """(unit, scenario) for a scenario id, or None."""
+    """(unit, scenario) for a scenario id, both rendered for the current learner, or None."""
     if not scenario_id:
         return None
     for u in all_units():
-        for sc in u["scenarios"]:
-            if sc["id"] == scenario_id:
-                return u, sc
+        if any(sc["id"] == scenario_id for sc in u["scenarios"]):
+            rendered = render_for_user(u)
+            return rendered, next(sc for sc in rendered["scenarios"] if sc["id"] == scenario_id)
     return None
 
 
@@ -145,18 +285,20 @@ def first_unit_of_level(level: str) -> dict:
 
 
 def public_unit(u: dict) -> dict:
-    """What the API hands out: the unit without its checkpoint tasks (those are revealed by the checkpoint endpoint)."""
-    return {k: v for k, v in u.items() if k != "checkpoint"}
+    """What the API hands out: the unit rendered for the current learner, without its checkpoint
+    tasks (those are revealed by the checkpoint endpoint)."""
+    return {k: v for k, v in render_for_user(u).items() if k != "checkpoint"}
 
 
 async def current_unit() -> dict:
-    """The profile's unit, or a sane fallback when the JSON moved on without the DB."""
+    """The profile's unit, rendered for the current learner (the tutor, the checkpoint and the
+    writing prompts all read it), or a sane fallback when the JSON moved on without the DB."""
     p = await profile_svc.get_profile()
     u = unit(p["unit_id"])
     if u is None:
         u = first_unit_of_level(p["level"])
         log.warning("profile unit_id %r not in curriculum; falling back to %s", p["unit_id"], u["id"])
-    return u
+    return render_for_user(u)
 
 
 async def current() -> dict:
