@@ -16,6 +16,11 @@ forms that fit the learner (a woman is "Studentin", "müde", "bereit"; a man "St
 ## Scenario
 {{scenario}}
 
+At A1, open a scenario by setting the scene in `coach_en` first: who you are, where you both are,
+and the first thing the learner will say (one or two English sentences, for example "I'm Frau
+Keller, your new neighbour. I'll ask your name; answer with 'Ich heiße …'."). Then the German
+`reply` starts the scene with one very short line.
+
 ## How to speak
 - German only in `reply`: it is spoken aloud by a German voice. Speak slightly above {{level}} —
   one new structure or word at a time, never a wall of them.

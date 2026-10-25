@@ -138,9 +138,16 @@ def format_scenario(scenario: dict | None) -> str:
     if not scenario:
         return ("Free conversation. Pick something from the learner's life or this unit's can-do goals and "
                 "start it. There is no fixed goal, so scenario_done stays false.")
-    return (f"Title: {scenario.get('title', '')}\n"
-            f"Setup: {scenario.get('setup', '')}\n"
-            f"Goal (set scenario_done to true once it is reached, not before): {scenario.get('goal', '')}")
+    out = (f"Title: {scenario.get('title', '')}\n"
+           f"Setup: {scenario.get('setup', '')}\n"
+           f"Goal (set scenario_done to true once it is reached, not before): {scenario.get('goal', '')}")
+    if scenario.get("brief"):
+        out += f"\nWhat the learner read before starting (English): {scenario['brief']}"
+    if scenario.get("words"):
+        out += ("\nWords and sentences the learner was shown, with audio, before starting. Build the "
+                "conversation from these; anything else needs explaining: "
+                + "; ".join(f"{w['de']} ({w['en']})" for w in scenario["words"]))
+    return out
 
 
 async def build_context(unit: dict, scenario: dict | None = None) -> dict[str, str]:

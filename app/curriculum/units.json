@@ -29,34 +29,197 @@
             {
               "id": "a1.1-1-nachbarin",
               "title": "Die neue Nachbarin",
-              "setup": "You are Frau Keller, {{name}}'s new neighbour, meeting {{him}} in the stairwell of {{his}} building in Germany for the first time. Use Sie. Greet {{him}}, say your name and ask who {{he}} is. Keep every sentence very short; {{he}} has just started learning.",
-              "goal": "{{He}} says {{his}} name and where {{he}} comes from, and asks you one question back."
+              "setup": "You are Frau Keller, {{name}}'s new neighbour, meeting {{him}} on the stairs of {{his}} building in Germany. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Tag! Ich bin Frau Keller. Wie heißen Sie?' 2) 'Woher kommen Sie?' 3) 'Freut mich!' and say goodbye.",
+              "goal": "{{He}} says {{his}} name and where {{he}} comes from.",
+              "brief": "You meet your new neighbour, Frau Keller, on the stairs of your building. She says hello, asks your name and where you are from. Short answers are fine.",
+              "words": [
+                {
+                  "de": "Guten Tag!",
+                  "en": "Hello (polite)"
+                },
+                {
+                  "de": "Ich heiße …",
+                  "en": "My name is …"
+                },
+                {
+                  "de": "Wie heißen Sie?",
+                  "en": "What is your name? (polite)"
+                },
+                {
+                  "de": "Woher kommen Sie?",
+                  "en": "Where are you from? (polite)"
+                },
+                {
+                  "de": "Ich komme aus Jordanien.",
+                  "en": "I come from Jordan."
+                },
+                {
+                  "de": "Freut mich!",
+                  "en": "Nice to meet you!"
+                },
+                {
+                  "de": "Auf Wiedersehen!",
+                  "en": "Goodbye (polite)"
+                }
+              ]
             },
             {
               "id": "a1.1-1-kollege",
               "title": "Der neue Kollege",
-              "setup": "You are Jonas, a developer on {{name}}'s team in Berlin, and this is your first video call with {{him}}. Use du, like German tech teams do. Say hi, introduce yourself in one sentence and ask where {{he}} is calling from.",
-              "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or work.",
+              "setup": "You are Jonas, a developer on {{name}}'s team in Berlin, on your first video call with {{him}}. Use du, like German tech teams do. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Ich bin Jonas. Wie heißt du?' 2) 'Woher kommst du?' 3) 'Und wo wohnst du?'",
+              "goal": "{{He}} says {{his}} name, where {{he}} comes from and where {{he}} lives.",
               "variants": {
                 "student": {
                   "title": "Der Tandempartner",
-                  "setup": "You are Jonas, a mechanical engineering student in Berlin and {{name}}'s new language-tandem partner, and this is your first video call with {{him}}. Use du, like German students do. Say hi, introduce yourself in one sentence and ask where {{he}} is calling from.",
-                  "goal": "{{He}} introduces {{himself}}, says {{he}} lives in Amman and asks where you live or study."
+                  "setup": "You are Jonas, a mechanical engineering student in Berlin and {{name}}'s new language-tandem partner, on your first video call. Use du, like students do. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Ich bin Jonas. Wie heißt du?' 2) 'Woher kommst du?' 3) 'Und wo wohnst du?'",
+                  "goal": "{{He}} says {{his}} name, where {{he}} comes from and where {{he}} lives.",
+                  "brief": "Your first video call with Jonas, a student in Berlin and your new language-exchange (tandem) partner. Students say du (informal 'you'). He asks your name, where you come from and where you live.",
+                  "words": [
+                    {
+                      "de": "Hallo!",
+                      "en": "Hi!"
+                    },
+                    {
+                      "de": "Ich bin …",
+                      "en": "I am …"
+                    },
+                    {
+                      "de": "Wie heißt du?",
+                      "en": "What's your name? (informal)"
+                    },
+                    {
+                      "de": "Woher kommst du?",
+                      "en": "Where are you from? (informal)"
+                    },
+                    {
+                      "de": "Ich komme aus Jordanien.",
+                      "en": "I come from Jordan."
+                    },
+                    {
+                      "de": "Ich wohne in Amman.",
+                      "en": "I live in Amman."
+                    },
+                    {
+                      "de": "der Tandempartner",
+                      "en": "the language-exchange partner"
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Your first video call with Jonas, a developer on your team in Berlin. At work in tech, Germans often say du (informal 'you'). He asks your name, where you come from and where you live.",
+              "words": [
+                {
+                  "de": "Hallo!",
+                  "en": "Hi!"
+                },
+                {
+                  "de": "Ich bin …",
+                  "en": "I am …"
+                },
+                {
+                  "de": "Wie heißt du?",
+                  "en": "What's your name? (informal)"
+                },
+                {
+                  "de": "Woher kommst du?",
+                  "en": "Where are you from? (informal)"
+                },
+                {
+                  "de": "Ich komme aus Jordanien.",
+                  "en": "I come from Jordan."
+                },
+                {
+                  "de": "Ich wohne in Amman.",
+                  "en": "I live in Amman."
+                },
+                {
+                  "de": "Und du?",
+                  "en": "And you?"
+                }
+              ]
             },
             {
               "id": "a1.1-1-empfang",
               "title": "Am Empfang",
-              "setup": "You are the receptionist at the company's office in Berlin. {{name}} is visiting for the first time. Use Sie. Ask for {{his}} name, which team {{he}} belongs to and spell-check {{his}} name by asking {{him}} to spell it (Wie schreibt man das?).",
-              "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} team or the person {{he}} is visiting.",
+              "setup": "You are the receptionist at the front desk of {{name}}'s company's office in Berlin; {{he}} is visiting for the first time. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Tag! Wie heißen Sie?' 2) 'Wie schreibt man das?' (just the first name, letter by letter; help with the letters if needed) 3) 'Zu wem möchten Sie?' and accept just a name, like 'Jonas'. Then: 'Danke! Einen Moment, bitte.'",
+              "goal": "{{He}} says {{his}} name, spells {{his}} first name and says who {{he}} is visiting.",
               "variants": {
                 "student": {
                   "title": "Im International Office",
-                  "setup": "You are the receptionist at the International Office of a technical university in Berlin. {{name}} is visiting for the first time to ask about an exchange semester. Use Sie. Ask for {{his}} name, what {{he}} studies and spell-check {{his}} name by asking {{him}} to spell it (Wie schreibt man das?).",
-                  "goal": "{{He}} gives {{his}} full name, spells it, and names {{his}} subject or the person {{he}} is visiting."
+                  "setup": "You are the receptionist at the International Office of a technical university in Berlin; {{name}} is visiting for the first time. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Tag! Wie heißen Sie?' 2) 'Wie schreibt man das?' (just the first name, letter by letter) 3) 'Was studieren Sie?' Then: 'Danke! Einen Moment, bitte.'",
+                  "goal": "{{He}} says {{his}} name, spells {{his}} first name and says what {{he}} studies.",
+                  "brief": "You visit the International Office of a university in Berlin about an exchange semester. The receptionist asks your name, asks you to spell it, and asks what you study.",
+                  "words": [
+                    {
+                      "de": "das International Office",
+                      "en": "the office for international students"
+                    },
+                    {
+                      "de": "Wie heißen Sie?",
+                      "en": "What is your name? (polite)"
+                    },
+                    {
+                      "de": "Mein Name ist …",
+                      "en": "My name is …"
+                    },
+                    {
+                      "de": "Wie schreibt man das?",
+                      "en": "How do you spell that?"
+                    },
+                    {
+                      "de": "A, B, C … (a, be, tse)",
+                      "en": "the letters, said one by one"
+                    },
+                    {
+                      "de": "Was studieren Sie?",
+                      "en": "What do you study?"
+                    },
+                    {
+                      "de": "Ich studiere Maschinenbau.",
+                      "en": "I study mechanical engineering."
+                    },
+                    {
+                      "de": "Einen Moment, bitte.",
+                      "en": "One moment, please."
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "You arrive at your company's office in Berlin. At the front desk (der Empfang) the receptionist asks your name, asks you to spell it, and asks who you are here to see: your colleague Jonas.",
+              "words": [
+                {
+                  "de": "der Empfang",
+                  "en": "the reception desk"
+                },
+                {
+                  "de": "Wie heißen Sie?",
+                  "en": "What is your name? (polite)"
+                },
+                {
+                  "de": "Mein Name ist …",
+                  "en": "My name is …"
+                },
+                {
+                  "de": "Wie schreibt man das?",
+                  "en": "How do you spell that?"
+                },
+                {
+                  "de": "A, B, C … (a, be, tse)",
+                  "en": "the letters, said one by one"
+                },
+                {
+                  "de": "Zu wem möchten Sie?",
+                  "en": "Who are you here to see?"
+                },
+                {
+                  "de": "Zu Jonas, bitte.",
+                  "en": "To see Jonas, please."
+                },
+                {
+                  "de": "Einen Moment, bitte.",
+                  "en": "One moment, please."
+                }
+              ]
             }
           ],
           "checkpoint": {
@@ -106,34 +269,209 @@
             {
               "id": "a1.1-2-standup-zeit",
               "title": "Wann ist das Standup?",
-              "setup": "You are Lena, the scrum master of {{name}}'s team. The daily standup time has to move and you need to find a slot that works for {{name}} in Amman (one hour ahead of Berlin). Ask when {{he}} starts work, suggest a time and check it fits. Use du.",
-              "goal": "{{He}} says when {{he}} starts and finishes work and agrees on a concrete time for the standup.",
+              "setup": "You are Lena, the scrum master of {{name}}'s team, and the daily meeting has to move. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Wann fängst du an?' (an answer like 'um neun' is perfect) 2) 'Wann hörst du auf?' 3) Suggest 'Um zehn Uhr?' and ask 'Passt das?'. Never make {{him}} work out the time difference to Amman.",
+              "goal": "{{He}} says when {{he}} starts and finishes work and says yes or no to a time.",
               "variants": {
                 "student": {
                   "title": "Wann ist die Lerngruppe?",
-                  "setup": "You are Lena, a German exchange student who runs an online study group for students in Berlin and Amman. The weekly meeting has to move and you need to find a slot that works for {{name}} in Amman (one hour ahead of Berlin). Ask when {{his}} lectures start and finish, suggest a time and check it fits. Use du.",
-                  "goal": "{{He}} says when {{his}} lectures start and finish and agrees on a concrete time for the study group."
+                  "setup": "You are Lena, who runs an online study group for students in Berlin and Amman, and the meeting has to move; you are asking {{name}}. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Wann hast du Uni?' (an answer like 'von neun bis zwei' is perfect) 2) Suggest 'Um vier Uhr?' and ask 'Passt das?' 3) Confirm the day: 'Am Montag?'",
+                  "goal": "{{He}} says when {{he}} has classes and says yes or no to a time.",
+                  "brief": "Lena runs an online study group (die Lerngruppe) and needs a new time. She asks when you have classes, then suggests a time and a day.",
+                  "words": [
+                    {
+                      "de": "die Lerngruppe",
+                      "en": "the study group"
+                    },
+                    {
+                      "de": "Wann hast du Uni?",
+                      "en": "When do you have classes?"
+                    },
+                    {
+                      "de": "Ich habe Uni von neun bis zwei.",
+                      "en": "I have classes from nine to two."
+                    },
+                    {
+                      "de": "um vier Uhr",
+                      "en": "at four o'clock"
+                    },
+                    {
+                      "de": "Passt das?",
+                      "en": "Does that work?"
+                    },
+                    {
+                      "de": "Ja, das passt.",
+                      "en": "Yes, that works."
+                    },
+                    {
+                      "de": "am Montag",
+                      "en": "on Monday"
+                    },
+                    {
+                      "de": "Lieber um fünf.",
+                      "en": "Five would be better."
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Lena runs your team's daily meeting (the standup) and needs to move it. She asks when you start and finish work, then suggests a time. Answer with 'um' plus a time: um neun = at nine.",
+              "words": [
+                {
+                  "de": "Wann fängst du an?",
+                  "en": "When do you start?"
+                },
+                {
+                  "de": "Ich fange um neun an.",
+                  "en": "I start at nine."
+                },
+                {
+                  "de": "Wann hörst du auf?",
+                  "en": "When do you finish?"
+                },
+                {
+                  "de": "Ich höre um fünf auf.",
+                  "en": "I finish at five."
+                },
+                {
+                  "de": "um zehn Uhr",
+                  "en": "at ten o'clock"
+                },
+                {
+                  "de": "Passt das?",
+                  "en": "Does that work?"
+                },
+                {
+                  "de": "Ja, das passt.",
+                  "en": "Yes, that works."
+                },
+                {
+                  "de": "Lieber um elf.",
+                  "en": "Eleven would be better."
+                }
+              ]
             },
             {
               "id": "a1.1-2-personalabteilung",
               "title": "Anruf von der Personalabteilung",
-              "setup": "You are Frau Berger from HR. You phone {{name}} to complete {{his}} employee file: you need {{his}} phone number, {{his}} date of birth and {{his}} email address, and you want to confirm the start date of {{his}} contract. Use Sie and read numbers back to {{him}} so {{he}} can confirm.",
-              "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date.",
+              "setup": "You are Frau Berger from HR, phoning {{name}} to complete {{his}} employee file. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Tag, hier ist Frau Berger. Wie ist Ihre Telefonnummer?' (digits said one by one are perfect; read them back) 2) 'Wie alt sind Sie?' 3) 'Danke, das ist alles!'",
+              "goal": "{{He}} gives {{his}} phone number digit by digit and says how old {{he}} is.",
               "variants": {
                 "student": {
                   "title": "Anruf vom International Office",
-                  "setup": "You are Frau Berger from the International Office of a technical university in Berlin. You phone {{name}} to complete {{his}} application for a summer school: you need {{his}} phone number, {{his}} date of birth and {{his}} email address, and you want to confirm the start date of the course. Use Sie and read numbers back to {{him}} so {{he}} can confirm.",
-                  "goal": "{{He}} gives a phone number, {{his}} date of birth and an email address, and confirms a date."
+                  "setup": "You are Frau Berger from the International Office of a technical university in Berlin, phoning {{name}} about {{his}} summer-school application. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Tag, hier ist Frau Berger. Wie ist Ihre Telefonnummer?' (digits one by one are perfect; read them back) 2) 'Wie alt sind Sie?' 3) 'Danke, das ist alles!'",
+                  "goal": "{{He}} gives {{his}} phone number digit by digit and says how old {{he}} is.",
+                  "brief": "Frau Berger from the university's International Office phones you about your summer-school application (die Bewerbung). She asks for your phone number and your age. Say the numbers one digit at a time.",
+                  "words": [
+                    {
+                      "de": "die Bewerbung",
+                      "en": "the application"
+                    },
+                    {
+                      "de": "Wie ist Ihre Telefonnummer?",
+                      "en": "What is your phone number?"
+                    },
+                    {
+                      "de": "Meine Nummer ist …",
+                      "en": "My number is …"
+                    },
+                    {
+                      "de": "null, eins, zwei, drei, vier",
+                      "en": "zero, one, two, three, four"
+                    },
+                    {
+                      "de": "fünf, sechs, sieben, acht, neun",
+                      "en": "five, six, seven, eight, nine"
+                    },
+                    {
+                      "de": "Wie alt sind Sie?",
+                      "en": "How old are you?"
+                    },
+                    {
+                      "de": "Ich bin zwanzig.",
+                      "en": "I'm twenty."
+                    },
+                    {
+                      "de": "Noch einmal, bitte.",
+                      "en": "Once more, please."
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Frau Berger from HR (die Personalabteilung) phones you to complete your file. She asks for your phone number and your age. Say the numbers one digit at a time; she will read them back.",
+              "words": [
+                {
+                  "de": "die Personalabteilung",
+                  "en": "HR (the personnel department)"
+                },
+                {
+                  "de": "Wie ist Ihre Telefonnummer?",
+                  "en": "What is your phone number?"
+                },
+                {
+                  "de": "Meine Nummer ist …",
+                  "en": "My number is …"
+                },
+                {
+                  "de": "null, eins, zwei, drei, vier",
+                  "en": "zero, one, two, three, four"
+                },
+                {
+                  "de": "fünf, sechs, sieben, acht, neun",
+                  "en": "five, six, seven, eight, nine"
+                },
+                {
+                  "de": "Wie alt sind Sie?",
+                  "en": "How old are you?"
+                },
+                {
+                  "de": "Ich bin dreißig.",
+                  "en": "I'm thirty."
+                },
+                {
+                  "de": "Noch einmal, bitte.",
+                  "en": "Once more, please."
+                }
+              ]
             },
             {
               "id": "a1.1-2-kiosk",
               "title": "Am Kiosk",
-              "setup": "You are the owner of a kiosk near Berlin Hauptbahnhof. {{name}} wants a bottle of water, a coffee and a newspaper. Tell {{him}} the prices one by one, give {{him}} the total and ask whether {{he}} pays with card or cash. Use Sie.",
-              "goal": "{{He}} asks the price of at least one item, understands the total and says how {{he}} wants to pay."
+              "setup": "You are the owner of a kiosk at Berlin Hauptbahnhof. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Was möchten Sie?' ('Ein Wasser, bitte' is a whole answer) 2) Give one small whole-euro price: 'Zwei Euro.' 3) 'Mit Karte oder bar?'",
+              "goal": "{{He}} asks for one thing, understands the price and says how {{he}} pays.",
+              "brief": "You're at a small shop (der Kiosk) in Berlin's main station and want a bottle of water. The owner asks what you want, tells you the price and asks if you pay by card or cash.",
+              "words": [
+                {
+                  "de": "der Kiosk",
+                  "en": "the small corner shop"
+                },
+                {
+                  "de": "Was möchten Sie?",
+                  "en": "What would you like?"
+                },
+                {
+                  "de": "Ein Wasser, bitte.",
+                  "en": "A water, please."
+                },
+                {
+                  "de": "Was kostet das?",
+                  "en": "How much is it?"
+                },
+                {
+                  "de": "zwei Euro",
+                  "en": "two euros"
+                },
+                {
+                  "de": "Mit Karte oder bar?",
+                  "en": "Card or cash?"
+                },
+                {
+                  "de": "Mit Karte, bitte.",
+                  "en": "By card, please."
+                },
+                {
+                  "de": "Danke, tschüss!",
+                  "en": "Thanks, bye!"
+                }
+              ]
             }
           ],
           "checkpoint": {
@@ -183,41 +521,227 @@
             {
               "id": "a1.1-3-standup",
               "title": "Das Daily Standup",
-              "setup": "You are Lena, the scrum master, running the daily standup. Ask {{name}} in very simple German what {{he}} is doing today and whether {{he}} needs help. If {{he}} answers in English, give {{him}} the German and ask again. Use du.",
-              "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not.",
+              "setup": "You are Lena, the scrum master, running the daily standup with {{name}} and the team. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Morgen! Was machst du heute?' (a short answer like 'Ich teste die App' is perfect; if {{he}} answers in English, give the German in coach_en and ask again) 2) 'Hast du ein Problem?' 3) 'Super, danke!'",
+              "goal": "{{He}} says one thing {{he}} is doing today and whether {{he}} has a problem.",
               "variants": {
                 "student": {
                   "title": "In der Lerngruppe",
-                  "setup": "You are Lena, a German exchange student, opening the study group with a quick round in which everyone says what they are doing today. Ask {{name}} in very simple German what {{he}} is doing today and whether {{he}} needs help. If {{he}} answers in English, give {{him}} the German and ask again. Use du.",
-                  "goal": "{{He}} names at least one task {{he}} is doing today and says whether {{he}} has a problem or not."
+                  "setup": "You are Lena, a German exchange student, opening the study group with {{name}} and the others: a quick round where everyone says what they are doing today. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Was machst du heute?' (a short answer like 'Ich lerne Mathe' is perfect; if {{he}} answers in English, give the German in coach_en and ask again) 2) 'Hast du ein Problem?' 3) 'Super, danke!'",
+                  "goal": "{{He}} says one thing {{he}} is doing today and whether {{he}} has a problem.",
+                  "brief": "Your study group starts with a quick round: everyone says what they are doing today. Lena asks what you're studying and whether anything is hard right now.",
+                  "words": [
+                    {
+                      "de": "Was machst du heute?",
+                      "en": "What are you doing today?"
+                    },
+                    {
+                      "de": "Ich lerne Mathe.",
+                      "en": "I'm studying maths."
+                    },
+                    {
+                      "de": "Ich habe eine Vorlesung.",
+                      "en": "I have a lecture."
+                    },
+                    {
+                      "de": "Ich lerne für die Prüfung.",
+                      "en": "I'm studying for the exam."
+                    },
+                    {
+                      "de": "Hast du ein Problem?",
+                      "en": "Do you have a problem?"
+                    },
+                    {
+                      "de": "Nein, alles gut.",
+                      "en": "No, all good."
+                    },
+                    {
+                      "de": "Ja, ich brauche Hilfe.",
+                      "en": "Yes, I need help."
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "The daily standup: every morning the team says in a few words what they are doing today. Lena asks what you're working on and whether anything is blocking you.",
+              "words": [
+                {
+                  "de": "Was machst du heute?",
+                  "en": "What are you doing today?"
+                },
+                {
+                  "de": "Ich arbeite an der App.",
+                  "en": "I'm working on the app."
+                },
+                {
+                  "de": "Ich teste die App.",
+                  "en": "I'm testing the app."
+                },
+                {
+                  "de": "Ich schreibe Code.",
+                  "en": "I'm writing code."
+                },
+                {
+                  "de": "Hast du ein Problem?",
+                  "en": "Do you have a problem?"
+                },
+                {
+                  "de": "Nein, alles gut.",
+                  "en": "No, all good."
+                },
+                {
+                  "de": "Ja, ich brauche Hilfe.",
+                  "en": "Yes, I need help."
+                }
+              ]
             },
             {
               "id": "a1.1-3-videocall",
               "title": "Vor dem Meeting",
-              "setup": "You are Jonas, a colleague. You are both early in a video call waiting for the others. Make small talk: ask how {{he}} is, how {{his}} morning was and what time it is in Amman now. Use du and short sentences.",
-              "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day.",
+              "setup": "You are Jonas, a colleague; you are both early in a video call waiting for the others. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Wie geht's?' 2) 'Wie spät ist es in Amman?' (help with 'Es ist … Uhr') 3) 'Bei mir ist es eine Stunde früher.' and 'Bis gleich!'",
+              "goal": "{{He}} says how {{he}} is and what time it is in Amman.",
               "variants": {
                 "student": {
                   "title": "Vor dem Online-Seminar",
-                  "setup": "You are Jonas, a student in Berlin who takes the same online seminar as {{name}}. You are both early in the video call waiting for the others. Make small talk: ask how {{he}} is, how {{his}} morning was and what time it is in Amman now. Use du and short sentences.",
-                  "goal": "{{He}} says how {{he}} is, says what time it is in Amman and asks you one question about your day."
+                  "setup": "You are Jonas, a student in Berlin in the same online seminar as {{name}}; you are both early in the video call. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Wie geht's?' 2) 'Wie spät ist es in Amman?' (help with 'Es ist … Uhr') 3) 'Bei mir ist es eine Stunde früher.' and 'Bis gleich!'",
+                  "goal": "{{He}} says how {{he}} is and what time it is in Amman.",
+                  "brief": "You and Jonas, a student in Berlin, joined your online seminar early and are waiting for the others. He makes small talk: how you are, and what time it is where you are.",
+                  "words": [
+                    {
+                      "de": "Wie geht's?",
+                      "en": "How are you?"
+                    },
+                    {
+                      "de": "Gut, danke. Und dir?",
+                      "en": "Good, thanks. And you?"
+                    },
+                    {
+                      "de": "Wie spät ist es?",
+                      "en": "What time is it?"
+                    },
+                    {
+                      "de": "Es ist drei Uhr.",
+                      "en": "It's three o'clock."
+                    },
+                    {
+                      "de": "das Seminar",
+                      "en": "the class (seminar)"
+                    },
+                    {
+                      "de": "eine Stunde früher",
+                      "en": "one hour earlier"
+                    },
+                    {
+                      "de": "Bis gleich!",
+                      "en": "See you in a moment!"
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "You and your colleague Jonas joined a video call early and are waiting for the others. He makes small talk: how you are, and what time it is where you are.",
+              "words": [
+                {
+                  "de": "Wie geht's?",
+                  "en": "How are you?"
+                },
+                {
+                  "de": "Gut, danke. Und dir?",
+                  "en": "Good, thanks. And you?"
+                },
+                {
+                  "de": "Wie spät ist es?",
+                  "en": "What time is it?"
+                },
+                {
+                  "de": "Es ist drei Uhr.",
+                  "en": "It's three o'clock."
+                },
+                {
+                  "de": "in Amman",
+                  "en": "in Amman"
+                },
+                {
+                  "de": "eine Stunde früher",
+                  "en": "one hour earlier"
+                },
+                {
+                  "de": "Bis gleich!",
+                  "en": "See you in a moment!"
+                }
+              ]
             },
             {
               "id": "a1.1-3-tagesablauf",
               "title": "Ein Tag in Amman",
-              "setup": "You are Mira, a new colleague who is curious how remote work from Amman looks. Ask {{name}} about {{his}} day from getting up to finishing work: when {{he}} gets up, when {{he}} starts, when {{he}} eats, when {{he}} stops. Use du.",
-              "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly.",
+              "setup": "You are Mira, a new colleague curious how remote work from Amman looks. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Wann stehst du auf?' (an answer like 'um sieben' is perfect) 2) 'Wann fängst du an?' 3) 'Wann isst du?' If that goes well, one more: 'Und wann hörst du auf?'",
+              "goal": "{{He}} says when {{he}} gets up and when {{he}} starts work.",
               "variants": {
                 "student": {
                   "title": "Ein Tag an der Uni",
-                  "setup": "You are Mira, a German student who is curious what student life in Amman looks like. Ask {{name}} about {{his}} day from getting up to the evening: when {{he}} gets up, when the first lecture starts, when {{he}} eats, when {{he}} goes home, and whether {{he}} also has a job on the side (Ich arbeite als … bei …). Use du.",
-                  "goal": "{{He}} describes {{his}} day with at least four activities and at least two separable verbs used correctly."
+                  "setup": "You are Mira, a German student curious what student life in Amman looks like, talking with {{name}}. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Wann stehst du auf?' (an answer like 'um sieben' is perfect) 2) 'Wann beginnt die Vorlesung?' 3) 'Wann isst du?'",
+                  "goal": "{{He}} says when {{he}} gets up and when {{his}} first class starts.",
+                  "brief": "Mira, a German student, is curious what a day at university in Amman looks like. She asks when you get up, when your first lecture starts and when you eat. Answer with 'um' plus a time.",
+                  "words": [
+                    {
+                      "de": "Wann stehst du auf?",
+                      "en": "When do you get up?"
+                    },
+                    {
+                      "de": "Ich stehe um sieben auf.",
+                      "en": "I get up at seven."
+                    },
+                    {
+                      "de": "Wann beginnt die Vorlesung?",
+                      "en": "When does the lecture start?"
+                    },
+                    {
+                      "de": "Die Vorlesung beginnt um zehn.",
+                      "en": "The lecture starts at ten."
+                    },
+                    {
+                      "de": "Wann isst du?",
+                      "en": "When do you eat?"
+                    },
+                    {
+                      "de": "Ich esse um eins.",
+                      "en": "I eat at one."
+                    },
+                    {
+                      "de": "in der Mensa",
+                      "en": "in the university canteen"
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Mira, a new colleague, is curious what a working day in Amman looks like. She asks when you get up, start work and eat. Answer with 'um' plus a time.",
+              "words": [
+                {
+                  "de": "Wann stehst du auf?",
+                  "en": "When do you get up?"
+                },
+                {
+                  "de": "Ich stehe um sieben auf.",
+                  "en": "I get up at seven."
+                },
+                {
+                  "de": "Wann fängst du an?",
+                  "en": "When do you start?"
+                },
+                {
+                  "de": "Ich fange um neun an.",
+                  "en": "I start at nine."
+                },
+                {
+                  "de": "Wann isst du?",
+                  "en": "When do you eat?"
+                },
+                {
+                  "de": "Ich esse um eins.",
+                  "en": "I eat at one."
+                },
+                {
+                  "de": "Ich höre um fünf auf.",
+                  "en": "I stop at five."
+                }
+              ]
             }
           ],
           "checkpoint": {
@@ -289,27 +813,151 @@
             {
               "id": "a1.1-4-baeckerei",
               "title": "In der Bäckerei",
-              "setup": "You are the woman behind the counter in a busy bakery in Berlin. Greet {{name}}, ask what {{he}} would like, offer a choice when {{he}} hesitates (Brötchen oder Brezel?), tell {{him}} the price and ask if that is everything. Use Sie, speak in short phrases, keep the queue moving.",
-              "goal": "{{He}} orders at least two items with quantities, asks what something is or whether it contains something, and pays."
+              "setup": "You are the woman behind the counter in a Berlin bakery. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Guten Morgen! Was möchten Sie?' (if {{he}} hesitates, offer 'Brötchen oder Brezel?') 2) 'Wie viele?' 3) 'Zwei Euro, bitte.' Keep it to one or two items.",
+              "goal": "{{He}} orders one item with a number and pays.",
+              "brief": "A German bakery (die Bäckerei) in the morning. The woman behind the counter asks what you'd like and how many. Bread rolls are Brötchen; a pretzel is a Brezel.",
+              "words": [
+                {
+                  "de": "Was möchten Sie?",
+                  "en": "What would you like?"
+                },
+                {
+                  "de": "Ich möchte zwei Brötchen.",
+                  "en": "I'd like two bread rolls."
+                },
+                {
+                  "de": "eine Brezel",
+                  "en": "a pretzel"
+                },
+                {
+                  "de": "Wie viele?",
+                  "en": "How many?"
+                },
+                {
+                  "de": "Das ist alles.",
+                  "en": "That's all."
+                },
+                {
+                  "de": "Was kostet das?",
+                  "en": "How much is it?"
+                },
+                {
+                  "de": "Danke schön!",
+                  "en": "Thank you!"
+                }
+              ]
             },
             {
               "id": "a1.1-4-teamessen",
               "title": "Mittagessen mit dem Team",
-              "setup": "You are the waiter at an Italian restaurant where {{name}} is having lunch with colleagues. Hand {{him}} the menu, ask what {{he}} wants to drink, then what {{he}} wants to eat. When {{he}} asks, explain simply what a dish contains. {{He}} does not eat pork, so be ready for that question. Use Sie.",
-              "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork.",
+              "setup": "You are the waiter in an Italian restaurant where {{name}} is having lunch with colleagues. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Was möchten Sie trinken?' 2) 'Und was möchten Sie essen? Pizza oder Pasta?' 3) If {{he}} asks 'Ist da Fleisch drin?', answer simply ('Nein, ohne Fleisch.').",
+              "goal": "{{He}} orders a drink and a dish.",
               "variants": {
                 "student": {
                   "title": "Mittagessen in der Mensa",
-                  "setup": "You are the woman behind the counter in the Mensa of a university in Berlin, where {{name}} is having lunch with other students on the first day of a summer school. Tell {{him}} the two dishes of the day, ask what {{he}} wants to eat and whether {{he}} wants a drink. When {{he}} asks, explain simply what a dish contains. {{He}} does not eat pork, so be ready for that question. Use Sie.",
-                  "goal": "{{He}} orders a drink and a dish and asks whether a dish contains meat or pork."
+                  "setup": "You are the woman behind the counter in the Mensa of a Berlin university, on the first day of a summer school. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. 1) 'Hallo! Nudeln oder Reis?' 2) If {{he}} asks 'Ist da Fleisch drin?', answer simply ('Nein, ohne Fleisch.') 3) 'Drei Euro, bitte.'",
+                  "goal": "{{He}} chooses a dish and pays.",
+                  "brief": "Lunch in the university canteen (die Mensa). The woman behind the counter offers two dishes: pasta or rice. You can ask whether there is meat in it.",
+                  "words": [
+                    {
+                      "de": "die Mensa",
+                      "en": "the university canteen"
+                    },
+                    {
+                      "de": "Nudeln oder Reis?",
+                      "en": "Pasta or rice?"
+                    },
+                    {
+                      "de": "Ich nehme den Reis.",
+                      "en": "I'll have the rice."
+                    },
+                    {
+                      "de": "Ist da Fleisch drin?",
+                      "en": "Is there meat in it?"
+                    },
+                    {
+                      "de": "ohne Fleisch",
+                      "en": "without meat"
+                    },
+                    {
+                      "de": "Was kostet das?",
+                      "en": "How much is it?"
+                    },
+                    {
+                      "de": "drei Euro",
+                      "en": "three euros"
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Lunch with your team at an Italian restaurant. The waiter asks what you'd like to drink, then what you'd like to eat. You can ask whether a dish has meat in it.",
+              "words": [
+                {
+                  "de": "Was möchten Sie trinken?",
+                  "en": "What would you like to drink?"
+                },
+                {
+                  "de": "Ein Wasser, bitte.",
+                  "en": "A water, please."
+                },
+                {
+                  "de": "Was möchten Sie essen?",
+                  "en": "What would you like to eat?"
+                },
+                {
+                  "de": "Ich nehme die Pizza.",
+                  "en": "I'll have the pizza."
+                },
+                {
+                  "de": "Ist da Fleisch drin?",
+                  "en": "Is there meat in it?"
+                },
+                {
+                  "de": "ohne Fleisch",
+                  "en": "without meat"
+                },
+                {
+                  "de": "Kein Schweinefleisch, bitte.",
+                  "en": "No pork, please."
+                }
+              ]
             },
             {
               "id": "a1.1-4-supermarkt",
               "title": "Im Supermarkt",
-              "setup": "You are an employee stacking shelves in a supermarket. {{name}} is looking for things on a shopping list: rice, yoghurt, tomatoes, bread. Tell {{him}} where things are (Gang drei, hinten links, neben der Kasse) and ask if {{he}} needs anything else. Use Sie.",
-              "goal": "{{He}} asks where at least two products are and understands and repeats back where to find them."
+              "setup": "You are an employee in a supermarket; {{name}} is looking for rice and bread. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. Answer each 'Wo ist …?' with one short chunk ('Da hinten.', 'Links.', 'Gang drei.'), then ask 'Noch etwas?'.",
+              "goal": "{{He}} asks where one thing is and says back where it is.",
+              "brief": "You're in a German supermarket looking for rice and bread. You ask an employee where things are; the answers are short: back there, on the left, aisle three.",
+              "words": [
+                {
+                  "de": "Entschuldigung!",
+                  "en": "Excuse me!"
+                },
+                {
+                  "de": "Wo ist der Reis?",
+                  "en": "Where is the rice?"
+                },
+                {
+                  "de": "Wo ist das Brot?",
+                  "en": "Where is the bread?"
+                },
+                {
+                  "de": "da hinten",
+                  "en": "back there"
+                },
+                {
+                  "de": "links / rechts",
+                  "en": "left / right"
+                },
+                {
+                  "de": "Gang drei",
+                  "en": "aisle three"
+                },
+                {
+                  "de": "Noch etwas?",
+                  "en": "Anything else?"
+                }
+              ]
             }
           ],
           "checkpoint": {
@@ -353,27 +1001,151 @@
             {
               "id": "a1.1-5-auslaenderbehoerde",
               "title": "Wo ist die Ausländerbehörde?",
-              "setup": "You are a passer-by at a tram stop in Berlin. {{name}} has an appointment at the Ausländerbehörde and does not know how to get there. Explain the way in two or three very simple steps (tram number, how many stops, then on foot) and check that {{he}} understood. Use Sie.",
-              "goal": "{{He}} asks for the way, asks you to repeat or speak more slowly at least once, and repeats the directions back correctly."
+              "setup": "You are a passer-by at a tram stop in Berlin. {{name}} asks you the way to the Ausländerbehörde. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. Give one step at a time ('Geradeaus.' then 'Dann links.'), speak slowly, and repeat when asked ('Noch einmal, bitte' / 'Langsamer, bitte').",
+              "goal": "{{He}} asks the way, asks you to repeat once, and says the directions back.",
+              "brief": "You have an appointment at the immigration office (die Ausländerbehörde) in Berlin and you're lost. You ask someone at a tram stop. They'll say straight on, left or right. Ask them to repeat or slow down if you need to.",
+              "words": [
+                {
+                  "de": "Entschuldigung, wo ist …?",
+                  "en": "Excuse me, where is …?"
+                },
+                {
+                  "de": "die Ausländerbehörde",
+                  "en": "the immigration office"
+                },
+                {
+                  "de": "geradeaus",
+                  "en": "straight on"
+                },
+                {
+                  "de": "links / rechts",
+                  "en": "left / right"
+                },
+                {
+                  "de": "Noch einmal, bitte.",
+                  "en": "Once more, please."
+                },
+                {
+                  "de": "Langsamer, bitte.",
+                  "en": "Slower, please."
+                },
+                {
+                  "de": "Vielen Dank!",
+                  "en": "Thank you very much!"
+                }
+              ]
             },
             {
               "id": "a1.1-5-buero",
               "title": "Im Bürogebäude",
-              "setup": "You are Jonas showing {{name}} around the Berlin office on {{his}} first visit. Walk {{him}} through: the kitchen, the toilets, the meeting room Mars, {{his}} desk. Ask {{him}} afterwards where each thing is to check {{he}} remembers. Use du.",
-              "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber.",
+              "setup": "You are Jonas, showing {{name}} around the Berlin office on {{his}} first visit. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. Show one room per turn: 'Hier ist die Küche.', 'Da links ist die Toilette.', 'Und das ist dein Tisch.' Then check: 'Wo ist die Küche?'",
+              "goal": "{{He}} says where one room is.",
               "variants": {
                 "student": {
                   "title": "Auf dem Campus",
-                  "setup": "You are Jonas, a student showing {{name}} around the mechanical engineering building of a university in Berlin on the first day of {{his}} exchange semester. Walk {{him}} through: the Mensa, the library, the materials lab, lecture hall H1. Ask {{him}} afterwards where each thing is to check {{he}} remembers. Use du.",
-                  "goal": "{{He}} correctly says where at least two rooms are, using links/rechts/geradeaus or neben/gegenüber."
+                  "setup": "You are Jonas, a student showing {{name}} around the campus of a Berlin university on the first day of {{his}} exchange semester. Use du. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. Show one place per turn: 'Hier ist die Mensa.', 'Da links ist die Bibliothek.', 'Und das ist der Hörsaal.' Then check: 'Wo ist die Mensa?'",
+                  "goal": "{{He}} says where one place is.",
+                  "brief": "Your first day at a university in Berlin. Jonas shows you around: the canteen, the library and the lecture hall. Then he checks whether you remember where things are.",
+                  "words": [
+                    {
+                      "de": "die Mensa",
+                      "en": "the university canteen"
+                    },
+                    {
+                      "de": "die Bibliothek",
+                      "en": "the library"
+                    },
+                    {
+                      "de": "der Hörsaal",
+                      "en": "the lecture hall"
+                    },
+                    {
+                      "de": "hier / da",
+                      "en": "here / there"
+                    },
+                    {
+                      "de": "links / rechts",
+                      "en": "left / right"
+                    },
+                    {
+                      "de": "Wo ist …?",
+                      "en": "Where is …?"
+                    },
+                    {
+                      "de": "Die Mensa ist links.",
+                      "en": "The canteen is on the left."
+                    }
+                  ]
                 }
-              }
+              },
+              "brief": "Your first day at the office in Berlin. Jonas shows you around: the kitchen, the toilet and your desk. Then he checks whether you remember where things are.",
+              "words": [
+                {
+                  "de": "die Küche",
+                  "en": "the kitchen"
+                },
+                {
+                  "de": "die Toilette",
+                  "en": "the toilet"
+                },
+                {
+                  "de": "dein Tisch",
+                  "en": "your desk"
+                },
+                {
+                  "de": "hier / da",
+                  "en": "here / there"
+                },
+                {
+                  "de": "links / rechts",
+                  "en": "left / right"
+                },
+                {
+                  "de": "Wo ist …?",
+                  "en": "Where is …?"
+                },
+                {
+                  "de": "Die Küche ist links.",
+                  "en": "The kitchen is on the left."
+                }
+              ]
             },
             {
               "id": "a1.1-5-hauptbahnhof",
               "title": "Am Hauptbahnhof",
-              "setup": "You are a Deutsche Bahn employee at the information desk. {{name}} wants the train to Hamburg and does not know which platform. Tell {{him}} the platform (Gleis) and the departure time, and tell {{him}} the platform is upstairs on the left. Use Sie.",
-              "goal": "{{He}} asks which platform {{his}} train leaves from and when, and confirms the answer back to you."
+              "setup": "You are a Deutsche Bahn employee at the information desk of Berlin Hauptbahnhof. {{name}} wants the train to Hamburg. Use Sie. Ask one question per turn, in this order, and use only words from the list the learner was shown. A one-word answer is enough: praise it and move on. Say 'Gleis sieben.' and 'Um zehn Uhr.' one at a time, and repeat whenever {{he}} asks.",
+              "goal": "{{He}} asks which platform and what time, and says it back.",
+              "brief": "At Berlin's main station (der Hauptbahnhof) you need the train to Hamburg. At the information desk you ask which platform (das Gleis) and what time it leaves.",
+              "words": [
+                {
+                  "de": "der Zug nach Hamburg",
+                  "en": "the train to Hamburg"
+                },
+                {
+                  "de": "Welches Gleis?",
+                  "en": "Which platform?"
+                },
+                {
+                  "de": "Gleis sieben",
+                  "en": "platform seven"
+                },
+                {
+                  "de": "Wann fährt der Zug?",
+                  "en": "When does the train leave?"
+                },
+                {
+                  "de": "um zehn Uhr",
+                  "en": "at ten o'clock"
+                },
+                {
+                  "de": "Noch einmal, bitte.",
+                  "en": "Once more, please."
+                },
+                {
+                  "de": "Danke schön!",
+                  "en": "Thank you!"
+                }
+              ]
             }
           ],
           "checkpoint": {

@@ -130,11 +130,24 @@ function renderStart(err) {
 function scenarioList() {
   const list = h('div', { class: 'choice-list', role: 'radiogroup', 'aria-label': 'Scenario' });
   const all = [{ id: null, title: 'Free conversation', goal: null, setup: 'No fixed goal. Talk about anything.' }, ...S.scenarios];
+  // The chosen scene's words, before it starts: a beginner cannot hold a conversation "at the
+  // reception" without first meeting the eight sentences it is made of.
+  const brief = h('section', { class: 'scene-words', 'aria-live': 'polite' });
   const sync = () => {
     for (const row of list.children) {
       const on = row.dataset.id === String((S.scenario && S.scenario.id) || '');
       row.setAttribute('aria-checked', String(on));
     }
+    clear(brief);
+    const words = (S.scenario && S.scenario.words) || [];
+    brief.hidden = !words.length;
+    if (!words.length) return;
+    brief.append(h('h2', { class: 'section-h' }, 'Words for this scene'),
+      h('p', { class: 'muted small' }, 'Tap one to hear it. The tutor uses these.'),
+      h('div', { class: 'lines' }, words.map((w) =>
+        h('button', { class: 'line', type: 'button', 'aria-label': `Play “${w.de}”`, onClick: () => playMessage('w', w.de, 'normal') },
+          h('span', { class: 'line-main' }, h('span', { class: 'line-de sm', lang: 'de' }, w.de), h('span', { class: 'line-en' }, w.en)),
+          h('span', { class: 'say' }, icon('speaker', 20))))));
   };
   for (const sc of all) {
     list.append(h('button', { class: 'choice', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: String(sc.id || '') }, onClick: () => {
@@ -144,10 +157,10 @@ function scenarioList() {
     } },
       h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
       h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
-        h('span', { class: 'choice-sub clamp' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
+        h('span', { class: 'choice-sub clamp' }, sc.brief || (sc.goal ? `Goal: ${sc.goal}` : sc.setup)))));
   }
   sync();
-  return list;
+  return [list, brief];
 }
 
 function openScenarioPicker() {
@@ -166,7 +179,7 @@ function openScenarioPicker() {
       }
     } }, h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
       h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
-        h('span', { class: 'choice-sub' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
+        h('span', { class: 'choice-sub' }, sc.brief || (sc.goal ? `Goal: ${sc.goal}` : sc.setup)))));
   }
   body.setAttribute('role', 'radiogroup');
   body.classList.add('choice-list');

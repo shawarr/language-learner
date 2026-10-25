@@ -155,3 +155,20 @@ async def status_for(unit_id: str) -> dict[str, Any]:
     p = await progress(unit_id)
     return {"has_lesson": True, "completed": p["completed"], "step": p["step"],
             "steps": len(exercises.build(lesson)), "title": lesson["title"], "minutes": lesson.get("minutes")}
+
+
+async def overview(unit_ids: list[str]) -> list[dict[str, Any]]:
+    """Per unit: is there a lesson, how far the learner got, and whether it is open. A lesson opens
+    when the one before it is finished, without waiting for that unit's checkpoint: the checkpoint
+    still marks the level, but learning ahead is never locked behind it."""
+    out: list[dict[str, Any]] = []
+    previous_done = True
+    for uid in unit_ids:
+        lesson = for_unit(uid)
+        p = await progress(uid)
+        steps = len(exercises.build(lesson)) if lesson else 0
+        out.append({"unit_id": uid, "has_lesson": lesson is not None, "open": previous_done,
+                    "completed": p["completed"], "step": min(p["step"], steps), "steps": steps})
+        # A unit with no written lesson cannot hold the next one hostage.
+        previous_done = p["completed"] or lesson is None
+    return out

@@ -222,3 +222,28 @@ def test_a_spoken_number_counts_however_the_transcriber_writes_it():
     assert matches_spoken("Es ist drei Uhr.", "Es ist 3 Uhr.")
     assert matches_spoken("eins", "1")
     assert not matches_spoken("fünf", "6")
+
+
+@pytest.mark.asyncio
+async def test_the_next_lesson_opens_when_this_one_is_finished(fresh_db):
+    """Learning ahead is never locked behind a checkpoint: a lesson opens when the one before it is done."""
+    units = ["a1.1-1", "a1.1-2", "a1.1-3"]
+    o = {x["unit_id"]: x for x in await lessons.overview(units)}
+    assert o["a1.1-1"]["open"] and not o["a1.1-2"]["open"]
+    await lessons.complete("a1.1-1")
+    o = {x["unit_id"]: x for x in await lessons.overview(units)}
+    assert o["a1.1-2"]["open"] and o["a1.1-1"]["completed"]
+
+
+def test_beginner_scenarios_come_with_a_briefing_and_their_words():
+    """'Am Empfang' with no context and no words gave a beginner nothing to say. Every A1.1 scene
+    (and each learner's version of it) says in English what is happening and gives the words."""
+    from app.services import curriculum
+
+    for kind in ("engineer", "student"):
+        persona = {"kind": kind, "name": "X", "about": "", "work": "", "role_de": "", "city": "Amman", "gender": "m"}
+        for u in curriculum.phase("a1.1")["units"]:
+            for sc in curriculum.render_for_user(u["scenarios"], persona):
+                assert sc.get("brief") and len(sc.get("words") or []) >= 5, (kind, sc["id"])
+                assert "one question per turn" in sc["setup"], sc["id"]
+                assert "{{" not in sc["brief"] + sc["setup"]

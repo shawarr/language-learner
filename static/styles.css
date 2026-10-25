@@ -544,6 +544,8 @@ textarea.input { resize: none; line-height: 1.5; }
 .node-row { display: flex; flex-direction: column; align-items: center; gap: 8px; transform: translateX(var(--x, 0px)); }
 .node { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; padding: 0; }
 .node.done { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.node.ahead { background: var(--bg); border-color: var(--accent); color: var(--accent-ink); }
+.node-sub { margin-top: -4px; font-size: var(--t-xs); color: var(--text-dim); }
 .node.locked { background: var(--surface-2); border-color: var(--line); color: var(--text-dim); }
 .node.now { width: 80px; height: 80px; background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .node.checkpoint { border-radius: 24px; }

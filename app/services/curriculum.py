@@ -37,6 +37,10 @@ _PRONOUNS = {"m": ("he", "him", "his", "himself"),
              "x": ("they", "them", "their", "themselves")}
 VARIANT_KINDS = ("engineer", "student")
 _SCENARIO_VARIANT_KEYS = ("title", "setup", "goal")
+# Optional on a scenario (and its variants): what the learner reads before starting, in English, and
+# the words and sentences it needs. A beginner dropped into "Am Empfang" with no context and no words
+# has nothing to say.
+_SCENARIO_BRIEF_KEYS = ("brief", "words")
 _TASK_VARIANT_KEYS = ("prompt", "hint")
 # A unit that is about one learner's job end to end (the standup, the postmortem) carries the other
 # kind's title, goals, themes and grammar examples. Same grammar points, same level, so both learners
@@ -85,6 +89,17 @@ def _check_variants(owner: dict, where: str, required: tuple[str, ...], allowed:
         extra = set(variant) - set(allowed)
         if extra:
             raise CurriculumError(f"{where}: variant {kind} has unexpected keys {sorted(extra)}")
+
+
+def _check_brief(node: dict, where: str) -> None:
+    if "brief" in node and (not isinstance(node["brief"], str) or not node["brief"].strip()):
+        raise CurriculumError(f"{where}: brief must be a non-empty string")
+    if "words" in node:
+        words = node["words"]
+        if not isinstance(words, list) or not words or not all(
+                isinstance(w, dict) and set(w) == {"de", "en"} and all(isinstance(w[k], str) and w[k].strip() for k in w)
+                for w in words):
+            raise CurriculumError(f"{where}: words must be a list of {{de, en}} pairs")
 
 
 def _check_unit_variants(unit: dict, uid: str) -> None:
@@ -152,7 +167,12 @@ def validate(data: dict) -> None:
                 for key in ("title", "setup", "goal"):
                     if not isinstance(sc.get(key), str) or not sc[key].strip():
                         raise CurriculumError(f"scenario {sid} needs {key}")
-                _check_variants(sc, f"scenario {sid}", _SCENARIO_VARIANT_KEYS, _SCENARIO_VARIANT_KEYS)
+                _check_brief(sc, f"scenario {sid}")
+                for kind, variant in (sc.get("variants") or {}).items():
+                    if isinstance(variant, dict):
+                        _check_brief(variant, f"scenario {sid} variant {kind}")
+                _check_variants(sc, f"scenario {sid}", _SCENARIO_VARIANT_KEYS,
+                                _SCENARIO_VARIANT_KEYS + _SCENARIO_BRIEF_KEYS)
             cp = unit.get("checkpoint")
             if not isinstance(cp, dict) or not all(isinstance(cp.get(k), dict) and cp[k].get("prompt")
                                                    for k in ("speaking", "writing")):

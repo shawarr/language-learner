@@ -100,7 +100,7 @@ async def test_nothing_handed_out_keeps_a_placeholder(fresh_db, username):
             found_unit, found = curriculum.scenario(sc["id"])
             assert_rendered(found_unit, f"scenario {sc['id']} (unit)")
             assert_rendered(found, f"scenario {sc['id']}")
-            assert set(found) == {"id", "title", "setup", "goal"}
+            assert {"id", "title", "setup", "goal"} <= set(found) <= {"id", "title", "setup", "goal", "brief", "words"}
         await profile.update_profile(unit_id=u["id"])
         assert_rendered(await curriculum.current_unit(), f"current_unit {u['id']}")
         cur = await curriculum.current()
@@ -159,7 +159,7 @@ def test_every_variant_is_complete_and_written_like_its_default():
         assert set(owner["variants"]) == {"student"}, where
         v = owner["variants"]["student"]
         if kind == "scenario":
-            assert set(v) == {"title", "setup", "goal"}, where
+            assert {"title", "setup", "goal"} <= set(v) <= {"title", "setup", "goal", "brief", "words"}, where
             assert v["setup"].startswith("You are "), where
             assert "{{name}}" in v["setup"] or "{{he}}" in v["setup"].lower(), f"{where}: the setup never names the learner"
         else:

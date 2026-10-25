@@ -47,6 +47,14 @@ async def status():
     return await lessons.status_for(cur["unit"]["id"])
 
 
+@router.get("/overview")
+async def overview():
+    """Every unit of the current phase: lesson, progress, and whether it is open (Learn's path)."""
+    cur = await curriculum.current()
+    phase = curriculum.phase(cur["phase"]["id"]) or {"units": []}
+    return {"units": await lessons.overview([u["id"] for u in phase["units"]])}
+
+
 @router.get("/{unit_id}")
 async def one(unit_id: str):
     return await _lesson_payload(unit_id)
