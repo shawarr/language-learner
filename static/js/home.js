@@ -21,7 +21,8 @@ export async function show() {
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(2)));
+  // Skeletons only on the first visit: coming back to a tab refreshes in place, without a flash.
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(2)));
   try {
     const [game, lesson, cur, board, due] = await Promise.all([
       api('/api/game/me'),
@@ -53,7 +54,7 @@ function render({ game, lesson, cur, board, due }) {
   S.body.append(h('div', { class: 'home-head' },
     h('button', { class: 'avatar-btn', type: 'button', 'aria-label': 'Your profile', onClick: () => window.dtSwitchTo('you') }, katze({ variant: me.avatar, mood, size: 40 })),
     h('div', { class: 'grow' },
-      h('div', { class: 'home-greet', lang: 'de' }, `${greeting()}, ${me.name || ''}`),
+      h('h1', { class: 'home-greet', lang: 'de' }, `${greeting()}, ${me.name || ''}`),
       h('div', { class: 'muted small row', style: { gap: '6px' } }, flame(), game.streak_days ? `${game.streak_days}-day streak` : 'No streak yet')),
     h('span', { class: 'pill xp' }, `Lv ${game.level.n} · ${game.xp_total} XP`)));
 
@@ -102,7 +103,7 @@ function legend(name, color, text, closed) {
 
 function planCard(icon, color, bg, title, sub, cta, go, primary) {
   return h('button', { class: 'card plan', type: 'button', onClick: go },
-    h('span', { class: 'plan-icon', style: { background: bg, color } }, icons[icon]()),
+    h('span', { class: 'plan-icon', style: { color } }, icons[icon]()),
     h('span', { class: 'grow', style: { textAlign: 'left' } }, h('span', { class: 'plan-title' }, title), h('span', { class: 'muted small' }, sub)),
     h('span', { class: `chip small ${primary ? 'active' : ''}` }, cta));
 }

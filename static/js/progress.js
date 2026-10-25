@@ -23,7 +23,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(5)), h('div', { class: 'card' }, skeleton(2)));
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(5)), h('div', { class: 'card' }, skeleton(2)));
   try {
     S.data = await api('/api/progress');
     render(S.data);

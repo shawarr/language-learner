@@ -52,7 +52,7 @@ function say(text, { speed = 'normal', quiet = false } = {}) {
 
 /* ---- the path --------------------------------------------------------- */
 async function loadPath() {
-  clear(S.pathBody).append(h('div', { class: 'card' }, skeleton(2)), skeleton(3, { tall: true }));
+  if (!S.pathBody.childElementCount || S.pathBody.querySelector('.error-line')) clear(S.pathBody).append(h('div', { class: 'card' }, skeleton(2)), skeleton(3, { tall: true }));
   try {
     const [tree, cur, lesson] = await Promise.all([
       api('/api/curriculum'),
@@ -266,7 +266,7 @@ function tip(note) {
 
 function soundsStep(step) {
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, step.title),
+    h('h1', { class: 'prompt-h' }, step.title),
     step.body ? h('p', { class: 'prompt-lead' }, step.body) : null,
     h('div', { class: 'lines' }, step.items.map((s) => lineBtn({ text: s.example, main: [
       h('span', { class: 'line-de' }, de(s.de, 'sound-letter'), h('span', { class: 'sound-say' }, s.say)),
@@ -276,7 +276,7 @@ function soundsStep(step) {
 
 function wordsStep(step) {
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, step.title),
+    h('h1', { class: 'prompt-h' }, step.title),
     step.body ? h('p', { class: 'prompt-lead' }, step.body) : null,
     h('div', { class: 'lines' }, step.items.map((it) => lineBtn({ text: it.de, main: [
       de(it.de, 'line-de'), h('span', { class: 'line-en' }, it.en || ''), it.note ? h('span', { class: 'line-note' }, it.note) : null] }))),
@@ -289,7 +289,7 @@ function grammarStep(step) {
     h('tbody', {}, step.table.rows.map((r) => h('tr', {}, r.map((c, i) =>
       h('td', { class: i === 0 ? 'de-cell' : '', lang: i === 0 ? 'de' : 'en' }, c))))))) : null;
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, step.title),
+    h('h1', { class: 'prompt-h' }, step.title),
     h('p', { class: 'prompt-lead' }, step.body),
     table,
     step.examples ? h('div', { class: 'lines' }, step.examples.map((it) => lineBtn({ text: it.de, main: [
@@ -327,13 +327,13 @@ function choiceStep(ex, n, { question, options, answer, why, audio = null, title
   });
   waitFoot(n, h('span', { class: 'foot-hint' }, 'Pick one'));
   return h('div', { class: 'stack-lg' },
-    audio ? listenControls(audio, title) : h('h2', { class: 'prompt-h', lang: 'en' }, question),
+    audio ? listenControls(audio, title) : h('h1', { class: 'prompt-h', lang: 'en' }, question),
     opts);
 }
 
 function listenControls(audio, title) {
   return h('div', { class: 'stack' },
-    h('h2', { class: 'prompt-h' }, title || 'What do you hear?'),
+    h('h1', { class: 'prompt-h' }, title || 'What do you hear?'),
     h('div', { class: 'listen-row' },
       h('button', { class: 'btn speak-big tactile', type: 'button', 'aria-label': 'Play it again', onClick: () => say(audio) }, icon('speaker', 36)),
       h('button', { class: 'btn speak-slow tactile', type: 'button', 'aria-label': 'Play it slowly', onClick: () => say(audio, { speed: 'slow' }) }, icon('slow', 26))));
@@ -383,7 +383,7 @@ function matchStep(ex, n) {
   for (const word of ex.right) rightCol.append(h('button', { class: 'match-tile tactile en', type: 'button', onClick: (e) => tap(e.currentTarget, 'en', word) }, word));
   waitFoot(n, h('span', { class: 'foot-hint' }, 'Tap a word, then its meaning'));
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, 'Match the pairs'),
+    h('h1', { class: 'prompt-h' }, 'Match the pairs'),
     h('div', { class: 'match-grid' }, leftCol, rightCol));
 }
 
@@ -426,7 +426,7 @@ function buildStep(ex, n) {
   if (passed(n)) S.foot.actions(backBtn(n), continueBtn(n));
   else S.foot.actions(backBtn(n), check);
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, 'Build it in German'),
+    h('h1', { class: 'prompt-h' }, 'Build it in German'),
     katzeSays(ex.en, { mood: 'happy', size: 64, sub: ex.hint || null, lang: 'en' }),
     slot, bank,
     passed(n) ? h('div', { class: 'row' }, check) : null);
@@ -458,7 +458,7 @@ function speakStep(ex, n) {
   });
   waitFoot(n, h('button', { class: 'btn ghost', type: 'button', onClick: () => go(n + 1) }, 'Can’t speak now'));
   return h('div', { class: 'stack-lg' },
-    h('h2', { class: 'prompt-h' }, 'Say this out loud'),
+    h('h1', { class: 'prompt-h' }, 'Say this out loud'),
     h('div', { class: 'say-card' },
       h('div', { class: 'grow' }, de(ex.de, 'say-de'), h('p', { class: 'line-en' }, ex.en)),
       h('button', { class: 'btn speak-big sm tactile', type: 'button', 'aria-label': 'Hear it', onClick: () => say(ex.de) }, icon('speaker', 28))),

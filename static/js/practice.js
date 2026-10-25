@@ -14,7 +14,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(skeleton(3, { tall: true }));
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(skeleton(3, { tall: true }));
   try {
     const [due, prog, game] = await Promise.all([
       api('/api/vocab/due?limit=1').catch(() => ({ due_count: 0 })),
@@ -53,7 +53,7 @@ const ICONS = {
 };
 function hubCard(icon, color, bg, title, sub, tail, go) {
   return h('button', { class: 'card hub', type: 'button', onClick: go },
-    h('span', { class: 'hub-icon', style: { background: bg, color }, html: ICONS[icon] }),
+    h('span', { class: 'hub-icon', style: { color }, html: ICONS[icon] }),
     h('span', { class: 'grow', style: { textAlign: 'left' } }, h('span', { class: 'hub-title' }, title), h('span', { class: 'muted small' }, sub)),
     tail || h('span', { class: 'ico muted', html: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' }));
 }

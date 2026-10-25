@@ -21,7 +21,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(4)));
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(4)));
   try {
     const [game, board] = await Promise.all([api('/api/game/me'), api('/api/leaderboard')]);
     render(game, board);
