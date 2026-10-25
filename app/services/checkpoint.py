@@ -22,7 +22,7 @@ from ..db import db, loads
 from ..prompts import render
 from ..providers.base import Message
 from ..providers.llm import llm
-from . import curriculum, profile
+from . import curriculum, lessons, profile
 
 DIMENSIONS = ("task_completion", "range", "accuracy", "fluency")
 PASS_MIN = 3
@@ -71,7 +71,12 @@ async def availability(unit_id: str) -> dict:
         if isinstance(meta, dict) and meta.get("unit_readiness") == "ready":
             ready = True
             break
-    reason = "ready" if ready else ("sessions" if ended >= needed else "not_yet")
+    # Having finished the unit's lesson counts for most of the practice: one conversation after it
+    # is enough. Waiting for several conversations kept everything after the unit locked too long.
+    lesson_done = False
+    if ended >= 1 and lessons.for_unit(unit_id):
+        lesson_done = (await lessons.progress(unit_id))["completed"]
+    reason = ("ready" if ready else "sessions" if ended >= needed else "lesson" if lesson_done else "not_yet")
     return {"available": reason != "not_yet", "reason": reason, "sessions_in_unit": ended, "sessions_needed": needed}
 
 

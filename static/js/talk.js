@@ -130,11 +130,24 @@ function renderStart(err) {
 function scenarioList() {
   const list = h('div', { class: 'choice-list', role: 'radiogroup', 'aria-label': 'Scenario' });
   const all = [{ id: null, title: 'Free conversation', goal: null, setup: 'No fixed goal. Talk about anything.' }, ...S.scenarios];
+  // The chosen scene's words, before it starts: a beginner cannot hold a conversation "at the
+  // reception" without first meeting the eight sentences it is made of.
+  const brief = h('section', { class: 'scene-words', 'aria-live': 'polite' });
   const sync = () => {
     for (const row of list.children) {
       const on = row.dataset.id === String((S.scenario && S.scenario.id) || '');
       row.setAttribute('aria-checked', String(on));
     }
+    clear(brief);
+    const words = (S.scenario && S.scenario.words) || [];
+    brief.hidden = !words.length;
+    if (!words.length) return;
+    brief.append(h('h2', { class: 'section-h' }, 'Words for this scene'),
+      h('p', { class: 'muted small' }, 'Tap one to hear it. The tutor uses these.'),
+      h('div', { class: 'lines' }, words.map((w) =>
+        h('button', { class: 'line', type: 'button', 'aria-label': `Play “${w.de}”`, onClick: () => playMessage('w', w.de, 'normal') },
+          h('span', { class: 'line-main' }, h('span', { class: 'line-de sm', lang: 'de' }, w.de), h('span', { class: 'line-en' }, w.en)),
+          h('span', { class: 'say' }, icon('speaker', 20))))));
   };
   for (const sc of all) {
     list.append(h('button', { class: 'choice', type: 'button', role: 'radio', 'aria-checked': 'false', dataset: { id: String(sc.id || '') }, onClick: () => {
@@ -144,10 +157,10 @@ function scenarioList() {
     } },
       h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
       h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
-        h('span', { class: 'choice-sub clamp' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
+        h('span', { class: 'choice-sub clamp' }, sc.brief || (sc.goal ? `Goal: ${sc.goal}` : sc.setup)))));
   }
   sync();
-  return list;
+  return [list, brief];
 }
 
 function openScenarioPicker() {
@@ -166,7 +179,7 @@ function openScenarioPicker() {
       }
     } }, h('span', { class: 'choice-mark', 'aria-hidden': 'true' }, icon('check', 14)),
       h('span', { class: 'choice-text' }, h('span', { class: 'choice-title', lang: 'de' }, sc.title),
-        h('span', { class: 'choice-sub' }, sc.goal ? `Goal: ${sc.goal}` : sc.setup))));
+        h('span', { class: 'choice-sub' }, sc.brief || (sc.goal ? `Goal: ${sc.goal}` : sc.setup)))));
   }
   body.setAttribute('role', 'radiogroup');
   body.classList.add('choice-list');
@@ -197,17 +210,20 @@ function renderHistory(messages) {
       S.chat.append(lastUser.el);
     } else {
       if (lastUser) { lastUser.attach({ corrections: m.correction || [], english_help: m.english_help }); lastUser.link(m.id); lastUser = null; }
-      S.chat.append(tutorBubble({ id: m.id, text: m.content, meaning: m.meaning_en }));
+      S.chat.append(tutorBubble({ id: m.id, text: m.content, meaning: m.meaning_en, coach: m.coach_en }));
     }
   }
   scrollToEnd(true, 'auto');
 }
 
-function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
+function tutorBubble({ id, text, meaning = null, coach = null, newVocab = [] }) {
   const sentence = h('p', { class: `bubble-text ${S.hideGerman ? 'hidden-text' : ''}` }, tappableWords(text, translateWord));
   // What it means, in English. Shown by default while the learner is a beginner: German-only is not
   // comprehensible input when you know no German, it is noise. Older messages have no meaning
   // stored, so this is always optional.
+  // The tutor talking to the learner in English (explanations, what to say next). Always shown:
+  // it is the tutoring itself, not a crib, so the EN toggle does not hide it.
+  const coachEl = coach ? h('p', { class: 'bubble-coach', lang: 'en' }, coach) : null;
   const meaningEl = meaning
     ? h('p', { class: 'bubble-meaning', lang: 'en', hidden: !S.showEnglish }, meaning)
     : null;
@@ -225,7 +241,7 @@ function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
   return h('div', { class: 'msg tutor', dataset: { id: String(id) } },
     h('span', { class: 'msg-avatar', 'aria-hidden': 'true' }, katze({ variant: (window.dtUser || {}).avatar, size: 30 })),
     h('div', { class: 'msg-body' },
-      h('div', { class: 'bubble' }, sentence, meaningEl, tools,
+      h('div', { class: 'bubble' }, coachEl, sentence, meaningEl, tools,
         h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))),
       vocab));
 }
@@ -410,7 +426,7 @@ function renderTurn(turn, userHandle, wasNear) {
     userHandle.link(turn.message_id);
     userHandle.attach({ corrections: turn.corrections || [], praise: turn.praise, english_help: turn.english_help });
   }
-  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, meaning: turn.meaning_en,
+  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, meaning: turn.meaning_en, coach: turn.coach_en,
     newVocab: turn.new_vocab || [] });
   S.chat.append(bubble);
   if (turn.scenario_done) S.chat.append(scenarioDoneCard());

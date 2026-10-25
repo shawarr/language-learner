@@ -54,12 +54,13 @@ function say(text, { speed = 'normal', quiet = false } = {}) {
 async function loadPath() {
   if (!S.pathBody.childElementCount || S.pathBody.querySelector('.error-line')) clear(S.pathBody).append(h('div', { class: 'card' }, skeleton(2)), skeleton(3, { tall: true }));
   try {
-    const [tree, cur, lesson] = await Promise.all([
+    const [tree, cur, lesson, overview] = await Promise.all([
       api('/api/curriculum'),
       api('/api/curriculum/current'),
       api(`/api/lesson/current?seed=${S.seed}`).catch((e) => (e.status === 404 ? null : Promise.reject(e))),
+      api('/api/lesson/overview').catch(() => ({ units: [] })),
     ]);
-    renderPath(tree, cur, lesson);
+    renderPath(tree, cur, lesson, overview.units || []);
   } catch (e) {
     clear(S.pathBody).append(errorLine(e, loadPath));
   }
@@ -67,7 +68,8 @@ async function loadPath() {
 
 const ZIG = [0, 64, 92, 64, 0, -64, -92, -64];
 
-function renderPath(tree, cur, lessonData) {
+function renderPath(tree, cur, lessonData, overview = []) {
+  const byUnit = Object.fromEntries(overview.map((o) => [o.unit_id, o]));
   clear(S.pathBody);
   const phase = (tree.phases || []).find((p) => p.id === cur.phase.id) || { units: [] };
   const phaseIdx = (tree.phases || []).indexOf(phase);
@@ -92,7 +94,11 @@ function renderPath(tree, cur, lessonData) {
       const x = offset();
       path.append(currentNode(u, x, lessonData), lessonCard(u, lessonData, x));
       path.append(checkpointNode(cur, offset()));
-    } else path.append(node({ u, state: 'locked', x: offset() }));
+    } else {
+      // Ahead of the current unit: open as soon as the lesson before it is finished.
+      const o = byUnit[u.id];
+      path.append(node({ u, state: o && o.open && o.has_lesson ? 'ahead' : 'locked', x: offset(), info: o }));
+    }
   });
   S.pathBody.append(path);
   if (nextPhase) {
@@ -101,12 +107,27 @@ function renderPath(tree, cur, lessonData) {
   }
 }
 
-function node({ u, state, x }) {
-  const label = state === 'done' ? `${u.title}, done` : `${u.title}, locked`;
-  const btn = h('button', { class: `node tactile ${state}`, type: 'button', 'aria-label': label,
-    onClick: () => (state === 'done' ? openDoneUnit(u) : toast('Pass the checkpoint before it to open this unit.')) },
-    icon(state === 'done' ? 'check' : 'lock', state === 'done' ? 28 : 22));
-  return h('div', { class: 'node-row', style: { '--x': `${x}px` } }, btn, h('div', { class: `node-label ${state}`, lang: 'de' }, u.title));
+function node({ u, state, x, info = null }) {
+  const label = { done: `${u.title}, done`, ahead: `${u.title}, open`, locked: `${u.title}, locked` }[state];
+  const act = { done: () => openDoneUnit(u), ahead: () => openAhead(u),
+    locked: () => toast('Finish the lesson before it to open this one.') }[state];
+  const glyph = state === 'locked' ? icon('lock', 22) : state === 'done' || (info && info.completed) ? icon('check', 28) : icon('book', 26);
+  const btn = h('button', { class: `node tactile ${state}`, type: 'button', 'aria-label': label, onClick: act }, glyph);
+  const sub = state === 'ahead' && info && info.steps
+    ? (info.completed ? 'Lesson done' : info.step ? `Step ${info.step} of ${info.steps}` : 'Lesson open') : null;
+  return h('div', { class: 'node-row', style: { '--x': `${x}px` } }, btn,
+    h('div', { class: `node-label ${state}`, lang: 'de' }, u.title),
+    sub ? h('div', { class: 'node-sub' }, sub) : null);
+}
+
+/* A lesson further along the path, opened early because the one before it is finished. */
+async function openAhead(u) {
+  try {
+    const data = await api(`/api/lesson/${u.id}`);
+    openPlayer({ ...data, unit_title: u.title });
+  } catch (e) {
+    toast(e.status === 404 ? 'This unit has no written lesson yet.' : 'Could not open the lesson.', { kind: 'err' });
+  }
 }
 
 function currentNode(u, x, data) {

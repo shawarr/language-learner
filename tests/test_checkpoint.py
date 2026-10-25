@@ -261,3 +261,19 @@ def test_routes(auth_client, client, monkeypatch):
     client.cookies.clear()
     assert client.get("/api/checkpoint/current").status_code == 401
     assert client.post("/api/checkpoint/1/submit", data={"writing_text": "x", "speaking_text": "y"}).status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_finishing_the_lesson_opens_the_checkpoint_after_one_conversation(fresh_db):
+    """Several conversations before anything opened kept the learner stuck in a unit; the lesson
+    counts for most of the practice."""
+    from app.services import lessons
+
+    assert (await checkpoint.availability("a1.1-1"))["reason"] == "not_yet"
+    await lessons.complete("a1.1-1")
+    assert (await checkpoint.availability("a1.1-1"))["reason"] == "not_yet", "the lesson alone is not enough"
+    await fresh_db.execute(
+        "INSERT INTO sessions (user_id, mode, unit_id, started_at, ended_at) "
+        "VALUES ((SELECT id FROM users WHERE username='ahmad'), 'talk', 'a1.1-1', 1, 2)")
+    a = await checkpoint.availability("a1.1-1")
+    assert a["available"] is True and a["reason"] == "lesson"

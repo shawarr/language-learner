@@ -44,7 +44,7 @@ function render() {
       ringAround(Math.min(1, done / need), 168, 'var(--accent)', 'var(--accent-dim)', katze({ variant: me().avatar, mood: 'sleepy', size: 88 })),
       h('h2', { class: 'finish-h' }, 'Not open yet'),
       h('p', { class: 'finish-sub' }, 'The checkpoint for ', cp.unit ? de(cp.unit.title) : 'this unit',
-        ' opens after a few conversations in the unit, or when the tutor says you are ready.'),
+        ' opens once you have finished its lesson and had one conversation, or after a few conversations, or when the tutor says you are ready.'),
       h('p', { class: 'muted small num' }, `${done} of ${need} conversations so far`,
         cp.last_result ? ` · last attempt ${cp.last_result.passed ? 'passed' : 'not yet'}` : ''),
       h('div', { class: 'finish-actions' },

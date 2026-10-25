@@ -40,6 +40,7 @@ TUTOR_TURN_SCHEMA = {
     "properties": {
         "reply": {"type": "string", "description": "German only. 1-3 short sentences, ends with one question. Spoken aloud verbatim."},
         "meaning_en": {"type": "string", "description": "What `reply` means, in natural English. Never spoken, never a word-by-word gloss."},
+        "coach_en": {"type": ["string", "null"], "description": "The tutor talking to the learner in English: an explanation, the answer to a question about German, or what to say next. Shown above `reply`, never spoken. Null when not needed; how often it is needed depends on the level (see the prompt)."},
         "corrections": {
             "type": "array",
             "items": {
@@ -74,7 +75,7 @@ TUTOR_TURN_SCHEMA = {
 
 SESSION_FIELDS = ("id", "mode", "scenario_id", "scenario_title", "unit_id", "started_at", "ended_at", "summary",
                   "user_turns")
-MESSAGE_FIELDS = ("id", "role", "content", "meaning_en", "transcript_raw", "input_kind", "stt_provider",
+MESSAGE_FIELDS = ("id", "role", "content", "meaning_en", "coach_en", "transcript_raw", "input_kind", "stt_provider",
                   "llm_model", "created_at")
 
 
@@ -93,7 +94,7 @@ def message_json(row: dict) -> dict:
 def turn_json(user_message_id: int | None, message_id: int, turn: dict, *,
               transcript: str | None = None, transcript_provider: str | None = None) -> dict:
     return {"user_message_id": user_message_id, "message_id": message_id, "reply": turn["reply"],
-            "meaning_en": turn["meaning_en"], "corrections": turn["corrections"], "praise": turn["praise"], "english_help": turn["english_help"],
+            "meaning_en": turn["meaning_en"], "coach_en": turn["coach_en"], "corrections": turn["corrections"], "praise": turn["praise"], "english_help": turn["english_help"],
             "new_vocab": turn["new_vocab"], "scenario_done": turn["scenario_done"],
             "transcript": transcript, "transcript_provider": transcript_provider}
 
@@ -132,6 +133,7 @@ def sanitize_turn(data: dict) -> dict:
     if isinstance(done, str):
         done = done.strip().lower() in ("true", "yes", "1")
     return {"reply": reply, "meaning_en": _text(data.get("meaning_en")) or None,
+            "coach_en": _text(data.get("coach_en")) or None,
             "corrections": corrections[:MAX_CORRECTIONS], "praise": _text(data.get("praise")) or None,
             "english_help": english_help, "new_vocab": new_vocab[:MAX_NEW_VOCAB], "scenario_done": bool(done)}
 
@@ -186,18 +188,23 @@ async def _system_prompt(scenario: dict | None) -> str:
     return render("tutor_talk", **await profile.build_context(unit, scenario))
 
 
+
+
+
 async def _history(session_id: int) -> list[Message]:
-    rows = await db.fetchall("SELECT role, content FROM messages WHERE session_id=? ORDER BY id DESC LIMIT ?",
+    rows = await db.fetchall("SELECT role, content, coach_en FROM messages WHERE session_id=? ORDER BY id DESC LIMIT ?",
                              (session_id, settings.history_window))
-    return [Message(r["role"], r["content"]) for r in reversed(rows)]
+    # The tutor's own English notes stay in its memory, so it does not explain the same thing twice.
+    return [Message(r["role"], r["content"] if not r["coach_en"] else f"[English to the learner: {r['coach_en']}]\n{r['content']}")
+            for r in reversed(rows)]
 
 
 async def _write_assistant(session_id: int, turn: dict, model: str | None, now: float) -> int:
     """The assistant row plus its vocab, uncommitted: the caller owns the transaction."""
     cur = await db.conn.execute(
-        "INSERT INTO messages (session_id, role, content, meaning_en, correction, english_help, llm_model, created_at) "
-        "VALUES (?, 'assistant', ?, ?, ?, ?, ?, ?)",
-        (session_id, turn["reply"], turn["meaning_en"], json.dumps(turn["corrections"], ensure_ascii=False),
+        "INSERT INTO messages (session_id, role, content, meaning_en, coach_en, correction, english_help, llm_model, created_at) "
+        "VALUES (?, 'assistant', ?, ?, ?, ?, ?, ?, ?)",
+        (session_id, turn["reply"], turn["meaning_en"], turn.get("coach_en"), json.dumps(turn["corrections"], ensure_ascii=False),
          json.dumps(turn["english_help"], ensure_ascii=False) if turn["english_help"] else None, model, now))
     for v in turn["new_vocab"]:
         await vocab.upsert(v["word"], v["translation"], v["example"], source="tutor", now=now, commit=False)
