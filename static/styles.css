@@ -384,7 +384,6 @@ textarea.input { resize: none; line-height: 1.5; }
 @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 10px var(--bad-dim); } 50% { box-shadow: 0 0 0 18px var(--bad-dim); } }
 @keyframes flip { 0% { transform: scale(.96); opacity: .4; } 100% { transform: none; opacity: 1; } }
 
 /* ---- bottom sheet --------------------------------------------------- */
@@ -752,7 +751,7 @@ textarea.input { resize: none; line-height: 1.5; }
 
 /* ---- the mic --------------------------------------------------------- */
 .mic-wrap { display: flex; flex-direction: column; gap: 6px; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-.mic-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--s-3); }
+.mic-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--s-3); isolation: isolate; }
 .mic-side { display: flex; align-items: center; }
 .mic-side:last-child { justify-content: flex-end; }
 .mic-btn { -webkit-touch-callout: none;
@@ -762,7 +761,16 @@ textarea.input { resize: none; line-height: 1.5; }
     transition: transform 260ms cubic-bezier(.3, 1.4, .6, 1), background-color var(--base) var(--ease);
 }
 .mic-btn:active:not(:disabled) { transform: scale(.94); transition-duration: 70ms; }
-.mic-btn.on { background: var(--bad); box-shadow: 0 0 0 0 var(--bad-dim); animation: pulse 1.6s var(--ease-in-out) infinite; }
+/* Recording: red, with a soft ring breathing behind it. The ring is its own layer animated by
+   transform and opacity only, so the button itself never repaints while the thumb is on it. */
+.mic-btn { position: relative; }
+.mic-btn::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 50%;
+  background: var(--bad); opacity: 0; transform: scale(1); pointer-events: none;
+}
+.mic-btn.on { background: var(--bad); color: #fff; }
+.mic-btn.on::after { animation: ring 1.6s var(--ease-in-out) infinite; }
+@keyframes ring { 0% { opacity: .28; transform: scale(1); } 100% { opacity: 0; transform: scale(1.45); } }
 .mic-btn:disabled { opacity: .45; }
 .mic-alt, .mic-cancel { width: 48px; height: 48px; min-height: 48px; border-radius: 50%; background: var(--surface-2); border: 0; color: var(--text); }
 .mic-label { min-height: 18px; text-align: center; font-size: var(--t-xs); font-weight: 500; color: var(--text-dim); }

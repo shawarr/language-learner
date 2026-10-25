@@ -63,20 +63,27 @@ export function createHoldToTalk({ onResult, onStart, label = 'Tap to talk, or h
   let cancelArmed = false, busy = false, maxTimer = null, idleLabel = label, lastBar = 0;
   const levels = new Array(BARS).fill(0);
 
+  let uiState = 'idle';
+  /* Redraws only on a real change. It used to run on every pointermove while holding, and each run
+     reset the timer and the waveform: the timer flickered 0, 1, 0, 2 and the hold felt jerky. */
   function setUi(state) {   // idle | hold | latched | cancel
+    if (state === uiState) return;
+    const starting = uiState === 'idle';
+    uiState = state;
     const on = state !== 'idle';
     btn.classList.toggle('on', on);
     btn.classList.toggle('latched', state === 'latched');
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? 'Stop and send' : 'Start recording');
-    clearIcon(on ? 'send' : 'mic');
+    // The arrow only when a tap will send; while held, the mic stays the mic.
+    clearIcon(state === 'latched' ? 'send' : 'mic');
     status.hidden = !on;
     status.classList.toggle('cancel', state === 'cancel');
     cancelBtn.hidden = state !== 'latched';
     if (side) side.hidden = on;
     labelEl.textContent = { idle: idleLabel, hold: 'Release to send · slide away to cancel', latched: 'Tap to send', cancel: 'Release to cancel' }[state];
     labelEl.classList.toggle('warn', state === 'cancel');
-    if (on) { timerEl.textContent = '0:00'; levels.fill(0); drawWave(); }
+    if (on && starting) { timerEl.textContent = '0:00'; levels.fill(0); drawWave(); }
   }
   function clearIcon(name) {
     if (btn.dataset.icon === name) return;
@@ -155,7 +162,10 @@ export function createHoldToTalk({ onResult, onStart, label = 'Tap to talk, or h
   btn.addEventListener('pointermove', (e) => {
     if (!press || press.stop || mode !== 'hold' || e.pointerId !== press.id) return;
     if (performance.now() - press.at < HOLD_MS) return;   // a tap wobbles; only a hold slides to cancel
-    cancelArmed = Math.hypot(e.clientX - press.x, e.clientY - press.y) >= 80;
+    const armed = Math.hypot(e.clientX - press.x, e.clientY - press.y) >= 80;
+    if (armed === cancelArmed) return;
+    cancelArmed = armed;
+    haptic(8);
     setUi(cancelArmed ? 'cancel' : 'hold');
   });
   const release = (interrupted) => (e) => {
