@@ -215,7 +215,7 @@ _FAMILIES = [
     ["bin", "bist", "ist", "sind", "seid"], ["habe", "hast", "hat", "haben", "habt"],
     ["war", "warst", "waren"], ["hatte", "hattest", "hatten"],
     ["im", "am", "um", "zum", "zur", "beim", "vom"],
-    ["als", "wenn", "wann", "ob"], ["dass", "weil", "obwohl", "damit"],
+    ["als", "wenn", "wann", "ob"], ["dass", "weil", "obwohl", "damit", "indem", "sodass"],
     ["deshalb", "trotzdem", "denn"], ["wurde", "wird", "worden", "werden"],
     ["dessen", "deren", "denen"],
 ]
