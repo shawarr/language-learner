@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import shutil
 import tempfile
 from dataclasses import dataclass
@@ -67,6 +68,36 @@ def normalize_mime(mime: str | None, filename: str | None = None) -> tuple[str, 
     return "webm", "audio/webm"
 
 
+# Below this peak level a recording holds no speech: a muted or broken microphone, or a clip that
+# only kept its first instant. Speech into a phone peaks around -25 to -3 dBFS; room noise sits
+# under -50.
+SILENCE_DB = -45.0
+
+
+async def prepare(audio: bytes, ext: str) -> tuple[bytes, str, str, float | None] | None:
+    """Re-encode to 16 kHz mono mp3 and measure the loudest moment, in one ffmpeg pass.
+
+    The re-encode also repairs what Safari's recorder writes (fragmented MP4 that some decoders
+    read only the start of). Returns (audio, ext, mime, peak dBFS or None), or None when ffmpeg is
+    missing or cannot read the file, and the caller sends the original."""
+    if not shutil.which("ffmpeg"):
+        return None
+    with tempfile.TemporaryDirectory() as d:
+        src, dst = Path(d) / f"in.{ext}", Path(d) / "out.mp3"
+        src.write_bytes(audio)
+        proc = await asyncio.create_subprocess_exec(
+            "ffmpeg", "-nostdin", "-hide_banner", "-y", "-i", str(src), "-ac", "1", "-ar", "16000",
+            "-b:a", "48k", "-af", "volumedetect", str(dst),
+            stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
+        _, err = await proc.communicate()
+        if proc.returncode != 0 or not dst.exists() or not dst.stat().st_size:
+            log.warning("ffmpeg could not read the .%s upload", ext)
+            return None
+        m = re.search(r"max_volume:\s*(-?[\d.]+|-inf) dB", err.decode(errors="ignore"))
+        peak = None if not m else (-120.0 if m.group(1) == "-inf" else float(m.group(1)))
+        return dst.read_bytes(), "mp3", "audio/mpeg", peak
+
+
 async def _to_mp3(audio: bytes, ext: str) -> tuple[bytes, str, str] | None:
     """Re-encode with ffmpeg (16 kHz mono mp3) when available. Returns None if ffmpeg is missing or fails."""
     if not shutil.which("ffmpeg"):
@@ -96,7 +127,7 @@ class STT:
 
     async def _gemini(self, audio: bytes, ext: str, mime: str) -> Transcript:
         # Gemini is happier with mp3/wav than with browser webm/mp4 containers; convert when we can.
-        conv = await _to_mp3(audio, ext)
+        conv = await _to_mp3(audio, ext) if ext != "mp3" else None
         if conv:
             audio, ext, mime = conv
         req = LLMRequest(system=VERBATIM_PROMPT, messages=[Message("user", "Transcribe this audio verbatim.")],
@@ -115,6 +146,13 @@ class STT:
         if not audio:
             raise ProviderError("empty recording", retryable=False)
         ext, mime_c = normalize_mime(mime, filename)
+        prepared = await prepare(audio, ext)
+        if prepared:
+            audio, ext, mime_c, peak = prepared
+            if peak is not None and peak < SILENCE_DB:
+                # Nothing to transcribe; sending it would only buy a hallucination (and a request).
+                log.info("silent recording (peak %.1f dBFS), not transcribed", peak)
+                return Transcript(text="", provider="silence", model="")
         errors: list[str] = []
         for engine in self._engines():
             try:
