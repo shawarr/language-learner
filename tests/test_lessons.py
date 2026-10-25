@@ -209,3 +209,16 @@ def test_listening_distractors_are_confusable():
                         raise AssertionError(f"first word swapped: {opt!r} for {ex['audio']!r}")
                     assert len(set(w.lower() for w in words)) == len(words), f"repeated word in {opt!r}"
     assert seen > 10
+
+
+def test_a_spoken_number_counts_however_the_transcriber_writes_it():
+    """Saying "fünf" came back from Whisper as "5" and was marked wrong."""
+    from app.services.exercises import german_number, matches_spoken
+
+    assert [german_number(n) for n in (1, 5, 17, 21, 30, 101, 2500)] == [
+        "eins", "fünf", "siebzehn", "einundzwanzig", "dreißig", "hunderteins", "zweitausendfünfhundert"]
+    assert matches_spoken("fünf", "5")
+    assert matches_spoken("einundzwanzig", "21.")
+    assert matches_spoken("Es ist drei Uhr.", "Es ist 3 Uhr.")
+    assert matches_spoken("eins", "1")
+    assert not matches_spoken("fünf", "6")

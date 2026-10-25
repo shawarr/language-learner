@@ -17,6 +17,7 @@ second run through the lesson is a different order.
 from __future__ import annotations
 
 import difflib
+import re
 import random
 from typing import Any
 
@@ -225,16 +226,50 @@ def grade(exercise: dict, answer: Any) -> bool:
     return False
 
 
+_ONES = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn", "elf",
+         "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn"]
+_TENS = ["", "", "zwanzig", "dreißig", "vierzig", "fünfzig", "sechzig", "siebzig", "achtzig", "neunzig"]
+
+
+def german_number(n: int) -> str:
+    """0..999999 as one German word: 21 -> einundzwanzig, 101 -> hunderteins, 2500 -> zweitausendfünfhundert."""
+    if n < 20:
+        return _ONES[n]
+    if n < 100:
+        unit = n % 10
+        return (("ein" if unit == 1 else _ONES[unit]) + "und" if unit else "") + _TENS[n // 10]
+    if n < 1000:
+        head = "" if n // 100 == 1 else _ONES[n // 100]
+        return head + "hundert" + (german_number(n % 100) if n % 100 else "")
+    k = n // 1000
+    head = "" if k == 1 else german_number(k).removesuffix("s") if german_number(k).endswith("eins") else german_number(k)
+    return head + "tausend" + (german_number(n % 1000) if n % 1000 else "")
+
+
+def spoken_words(text: str) -> list[str]:
+    """Words for comparing what was said: lower case, no punctuation, ß as ss, numbers as words.
+
+    Whisper writes a spoken number as digits ("fünf" -> "5", "drei Uhr" -> "3 Uhr"), so digits
+    become German words before anything is compared; "eins" and "ein" count as one word."""
+    t = text.lower().replace("ß", "ss")
+    t = re.sub(r"(\d)[:.](\d)", r"\1 \2", t)            # 14:30, 3.20 -> two numbers
+    t = re.sub(r"[^\w\s]", " ", t)
+    out: list[str] = []
+    for w in t.split():
+        if w.isdigit() and len(w) <= 6:
+            w = german_number(int(w)).replace("ß", "ss")
+        out.append("ein" if w == "eins" else w)
+    return out
+
+
 def matches_spoken(expected: str, heard: str) -> bool:
     """Did he say the line? Judged generously on purpose.
 
     The transcriber mishears a beginner's accent constantly, and punishing that would teach him to
-    stop speaking — the opposite of the point. Punctuation and case are ignored, and most of the
-    words have to be there, not all of them.
+    stop speaking — the opposite of the point. Punctuation, case and how a number is written are
+    ignored, and most of the words have to be there, not all of them.
     """
-    strip = str.maketrans("", "", ".,!?;:—-–\"'„“")
-    want = [w for w in expected.lower().translate(strip).split() if w]
-    got = [w for w in heard.lower().translate(strip).split() if w]
+    want, got = spoken_words(expected), spoken_words(heard)
     if not want:
         return False
     remaining = list(got)

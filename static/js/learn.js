@@ -471,11 +471,30 @@ function speakStep(ex, n) {
     mic.el, heard);
 }
 
-/* Same generous rule as the server: a beginner's accent gets misheard constantly, and punishing
-   that teaches the learner to stop speaking. */
+/* Same generous rule as the server (exercises.matches_spoken): a beginner's accent gets misheard
+   constantly, and punishing that teaches the learner to stop speaking. The transcriber writes a
+   spoken number as digits ("fünf" comes back as "5"), so digits become German words first. */
+const ONES = ['null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf',
+  'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn'];
+const TENS = ['', '', 'zwanzig', 'dreißig', 'vierzig', 'fünfzig', 'sechzig', 'siebzig', 'achtzig', 'neunzig'];
+function germanNumber(n) {
+  if (n < 20) return ONES[n];
+  if (n < 100) { const u = n % 10; return (u ? (u === 1 ? 'ein' : ONES[u]) + 'und' : '') + TENS[Math.floor(n / 10)]; }
+  if (n < 1000) { const h = Math.floor(n / 100); return (h === 1 ? '' : ONES[h]) + 'hundert' + (n % 100 ? germanNumber(n % 100) : ''); }
+  const k = Math.floor(n / 1000);
+  const head = k === 1 ? '' : germanNumber(k).replace(/eins$/, 'ein');
+  return head + 'tausend' + (n % 1000 ? germanNumber(n % 1000) : '');
+}
+function spokenWords(text) {
+  return String(text).toLowerCase().replace(/ß/g, 'ss')
+    .replace(/(\d)[:.](\d)/g, '$1 $2')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/).filter(Boolean)
+    .map((w) => (/^\d{1,6}$/.test(w) ? germanNumber(Number(w)).replace(/ß/g, 'ss') : w))
+    .map((w) => (w === 'eins' ? 'ein' : w));
+}
 function matches(expected, saidText) {
-  const norm = (s) => s.toLowerCase().replace(/[.,!?;:—–"'„“”]/g, '').split(/\s+/).filter(Boolean);
-  const want = norm(expected), got = norm(saidText);
+  const want = spokenWords(expected), got = spokenWords(saidText);
   if (!want.length) return false;
   const pool = [...got];
   let hit = 0;
