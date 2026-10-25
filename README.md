@@ -128,6 +128,38 @@ cp .env.example .env && $EDITOR .env        # first time only
 bash deploy/deploy.sh                       # build, restart, wait for health
 ```
 
+### Automatic deploys
+
+`.github/workflows/ci.yml` runs the tests on every push. When they pass on `main`, it logs into the
+server over SSH and runs `deploy/ci-deploy.sh`: pull `main` (fast-forward only, never overwriting
+edits made on the server), back up the database, `deploy.sh`. The log is `/var/log/tutor-deploy.log`.
+The phones pick the new version up by themselves on their next launch.
+
+The key the workflow uses can run that script and nothing else. One-time setup:
+
+On the server, as root:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C github-deploy -f /root/github-deploy
+echo "command=\"/opt/language-learner/deploy/ci-deploy.sh\",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty $(cat /root/github-deploy.pub)" >> /root/.ssh/authorized_keys
+cat /root/github-deploy             # the private key: goes into DEPLOY_SSH_KEY below
+ssh-keyscan -t ed25519 localhost 2>/dev/null | sed "s/^localhost/YOUR_SERVER_HOSTNAME/"   # goes into DEPLOY_KNOWN_HOSTS
+rm /root/github-deploy              # once it is stored in GitHub
+```
+
+In GitHub: the repository, Settings, Secrets and variables, Actions, New repository secret:
+
+| Secret | Value |
+| --- | --- |
+| `DEPLOY_HOST` | the server's hostname or IP, as you would `ssh` to it |
+| `DEPLOY_SSH_KEY` | the private key printed above, all of it |
+| `DEPLOY_KNOWN_HOSTS` | the `ssh-keyscan` line, with the hostname you put in `DEPLOY_HOST` |
+| `DEPLOY_USER` | optional, defaults to `root` |
+| `DEPLOY_PORT` | optional, defaults to `22` |
+
+Then every merge into `main` deploys. To deploy by hand without a push: Actions, ci, Run workflow
+on `main`, or on the server `bash deploy/ci-deploy.sh`.
+
 ### Accounts
 
 Two learners, set in `.env`. The passwords are hashed (PBKDF2) on every boot and never stored in

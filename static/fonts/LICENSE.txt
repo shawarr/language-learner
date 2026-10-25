@@ -1,0 +1,3 @@
+Instrument Sans and Instrument Serif, by Rodrigo Fuenzalida and Jordan Egstad.
+SIL Open Font License 1.1: https://openfontlicense.org
+Downloaded from Google Fonts; served from here because the CSP allows no external resources.

@@ -109,7 +109,7 @@ function renderTask() {
   const status = h('div', { class: 'stack' });
   const speakTask = t.kind === 'speak';
   S.body.append(
-    h('div', { class: 'row between' }, h('h2', { class: 'prompt-h' }, t.title),
+    h('div', { class: 'row between' }, h('h1', { class: 'prompt-h' }, t.title),
       h('span', { class: 'pill kind' }, icon(speakTask ? 'mic' : 'pen', 14), speakTask ? 'Speak' : 'Write')),
     h('p', { class: 'prompt-lead' }, t.instruction_en),
     t.prompt_de ? h('div', { class: 'says' }, katze({ variant: me().avatar, size: 56 }),

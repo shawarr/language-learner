@@ -1,0 +1,79 @@
+# Test every push; deploy main to the server when the tests pass.
+#
+# The deploy logs in with a key that can do one thing only: authorized_keys on the server forces
+# it to run deploy/ci-deploy.sh, whatever the client asks for. Setup: README.md, "Automatic deploys".
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
+        run: pip install -r requirements-dev.txt
+      - name: Tests (offline, fake provider, no keys)
+        env:
+          LLM_PRIMARY: "fake:fake"
+        run: python -m pytest -q
+
+  deploy:
+    needs: test
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # One deploy at a time; a newer push waits for the running one instead of cancelling it mid-build.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment: production
+    steps:
+      - name: Check the secrets are set
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          missing=""
+          [ -n "$HOST" ] || missing="$missing DEPLOY_HOST"
+          [ -n "$KEY" ] || missing="$missing DEPLOY_SSH_KEY"
+          [ -n "$KNOWN" ] || missing="$missing DEPLOY_KNOWN_HOSTS"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing (see README.md, 'Automatic deploys')"
+            exit 1
+          fi
+      - name: Deploy
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER_NAME: ${{ secrets.DEPLOY_USER || 'root' }}
+          PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts && chmod 644 ~/.ssh/known_hosts
+          # The server's forced command runs the deploy; the commit sent along is only checked
+          # against what the server pulls, so a stale run cannot deploy an older main.
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$USER_NAME@$HOST" "deploy ${GITHUB_SHA}"

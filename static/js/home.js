@@ -21,7 +21,8 @@ export async function show() {
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(2)));
+  // Skeletons only on the first visit: coming back to a tab refreshes in place, without a flash.
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(3)), h('div', { class: 'card' }, skeleton(2)));
   try {
     const [game, lesson, cur, board, due] = await Promise.all([
       api('/api/game/me'),
@@ -53,19 +54,19 @@ function render({ game, lesson, cur, board, due }) {
   S.body.append(h('div', { class: 'home-head' },
     h('button', { class: 'avatar-btn', type: 'button', 'aria-label': 'Your profile', onClick: () => window.dtSwitchTo('you') }, katze({ variant: me.avatar, mood, size: 40 })),
     h('div', { class: 'grow' },
-      h('div', { class: 'home-greet', lang: 'de' }, `${greeting()}, ${me.name || ''}`),
+      h('h1', { class: 'home-greet', lang: 'de' }, `${greeting()}, ${me.name || ''}`),
       h('div', { class: 'muted small row', style: { gap: '6px' } }, flame(), game.streak_days ? `${game.streak_days}-day streak` : 'No streak yet')),
     h('span', { class: 'pill xp' }, `Lv ${game.level.n} · ${game.xp_total} XP`)));
 
   const ringsEl = rings([
-    { key: 'speak', color: 'var(--accent)', track: 'var(--accent-dim)', fraction: g.speak?.fraction || 0 },
-    { key: 'review', color: 'var(--good)', track: 'var(--good-dim)', fraction: g.review?.fraction || 0 },
-    { key: 'study', color: 'var(--warn)', track: 'var(--warn-dim)', fraction: g.study?.fraction || 0 },
+    { key: 'speak', color: 'var(--accent)', track: 'color-mix(in srgb, var(--accent) 16%, transparent)', fraction: g.speak?.fraction || 0 },
+    { key: 'review', color: 'var(--ring-2)', track: 'color-mix(in srgb, var(--ring-2) 16%, transparent)', fraction: g.review?.fraction || 0 },
+    { key: 'study', color: 'var(--warn)', track: 'color-mix(in srgb, var(--warn) 18%, transparent)', fraction: g.study?.fraction || 0 },
   ], 140);
   S.body.append(h('div', { class: 'card rings-card' }, ringsEl,
     h('div', { class: 'stack', style: { gap: '10px', flex: '1' } },
       legend('Speak', 'var(--accent)', `${g.speak?.done || 0} of ${g.speak?.target || 5} turns`, g.speak?.fraction >= 1),
-      legend('Review', 'var(--good)', `${g.review?.done || 0} of ${g.review?.target || 10} cards`, g.review?.fraction >= 1),
+      legend('Review', 'var(--ring-2)', `${g.review?.done || 0} of ${g.review?.target || 10} cards`, g.review?.fraction >= 1),
       legend('Study', 'var(--warn)', `${g.study?.done || 0} of ${g.study?.target || 1} · lesson, drill or writing`, g.study?.fraction >= 1))));
 
   const plan = h('div', { class: 'stack' }, h('div', { class: 'card-title' }, 'Today’s plan'));
@@ -76,7 +77,7 @@ function render({ game, lesson, cur, board, due }) {
   const sc = cur && cur.scenarios && cur.scenarios[0];
   plan.append(planCard('mic', 'var(--accent)', 'var(--accent-dim)', sc ? `Talk · ${sc.title}` : 'Talk', 'A short conversation with the tutor · about 5 min', 'Start', () => window.dtSwitchTo('talk'), !lesson || lesson.completed));
   const n = due ? due.due_count || 0 : 0;
-  plan.append(planCard('cards', 'var(--good)', 'var(--good-dim)', n ? `Review · ${n} card${n === 1 ? '' : 's'} due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
+  plan.append(planCard('cards', 'var(--ring-2)', 'var(--surface-2)', n ? `Review · ${n} card${n === 1 ? '' : 's'} due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
   S.body.append(plan);
 
   if (board && board.users && board.users.length > 1) {
@@ -102,7 +103,7 @@ function legend(name, color, text, closed) {
 
 function planCard(icon, color, bg, title, sub, cta, go, primary) {
   return h('button', { class: 'card plan', type: 'button', onClick: go },
-    h('span', { class: 'plan-icon', style: { background: bg, color } }, icons[icon]()),
+    h('span', { class: 'plan-icon', style: { color } }, icons[icon]()),
     h('span', { class: 'grow', style: { textAlign: 'left' } }, h('span', { class: 'plan-title' }, title), h('span', { class: 'muted small' }, sub)),
     h('span', { class: `chip small ${primary ? 'active' : ''}` }, cta));
 }

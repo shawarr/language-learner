@@ -217,7 +217,7 @@ function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
   const slowBtn = h('button', { class: 'bubble-tool slow', type: 'button', 'aria-label': 'Play slowly', 'aria-pressed': 'false',
     onClick: () => playMessage(id, text, 'slow') }, icon('slow', 16), 'Slow');
   const tools = h('div', { class: 'bubble-foot' },
-    h('button', { class: 'bubble-play play', type: 'button', 'aria-label': 'Play again', onClick: () => playMessage(id, text, 'normal') }, icon('play', 16)),
+    h('button', { class: 'bubble-play play', type: 'button', 'aria-label': 'Play again', onClick: () => playMessage(id, text, 'normal') }, icon('play', 16), 'Play'),
     slowBtn, reveal);
   const vocab = newVocab.length ? h('div', { class: 'vocab-chips' }, h('span', { class: 'vocab-label' }, 'New'), newVocab.map((v) =>
     h('button', { class: 'chip small', type: 'button', lang: 'de', onClick: () => translateWord(v.word.split(' (')[0].replace(/^(der|die|das)\s+/i, ''), v.example || text, v) },

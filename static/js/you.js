@@ -21,7 +21,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(4)));
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(h('div', { class: 'card' }, skeleton(2)), h('div', { class: 'card' }, skeleton(4)));
   try {
     const [game, board] = await Promise.all([api('/api/game/me'), api('/api/leaderboard')]);
     render(game, board);
@@ -78,7 +78,8 @@ function render(game, board) {
 
 function days(n) { return `${n} day${n === 1 ? '' : 's'}`; }
 
-function badgeColor(icon) { return { mic: 'var(--accent)', flame: 'var(--warn)', book: 'var(--good)', star: 'var(--cat-gender)', trophy: 'var(--warn)', cat: 'var(--accent)' }[icon] || 'var(--warn)'; }
+// Earned badges in ink, locked ones grey: a rainbow of icon colours read as a template.
+function badgeColor() { return 'var(--text)'; }
 
 function pickAvatar() {
   const me = window.dtUser || {};

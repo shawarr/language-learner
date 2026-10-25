@@ -49,5 +49,20 @@ async def _provider_error(_: Request, exc: ProviderError):
                         content={"detail": str(exc), "retryable": exc.retryable})
 
 
+class ShellFiles(StaticFiles):
+    """The PWA shell, always revalidated.
+
+    Without a Cache-Control header Safari guesses a freshness lifetime for each file, so after an
+    update some modules arrived new and others came from its cache: the new Talk screen with the
+    old mic and old styles. `no-cache` makes every load ask (a cheap 304 when nothing changed); the
+    service worker is what keeps the app working offline.
+    """
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 # The PWA shell. Mounted last so /api/* wins. html=True serves index.html for "/".
-app.mount("/", StaticFiles(directory=settings.static_dir, html=True), name="static")
+app.mount("/", ShellFiles(directory=settings.static_dir, html=True), name="static")

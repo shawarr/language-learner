@@ -14,7 +14,7 @@ export async function show() { await load(); }
 export function hide() {}
 
 async function load() {
-  clear(S.body).append(skeleton(3, { tall: true }));
+  if (!S.body.childElementCount || S.body.querySelector('.error-line')) clear(S.body).append(skeleton(3, { tall: true }));
   try {
     const [due, prog, game] = await Promise.all([
       api('/api/vocab/due?limit=1').catch(() => ({ due_count: 0 })),
@@ -29,7 +29,7 @@ function render(due, prog, game) {
   clear(S.body);
   if (game) S.body.append(h('p', { class: 'muted small' }, `Study ring: ${game.goals.study.done} of ${game.goals.study.target}`));
   S.body.append(
-    hubCard('cards', 'var(--good)', 'var(--good-dim)', 'Review', due ? `${due} card${due === 1 ? '' : 's'} due · about ${Math.max(1, Math.round(due / 4))} min` : 'Nothing due right now', due ? h('span', { class: 'count' }, due) : null, () => window.dtSwitchTo('review')),
+    hubCard('cards', 'var(--ring-2)', 'var(--surface-2)', 'Review', due ? `${due} card${due === 1 ? '' : 's'} due · about ${Math.max(1, Math.round(due / 4))} min` : 'Nothing due right now', due ? h('span', { class: 'count' }, due) : null, () => window.dtSwitchTo('review')),
     hubCard('bolt', 'var(--warn)', 'var(--warn-dim)', 'Drill', 'Eight items from your own mistakes · 2 min', null, () => window.dtSwitchTo('drill')),
     hubCard('pen', 'var(--accent)', 'var(--accent-dim)', 'Write', 'A short task from your unit, with corrections', null, () => window.dtSwitchTo('write')));
   const top = prog && prog.top_mistakes && prog.top_mistakes[0];
@@ -53,7 +53,7 @@ const ICONS = {
 };
 function hubCard(icon, color, bg, title, sub, tail, go) {
   return h('button', { class: 'card hub', type: 'button', onClick: go },
-    h('span', { class: 'hub-icon', style: { background: bg, color }, html: ICONS[icon] }),
+    h('span', { class: 'hub-icon', style: { color }, html: ICONS[icon] }),
     h('span', { class: 'grow', style: { textAlign: 'left' } }, h('span', { class: 'hub-title' }, title), h('span', { class: 'muted small' }, sub)),
     tail || h('span', { class: 'ico muted', html: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>' }));
 }

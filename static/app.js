@@ -99,8 +99,14 @@ export function switchTo(name, opts = {}) {
   // A session's focus mode (tab bar aside) belongs to the screen that set it; the next one decides.
   $('#app').classList.remove('focus');
   if (current && current !== name) window.dtBack = current;
-  for (const sec of $$('.screen')) sec.hidden = sec.id !== `screen-${name}`;
+  for (const sec of $$('.screen')) {
+    const on = sec.id === `screen-${name}`;
+    if (on && sec.hidden) { sec.classList.remove('enter'); void sec.offsetWidth; sec.classList.add('enter'); }
+    sec.hidden = !on;
+  }
   const lit = PARENT[name] || name;
+  const at = TABS.indexOf(lit);
+  $('#tabs').style.setProperty('--at', String(Math.max(0, at)));
   for (const tab of $$('.tab')) {
     const on = tab.dataset.tab === lit;
     tab.classList.toggle('active', on);
@@ -130,6 +136,9 @@ async function boot() {
   for (const tab of $$('.tab')) tab.addEventListener('click', () => { unlockAudio(); switchTo(tab.dataset.tab); });
   document.addEventListener('dt:go-tab', (e) => switchTo(e.detail));
   document.addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
+  // iOS Safari only applies :active press states when the page listens for touches; without this
+  // every button's press feedback silently does nothing, which is what made taps feel dead.
+  document.addEventListener('touchstart', () => {}, { passive: true });
 
   // iOS keeps the layout viewport under the keyboard; size #app to the visual viewport so the
   // composer stays glued above the keys and the last message stays visible (DESIGN.md §3).
@@ -179,16 +188,16 @@ async function boot() {
   sync();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then((reg) => {
-      reg.addEventListener('updatefound', () => {
-        const sw = reg.installing;
-        sw && sw.addEventListener('statechange', () => {
-          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-            toast('Update ready.', { action: 'Reload', onAction: () => location.reload(), duration: 0 });
-          }
-        });
-      });
-    }).catch(() => {});
+    // When a new version takes over, reload once: this page's modules are the old version, and
+    // mixing them with new ones is how screens broke after an update.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('/sw.js').then((reg) => reg.update().catch(() => {})).catch(() => {});
   }
 
   try {
