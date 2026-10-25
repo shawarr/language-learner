@@ -80,7 +80,8 @@ Copy `.env.example` to `.env` and fill it in. The ones that matter:
 | `LLM_FAST` | `groq:openai/gpt-oss-20b` | cheap calls (word translation, drill grading) |
 | `STT_PROVIDER` | `groq` | `groq` (0.35 s) or `gemini` (~6 s); the other is the automatic fallback |
 | `WHISPER_PROMPT` | *(empty)* | **leave empty.** A prompt in clean German makes Whisper fix your grammar — see `docs/STT-FINDINGS.md`. |
-| `TTS_VOICE` | `de-DE-SeraphinaMultilingualNeural` | also Florian (m), Katja (f), Conrad (m), `de-AT-*`, `de-CH-*` |
+| `TTS_VOICE` | `de-DE-KatjaNeural` | German-only voices: Conrad (m), Amala (f), Killian (m), `de-AT-*`, `de-CH-*`. Not a *Multilingual* one: it reads "das Team" in English |
+| `TTS_VOICE_2` | `de-DE-ConradNeural` | the second speaker in lesson dialogues |
 | `TTS_RATE_SLOW` | `-30%` | the "slow" replay speed |
 | `ANALYZE_EVERY_TURNS` | `8` | how often the analyzer runs inside a long session |
 | `DATA_DIR` | `/data` | holds `tutor.db` and the TTS cache |

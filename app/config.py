@@ -10,6 +10,19 @@ def _env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
 
 
+# A "Multilingual" neural voice guesses the language of every sentence on its own, and edge-tts
+# marks its requests en-US: "Hallo Jonas", "das Team", "der Code" came out in English. A learner
+# must only ever hear German, so these map to the German-only voice of the same speaker type,
+# even when an older .env still names them.
+_GERMAN_ONLY = {"de-DE-SeraphinaMultilingualNeural": "de-DE-KatjaNeural",
+                "de-DE-FlorianMultilingualNeural": "de-DE-ConradNeural"}
+
+
+def _voice(name: str, default: str) -> str:
+    v = _env(name, default)
+    return _GERMAN_ONLY.get(v, v)
+
+
 def _bool(name: str, default: bool) -> bool:
     v = os.environ.get(name)
     if v is None:
@@ -72,9 +85,9 @@ class Settings:
 
     # TTS: "edge" (free, no key) with gemini as fallback.
     tts_provider: str = field(default_factory=lambda: _env("TTS_PROVIDER", "edge"))
-    tts_voice: str = field(default_factory=lambda: _env("TTS_VOICE", "de-DE-SeraphinaMultilingualNeural"))
+    tts_voice: str = field(default_factory=lambda: _voice("TTS_VOICE", "de-DE-KatjaNeural"))
     # The second speaker of a lesson dialogue: two people in one voice are hard to tell apart by ear.
-    tts_voice_2: str = field(default_factory=lambda: _env("TTS_VOICE_2", "de-DE-FlorianMultilingualNeural"))
+    tts_voice_2: str = field(default_factory=lambda: _voice("TTS_VOICE_2", "de-DE-ConradNeural"))
     tts_rate_normal: str = field(default_factory=lambda: _env("TTS_RATE_NORMAL", "-5%"))
     tts_rate_slow: str = field(default_factory=lambda: _env("TTS_RATE_SLOW", "-30%"))
     gemini_tts_model: str = field(default_factory=lambda: _env("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts"))

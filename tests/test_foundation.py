@@ -511,3 +511,16 @@ async def test_a_silent_recording_is_not_sent_to_the_transcriber(monkeypatch, tm
     monkeypatch.setattr(stt_mod.stt, "_gemini", must_not_run)
     t = await stt_mod.stt.transcribe(clip.read_bytes(), "audio/mp4")
     assert t.text == "" and t.provider == "silence"
+
+
+def test_tts_never_uses_a_voice_that_guesses_the_language(monkeypatch):
+    """A Multilingual voice read "das Team" and "Hallo Jonas" in English. An old .env that still names
+    one gets the German-only voice instead."""
+    from app.config import Settings
+
+    monkeypatch.setenv("TTS_VOICE", "de-DE-SeraphinaMultilingualNeural")
+    monkeypatch.setenv("TTS_VOICE_2", "de-DE-FlorianMultilingualNeural")
+    s = Settings()
+    assert (s.tts_voice, s.tts_voice_2) == ("de-DE-KatjaNeural", "de-DE-ConradNeural")
+    monkeypatch.setenv("TTS_VOICE", "de-AT-IngridNeural")
+    assert Settings().tts_voice == "de-AT-IngridNeural", "any other voice is left as configured"
