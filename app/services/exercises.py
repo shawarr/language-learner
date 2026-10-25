@@ -43,6 +43,10 @@ def _pick(rng: random.Random, pool: list[str], exclude: str, n: int) -> list[str
     return options[:n]
 
 
+def _is_list(s: str) -> bool:
+    return "/" in s
+
+
 def _norm(s: str) -> str:
     return "".join(ch for ch in _clean(s).lower() if ch.isalnum() or ch == " ")
 
@@ -110,7 +114,8 @@ def build(lesson: dict[str, Any], seed: int = 0) -> list[dict[str, Any]]:
     steps = lesson.get("steps", [])
 
     # Everything sayable in this lesson, for distractors that are plausibly confusable.
-    vocabulary = [i["de"] for s in steps for i in (s.get("items") or []) if s.get("type") == "words" and i.get("de")]
+    vocabulary = [i["de"] for s in steps for i in (s.get("items") or [])
+                  if s.get("type") == "words" and i.get("de") and not _is_list(i["de"])]
     sentences = [e["de"] for s in steps for e in (s.get("examples") or []) if e.get("de")]
     # Words taught side by side in one list are one class (the days, the numbers, the greetings):
     # the head word of each short item, which is what a listening distractor may swap.
@@ -152,8 +157,10 @@ def _practise_words(step: dict, vocabulary: list[str], rng: random.Random, group
                     "pairs": [{"de": p["de"], "en": p["en"]} for p in pairs],
                     "left": left, "right": right})
 
-    # 2. Listen: audio only, choose the German. The one exercise that builds the ear.
-    for item in _sample(items, LISTEN_PER_WORDS, rng):
+    # 2. Listen: audio only, choose the German. The one exercise that builds the ear. A listed pair
+    # ("der Student / die Studentin") is a reference line, not one thing anybody says.
+    single = [i for i in items if not _is_list(i["de"])]
+    for item in _sample(single, LISTEN_PER_WORDS, rng):
         distractors = _confusable(rng, item["de"], vocabulary, 2, groups)
         if len(distractors) < 2:
             continue
@@ -164,7 +171,7 @@ def _practise_words(step: dict, vocabulary: list[str], rng: random.Random, group
                     "en": item["en"]})
 
     # 3. Say it: speaking is the whole point of the app, so it belongs in the lesson, not only in Talk.
-    speakable = [i for i in items if 1 <= len(_words_of(i["de"])) <= 8]
+    speakable = [i for i in single if 1 <= len(_words_of(i["de"])) <= 8]
     for item in _sample(speakable, 1, rng):
         out.append({"type": "speak", "mode": "practise", "title": "Say it out loud",
                     "de": item["de"], "en": item["en"]})

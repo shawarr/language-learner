@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import re
 import struct
 from pathlib import Path
 
@@ -77,7 +78,8 @@ _ENGINES = {
 
 async def synthesize(text: str, speed: str = "normal", voice: int = 1) -> Path:
     """Returns the path of a cached audio file. Raises ProviderError when every engine fails."""
-    text = " ".join(text.split())
+    # Lessons write alternatives as "heute / morgen": a voice reads the slash out ("Schrägstrich").
+    text = re.sub(r"\s+/\s+", ", ", " ".join(text.split()))
     if not text:
         raise ProviderError("nothing to say", retryable=False)
     # db.connect() creates this at startup, but a script or a test can reach TTS without it, and a
