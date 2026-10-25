@@ -113,7 +113,7 @@ function currentNode(u, x, data) {
   const p = data && data.progress;
   const total = data && data.exercises ? data.exercises.length : 0;
   const fraction = p && total ? (p.completed ? 1 : Math.min(1, (p.step || 0) / total)) : 0;
-  const ring = rings([{ key: 'lesson', color: 'var(--warn)', track: 'var(--surface-2)', fraction }], 112);
+  const ring = rings([{ key: 'lesson', color: 'var(--accent)', track: 'var(--surface-2)', fraction }], 112);
   ring.classList.add('node-ring');
   const btn = h('button', { class: 'node tactile now', type: 'button', 'aria-label': `${u.title}, current unit`,
     onClick: () => (data && data.lesson ? openPlayer(data) : window.dtSwitchTo('talk')) }, icon('book', 30));
@@ -147,7 +147,7 @@ function lessonCard(u, data, x) {
   } else if (step > 0) {
     card.append(
       h('div', { class: 'meter', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(total), 'aria-valuenow': String(step) },
-        h('i', { style: { width: `${Math.round((100 * step) / total)}%`, background: 'var(--warn)' } })),
+        h('i', { style: { width: `${Math.round((100 * step) / total)}%`, background: 'var(--accent)' } })),
       h('p', { class: 'muted small num' }, `Step ${step} of ${total} · ${meta}`),
       h('button', { class: 'btn primary block lg tactile', type: 'button', onClick: () => openPlayer(data) }, 'Continue the lesson'));
   } else {

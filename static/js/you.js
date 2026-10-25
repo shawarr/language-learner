@@ -78,7 +78,8 @@ function render(game, board) {
 
 function days(n) { return `${n} day${n === 1 ? '' : 's'}`; }
 
-function badgeColor(icon) { return { mic: 'var(--accent)', flame: 'var(--warn)', book: 'var(--good)', star: 'var(--cat-gender)', trophy: 'var(--warn)', cat: 'var(--accent)' }[icon] || 'var(--warn)'; }
+// Earned badges in ink, locked ones grey: a rainbow of icon colours read as a template.
+function badgeColor() { return 'var(--text)'; }
 
 function pickAvatar() {
   const me = window.dtUser || {};

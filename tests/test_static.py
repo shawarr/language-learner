@@ -188,3 +188,17 @@ def test_every_frontend_module_parses(tmp_path):
         r = subprocess.run([node, "--check", str(copy)], capture_output=True, text=True, timeout=30)
         why = next((ln for ln in r.stderr.splitlines() if "Error" in ln), r.stderr.strip()[-200:])
         assert r.returncode == 0, f"{f.name} does not parse: {why}"
+
+
+def test_an_update_cannot_mix_old_and_new_shell_files(client):
+    """After an update an iPhone showed the new Talk screen with the old mic and old styles: Safari
+    had guessed a cache lifetime for some files and not others. Every shell file is revalidated,
+    the service worker installs with cache: 'reload' and serves network-first, and the page reloads
+    once when a new worker takes over."""
+    for path in ("/", "/app.js", "/styles.css", "/js/mic.js"):
+        r = client.get(path)
+        assert r.status_code == 200 and r.headers.get("cache-control") == "no-cache", path
+    sw = (STATIC / "sw.js").read_text()
+    assert "cache: 'reload'" in sw and "fromNetwork" in sw
+    app_js = (STATIC / "app.js").read_text()
+    assert "controllerchange" in app_js

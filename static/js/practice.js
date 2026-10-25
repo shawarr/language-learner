@@ -29,7 +29,7 @@ function render(due, prog, game) {
   clear(S.body);
   if (game) S.body.append(h('p', { class: 'muted small' }, `Study ring: ${game.goals.study.done} of ${game.goals.study.target}`));
   S.body.append(
-    hubCard('cards', 'var(--good)', 'var(--good-dim)', 'Review', due ? `${due} card${due === 1 ? '' : 's'} due · about ${Math.max(1, Math.round(due / 4))} min` : 'Nothing due right now', due ? h('span', { class: 'count' }, due) : null, () => window.dtSwitchTo('review')),
+    hubCard('cards', 'var(--ring-2)', 'var(--surface-2)', 'Review', due ? `${due} card${due === 1 ? '' : 's'} due · about ${Math.max(1, Math.round(due / 4))} min` : 'Nothing due right now', due ? h('span', { class: 'count' }, due) : null, () => window.dtSwitchTo('review')),
     hubCard('bolt', 'var(--warn)', 'var(--warn-dim)', 'Drill', 'Eight items from your own mistakes · 2 min', null, () => window.dtSwitchTo('drill')),
     hubCard('pen', 'var(--accent)', 'var(--accent-dim)', 'Write', 'A short task from your unit, with corrections', null, () => window.dtSwitchTo('write')));
   const top = prog && prog.top_mistakes && prog.top_mistakes[0];

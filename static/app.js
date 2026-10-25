@@ -188,16 +188,16 @@ async function boot() {
   sync();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then((reg) => {
-      reg.addEventListener('updatefound', () => {
-        const sw = reg.installing;
-        sw && sw.addEventListener('statechange', () => {
-          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-            toast('Update ready.', { action: 'Reload', onAction: () => location.reload(), duration: 0 });
-          }
-        });
-      });
-    }).catch(() => {});
+    // When a new version takes over, reload once: this page's modules are the old version, and
+    // mixing them with new ones is how screens broke after an update.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('/sw.js').then((reg) => reg.update().catch(() => {})).catch(() => {});
   }
 
   try {

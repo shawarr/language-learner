@@ -59,14 +59,14 @@ function render({ game, lesson, cur, board, due }) {
     h('span', { class: 'pill xp' }, `Lv ${game.level.n} · ${game.xp_total} XP`)));
 
   const ringsEl = rings([
-    { key: 'speak', color: 'var(--accent)', track: 'var(--accent-dim)', fraction: g.speak?.fraction || 0 },
-    { key: 'review', color: 'var(--good)', track: 'var(--good-dim)', fraction: g.review?.fraction || 0 },
-    { key: 'study', color: 'var(--warn)', track: 'var(--warn-dim)', fraction: g.study?.fraction || 0 },
+    { key: 'speak', color: 'var(--accent)', track: 'color-mix(in srgb, var(--accent) 16%, transparent)', fraction: g.speak?.fraction || 0 },
+    { key: 'review', color: 'var(--ring-2)', track: 'color-mix(in srgb, var(--ring-2) 16%, transparent)', fraction: g.review?.fraction || 0 },
+    { key: 'study', color: 'var(--warn)', track: 'color-mix(in srgb, var(--warn) 18%, transparent)', fraction: g.study?.fraction || 0 },
   ], 140);
   S.body.append(h('div', { class: 'card rings-card' }, ringsEl,
     h('div', { class: 'stack', style: { gap: '10px', flex: '1' } },
       legend('Speak', 'var(--accent)', `${g.speak?.done || 0} of ${g.speak?.target || 5} turns`, g.speak?.fraction >= 1),
-      legend('Review', 'var(--good)', `${g.review?.done || 0} of ${g.review?.target || 10} cards`, g.review?.fraction >= 1),
+      legend('Review', 'var(--ring-2)', `${g.review?.done || 0} of ${g.review?.target || 10} cards`, g.review?.fraction >= 1),
       legend('Study', 'var(--warn)', `${g.study?.done || 0} of ${g.study?.target || 1} · lesson, drill or writing`, g.study?.fraction >= 1))));
 
   const plan = h('div', { class: 'stack' }, h('div', { class: 'card-title' }, 'Today’s plan'));
@@ -77,7 +77,7 @@ function render({ game, lesson, cur, board, due }) {
   const sc = cur && cur.scenarios && cur.scenarios[0];
   plan.append(planCard('mic', 'var(--accent)', 'var(--accent-dim)', sc ? `Talk · ${sc.title}` : 'Talk', 'A short conversation with the tutor · about 5 min', 'Start', () => window.dtSwitchTo('talk'), !lesson || lesson.completed));
   const n = due ? due.due_count || 0 : 0;
-  plan.append(planCard('cards', 'var(--good)', 'var(--good-dim)', n ? `Review · ${n} card${n === 1 ? '' : 's'} due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
+  plan.append(planCard('cards', 'var(--ring-2)', 'var(--surface-2)', n ? `Review · ${n} card${n === 1 ? '' : 's'} due` : 'Review', n ? says('due', { n }) : 'Nothing due yet; cards come from conversations', n ? 'Go' : 'Open', () => window.dtSwitchTo('review'), false));
   S.body.append(plan);
 
   if (board && board.users && board.users.length > 1) {
