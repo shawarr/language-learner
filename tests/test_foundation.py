@@ -468,3 +468,42 @@ async def test_openai_compat_rejects_audio_with_a_permanent_error():
     with pytest.raises(ProviderError) as e:
         await p.complete("m", LLMRequest(system="", messages=[Message("user", "hi")], audio=b"x"))
     assert e.value.retryable is False
+
+
+def test_whisper_hallucinations_over_silence_are_dropped():
+    """A silent iPhone clip came back as "Vielen Dank." on every attempt, whatever was said. Whisper
+    marks such segments itself (high no-speech probability); they never reach the learner."""
+    from app.providers.openai_compat import speech_only
+
+    silent = {"text": "Vielen Dank.", "segments": [{"text": " Vielen Dank.", "no_speech_prob": 0.72, "avg_logprob": -1.3}]}
+    assert speech_only(silent) == ""
+    stock = {"text": "Vielen Dank.", "segments": [{"text": " Vielen Dank.", "no_speech_prob": 0.3, "avg_logprob": -0.4}]}
+    assert speech_only(stock) == "", "a stock sign-off with real doubt about speech is dropped"
+    said = {"text": "Vielen Dank.", "segments": [{"text": " Vielen Dank.", "no_speech_prob": 0.01, "avg_logprob": -0.2}]}
+    assert speech_only(said) == "Vielen Dank.", "a learner who really says it gets it back"
+    mixed = {"segments": [{"text": " Ich wohne in Amman.", "no_speech_prob": 0.02, "avg_logprob": -0.3},
+                          {"text": " Untertitel im Auftrag des ZDF", "no_speech_prob": 0.95, "avg_logprob": -0.9}]}
+    assert speech_only(mixed) == "Ich wohne in Amman."
+    assert speech_only({"text": " hallo "}) == "hallo"
+
+
+@pytest.mark.asyncio
+async def test_a_silent_recording_is_not_sent_to_the_transcriber(monkeypatch, tmp_path):
+    import shutil
+    import subprocess
+
+    from app.providers import stt as stt_mod
+
+    if not shutil.which("ffmpeg"):
+        pytest.skip("ffmpeg not installed")
+    clip = tmp_path / "s.m4a"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono",
+                    "-t", "1", "-c:a", "aac", str(clip)], check=True)
+
+    async def must_not_run(audio, ext, mime):
+        raise AssertionError("a silent clip was sent to the transcriber")
+
+    monkeypatch.setattr(stt_mod.stt, "_groq", must_not_run)
+    monkeypatch.setattr(stt_mod.stt, "_gemini", must_not_run)
+    t = await stt_mod.stt.transcribe(clip.read_bytes(), "audio/mp4")
+    assert t.text == "" and t.provider == "silence"

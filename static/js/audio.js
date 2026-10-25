@@ -68,7 +68,9 @@ export class Recorder {
     this.rec = new MediaRecorder(this.stream);       // the browser picks the container
     this.chunks = [];
     this.rec.ondataavailable = (e) => { if (e.data && e.data.size) this.chunks.push(e.data); };
-    this.rec.start(250);
+    // One piece, no timeslice: Safari's recorder writes fragmented MP4 in timeslice mode, and the
+    // transcriber then read only the first instant and heard silence ("Vielen Dank.").
+    this.rec.start();
     this.startedAt = Date.now();
     this._meter();
     this._timer = setInterval(() => this.onTick(Date.now() - this.startedAt), 200);

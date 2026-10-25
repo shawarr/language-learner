@@ -82,10 +82,13 @@ class OpenAICompatProvider:
     async def transcribe(self, model: str, audio: bytes, filename: str, mime: str,
                          language: str = "de", prompt: str = "") -> str:
         """Whisper-style transcription. No prompt by default: a prompt written in clean German
-        makes Whisper fix the learner's grammar (docs/STT-FINDINGS.md)."""
+        makes Whisper fix the learner's grammar (docs/STT-FINDINGS.md).
+
+        Asks for verbose_json so each segment carries Whisper's own "was there speech?" estimate,
+        and drops the segments it invented over silence (see `speech_only`)."""
         if not self.api_key:
             raise ProviderError(f"{self.name} api key not set")
-        data: dict[str, Any] = {"model": model, "language": language, "response_format": "json",
+        data: dict[str, Any] = {"model": model, "language": language, "response_format": "verbose_json",
                                 "temperature": "0"}
         if prompt:
             data["prompt"] = prompt
@@ -95,4 +98,43 @@ class OpenAICompatProvider:
         except httpx.HTTPError as e:
             raise ProviderError(f"{self.name} stt network error: {e}") from e
         self._check(r, "stt")
-        return (r.json().get("text") or "").strip()
+        return speech_only(r.json())
+
+
+# What Whisper writes over silence or noise in German: subtitle credits and sign-offs from the
+# television it was trained on. Seen in this app: a silent iPhone clip came back as "Vielen Dank."
+# every time, whatever the learner said.
+SILENCE_PHRASES = {
+    "vielen dank", "danke", "danke schön", "dankeschön", "tschüss", "bis zum nächsten mal",
+    "danke fürs zuschauen", "vielen dank fürs zuschauen", "untertitel im auftrag des zdf",
+    "untertitel der amaraorg-community", "untertitelung des zdf", "swr 2021", "ich danke ihnen",
+}
+
+
+def _norm(text: str) -> str:
+    return " ".join("".join(ch for ch in text.lower() if ch.isalnum() or ch in " -").split())
+
+
+def speech_only(payload: dict) -> str:
+    """The transcript without what Whisper made up over silence.
+
+    Whisper's own rule, from its reference decoder: a segment whose no-speech probability is over
+    0.6 while its average log-probability is under -1 was not speech. A segment it is nearly sure
+    of (over 0.9) goes too. And a whole transcript that is one of its stock sign-offs is dropped
+    unless Whisper was confident there was speech in it, so a learner who really says "Vielen Dank"
+    still gets it back.
+    """
+    segments = payload.get("segments")
+    if not isinstance(segments, list) or not segments:
+        return (payload.get("text") or "").strip()
+    kept = []
+    for seg in segments:
+        nsp = float(seg.get("no_speech_prob") or 0)
+        lp = float(seg.get("avg_logprob") or 0)
+        if nsp > 0.9 or (nsp > 0.6 and lp < -1.0):
+            continue
+        kept.append(seg)
+    text = " ".join((seg.get("text") or "").strip() for seg in kept).strip()
+    if _norm(text) in SILENCE_PHRASES and max(float(seg.get("no_speech_prob") or 0) for seg in kept) > 0.1:
+        return ""
+    return text

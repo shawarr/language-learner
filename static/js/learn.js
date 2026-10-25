@@ -445,7 +445,13 @@ function speakStep(ex, n) {
       try {
         const res = await upload('/api/voice/transcribe', blob, audioFilename(mime));
         const said = (res.text || '').trim();
-        heard.textContent = said ? `Heard: “${said}”` : 'Nothing came through.';
+        if (!said) {
+          // A silent clip is the microphone's fault, not the learner's: no verdict, try again.
+          tries -= 1;
+          heard.textContent = 'Nothing was heard in that recording. Check the microphone is not muted, then try again.';
+          return;
+        }
+        heard.textContent = `Heard: “${said}”`;
         const ok = matches(ex.de, said);
         verdict(n, ok, ok ? (tries > 1 ? 'Got it that time.' : null)
           : tries === 1 ? 'Close is fine. Say it once more with the mic, or continue.' : 'Listen once more and try again, or continue.');
