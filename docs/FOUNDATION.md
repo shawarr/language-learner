@@ -97,9 +97,10 @@ turn, and in a background task so it never delays a reply. Keep it that way: a s
 turn would double the wait and halve the daily budget.
 
 **German edge-tts voices available** (verified from the server):
-`de-DE-SeraphinaMultilingualNeural` (f, default — the most natural), `de-DE-FlorianMultilingualNeural`
-(m), `de-DE-KatjaNeural` (f), `de-DE-ConradNeural` (m), `de-DE-AmalaNeural` (f),
-`de-DE-KillianNeural` (m), plus `de-AT-*` (Austrian) and `de-CH-*` (Swiss).
+`de-DE-KatjaNeural` (f, default), `de-DE-ConradNeural` (m),
+`de-DE-AmalaNeural` (f), `de-DE-KillianNeural` (m), plus `de-AT-*` (Austrian) and `de-CH-*` (Swiss).
+The *Multilingual* voices (Seraphina, Florian) sound the most natural but detect the language per
+sentence and read short German in English; config.py maps them to Katja and Conrad.
 
 ---
 
