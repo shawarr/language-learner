@@ -703,6 +703,9 @@ textarea.input { resize: none; line-height: 1.5; }
 .msg.user .bubble { background: var(--me-bg); border-color: var(--me-bg); color: #fff; border-bottom-right-radius: 6px; }
 .msg.pending .bubble { opacity: .7; }
 .bubble-text { font-size: var(--t-md); line-height: 1.5; overflow-wrap: anywhere; }
+/* The tutor explaining in English, above the German it is about. */
+.bubble-coach { margin: 0 0 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  font-size: var(--t-sm); line-height: 1.5; color: var(--text); }
 /* What the German means. Quiet and clearly secondary — the German stays the loudest thing in the
    bubble — but always legible, because at A1 this is the line that makes the reply usable at all. */
 .bubble-meaning { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line);

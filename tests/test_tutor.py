@@ -69,7 +69,7 @@ def test_sanitize_handles_wrong_types_and_unknown_category():
     out = tutor.sanitize_turn({"reply": "Ja.", "corrections": "none", "new_vocab": None, "scenario_done": None,
                                "english_help": {"english": "a", "german": "b", "literal": "c"},
                                "praise": "Sehr gut!"})
-    assert out == {"reply": "Ja.", "meaning_en": None, "corrections": [], "praise": "Sehr gut!", "new_vocab": [],
+    assert out == {"reply": "Ja.", "meaning_en": None, "coach_en": None, "corrections": [], "praise": "Sehr gut!", "new_vocab": [],
                    "scenario_done": False, "english_help": {"english": "a", "german": "b", "literal": "c"}}
     out = tutor.sanitize_turn({"reply": "Ja.", "corrections": [{"wrong": "a", "right": "b", "category": "made-up"}]})
     assert out["corrections"] == [{"wrong": "a", "right": "b", "category": "other", "explanation": ""}]
@@ -117,7 +117,7 @@ async def test_turn_persists_both_rows_with_the_right_columns(fresh_db):
     FakeProvider.canned = TURN
     sid = (await tutor.start_session())["session"]["id"]
     out = await tutor.take_turn(sid, "Gestern ich habe gegangen.")
-    assert set(out) == {"user_message_id", "message_id", "reply", "meaning_en", "corrections", "praise",
+    assert set(out) == {"user_message_id", "message_id", "reply", "meaning_en", "coach_en", "corrections", "praise",
                         "english_help", "new_vocab", "scenario_done", "transcript", "transcript_provider"}
     assert out["transcript"] is None and out["transcript_provider"] is None
     user = await fresh_db.fetchone("SELECT * FROM messages WHERE id=?", (out["user_message_id"],))
@@ -396,7 +396,7 @@ def test_talk_routes_end_to_end(auth_client):
     r = auth_client.get(f"/api/talk/session/{sid}")
     assert r.status_code == 200
     msgs = r.json()["messages"]
-    assert len(msgs) == 3 and set(msgs[1]) == {"id", "role", "content", "meaning_en", "transcript_raw", "input_kind",
+    assert len(msgs) == 3 and set(msgs[1]) == {"id", "role", "content", "meaning_en", "coach_en", "transcript_raw", "input_kind",
                                                "correction", "english_help", "stt_provider", "llm_model", "created_at"}
     assert auth_client.get(f"/api/talk/session/{sid + 50}").status_code == 404
 
@@ -520,3 +520,31 @@ async def test_tts_prewarm_failure_never_touches_the_turn(fresh_db, monkeypatch)
     turn = await tutor.take_turn(data["session"]["id"], "Hallo")
     await asyncio.sleep(0)
     assert turn["reply"]
+
+
+@pytest.mark.asyncio
+async def test_the_tutor_can_explain_in_english_to_a_beginner(fresh_db):
+    """A German-only partner cannot tutor someone who knows no German: "I'm still learning, I don't
+    know" got another German sentence back. The tutor now explains in English (coach_en), shown above
+    the German and never spoken, stored with the turn and remembered in the history."""
+    from app.prompts import render
+
+    FakeProvider.canned = {**TURN, "coach_en": "No problem. Just say: Ich lerne noch Deutsch."}
+    sid = (await tutor.start_session())["session"]["id"]
+    out = await tutor.take_turn(sid, "yo im still learning idk")
+    assert out["coach_en"] == "No problem. Just say: Ich lerne noch Deutsch."
+    row = await fresh_db.fetchone("SELECT coach_en FROM messages WHERE id=?", (out["message_id"],))
+    assert row["coach_en"] == out["coach_en"]
+    history = await tutor._history(sid)
+    assert any("English to the learner" in m.content for m in history if m.role == "assistant")
+    # Spoken text never contains it.
+    assert "No problem" not in out["reply"]
+
+    from app.services import profile
+    assert "freely" in profile.english_policy("A1.1")
+    assert "Stay in German" in profile.english_policy("B1.2")
+    prompt = await tutor._system_prompt(None)
+    assert "coach_en" in prompt and "{{" not in prompt and "explain in plain English" in prompt
+    assert "coach_en" in tutor.TUTOR_TURN_SCHEMA["properties"]
+    assert ("messages", "coach_en", "TEXT") in __import__("app.db", fromlist=["MIGRATIONS"]).MIGRATIONS
+    assert "{{english_policy}}" in (settings.base_dir / "prompts" / "tutor_talk.md").read_text()

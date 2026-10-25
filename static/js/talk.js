@@ -197,17 +197,20 @@ function renderHistory(messages) {
       S.chat.append(lastUser.el);
     } else {
       if (lastUser) { lastUser.attach({ corrections: m.correction || [], english_help: m.english_help }); lastUser.link(m.id); lastUser = null; }
-      S.chat.append(tutorBubble({ id: m.id, text: m.content, meaning: m.meaning_en }));
+      S.chat.append(tutorBubble({ id: m.id, text: m.content, meaning: m.meaning_en, coach: m.coach_en }));
     }
   }
   scrollToEnd(true, 'auto');
 }
 
-function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
+function tutorBubble({ id, text, meaning = null, coach = null, newVocab = [] }) {
   const sentence = h('p', { class: `bubble-text ${S.hideGerman ? 'hidden-text' : ''}` }, tappableWords(text, translateWord));
   // What it means, in English. Shown by default while the learner is a beginner: German-only is not
   // comprehensible input when you know no German, it is noise. Older messages have no meaning
   // stored, so this is always optional.
+  // The tutor talking to the learner in English (explanations, what to say next). Always shown:
+  // it is the tutoring itself, not a crib, so the EN toggle does not hide it.
+  const coachEl = coach ? h('p', { class: 'bubble-coach', lang: 'en' }, coach) : null;
   const meaningEl = meaning
     ? h('p', { class: 'bubble-meaning', lang: 'en', hidden: !S.showEnglish }, meaning)
     : null;
@@ -225,7 +228,7 @@ function tutorBubble({ id, text, meaning = null, newVocab = [] }) {
   return h('div', { class: 'msg tutor', dataset: { id: String(id) } },
     h('span', { class: 'msg-avatar', 'aria-hidden': 'true' }, katze({ variant: (window.dtUser || {}).avatar, size: 30 })),
     h('div', { class: 'msg-body' },
-      h('div', { class: 'bubble' }, sentence, meaningEl, tools,
+      h('div', { class: 'bubble' }, coachEl, sentence, meaningEl, tools,
         h('div', { class: 'audio-line', 'aria-hidden': 'true' }, h('i'))),
       vocab));
 }
@@ -410,7 +413,7 @@ function renderTurn(turn, userHandle, wasNear) {
     userHandle.link(turn.message_id);
     userHandle.attach({ corrections: turn.corrections || [], praise: turn.praise, english_help: turn.english_help });
   }
-  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, meaning: turn.meaning_en,
+  const bubble = tutorBubble({ id: turn.message_id, text: turn.reply, meaning: turn.meaning_en, coach: turn.coach_en,
     newVocab: turn.new_vocab || [] });
   S.chat.append(bubble);
   if (turn.scenario_done) S.chat.append(scenarioDoneCard());

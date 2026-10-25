@@ -165,4 +165,22 @@ async def build_context(unit: dict, scenario: dict | None = None) -> dict[str, s
         "facts": "; ".join(p["facts"]) or NONE_YET,
         "rolling_summary": " ".join(p["rolling_summary"].split()) or NONE_YET,
         "scenario": format_scenario(scenario),
+        "english_policy": english_policy(p["level"]),
     }
+
+
+def english_policy(level: str | None) -> str:
+    """How much English the tutor may speak, by level. A beginner cannot be tutored in German alone:
+    at A1 it explains in English whenever the learner needs it; by B1 it stays in German unless asked."""
+    lv = str(level or "A1").upper()
+    if lv.startswith("A1"):
+        return ("The learner is a beginner. Use `coach_en` freely: whenever the learner writes in English, "
+                "says they do not understand, asks anything about German, or gives a one-word or confused answer, "
+                "explain in plain English (two or three short sentences) and tell them exactly what to say next. "
+                "It is fine to use it on most turns early in a conversation.")
+    if lv.startswith("A2"):
+        return ("Use `coach_en` when the learner writes in English, is clearly lost, or asks about German: "
+                "a short English explanation, then back to German. Not on turns that go fine.")
+    return ("Stay in German. Use `coach_en` only when the learner explicitly asks for English or asks a question "
+            "about German grammar or words, and keep it to one or two sentences.")
+

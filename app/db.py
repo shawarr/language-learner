@@ -194,6 +194,8 @@ MIGRATIONS: list[tuple[str, str, str]] = [
     # The tutor speaks German; this is what it means. A beginner cannot bootstrap from German alone,
     # so the meaning travels with every reply instead of costing a second model call to ask for.
     ("messages", "meaning_en", "TEXT"),
+    # The tutor talking to a beginner in English: an explanation or what to say next (by level).
+    ("messages", "coach_en", "TEXT"),
 ]
 
 DEFAULT_SKILLS = {"speaking": 10, "listening": 10, "writing": 10, "grammar": 10, "vocab": 10}
