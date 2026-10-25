@@ -77,8 +77,19 @@ async def test_status_drives_the_landing_tab(fresh_db):
     assert s["has_lesson"] and not s["completed"] and s["steps"] > 0
     await lessons.complete("a1.1-1")
     assert (await lessons.status_for("a1.1-1"))["completed"]
-    # A unit with no written lesson must not strand the learner on an empty tab.
-    assert (await lessons.status_for("b1.2-5"))["has_lesson"] is False
+
+
+
+@pytest.mark.asyncio
+async def test_a_unit_without_a_lesson_does_not_strand_the_learner(fresh_db, monkeypatch):
+    """Every unit has a lesson today, but one added to units.json before its lesson is written must
+    not leave an empty tab or lock the lessons after it."""
+    data = {k: v for k, v in lessons.load().items() if k != "a1.1-2"}
+    monkeypatch.setattr(lessons, "load", lambda: data)
+    assert (await lessons.status_for("a1.1-2"))["has_lesson"] is False
+    await lessons.complete("a1.1-1")
+    o = {x["unit_id"]: x for x in await lessons.overview(["a1.1-1", "a1.1-2", "a1.1-3"])}
+    assert o["a1.1-3"]["open"], "a missing lesson cannot hold the next one hostage"
 
 
 def test_lesson_routes_need_auth(client):
@@ -233,6 +244,62 @@ async def test_the_next_lesson_opens_when_this_one_is_finished(fresh_db):
     await lessons.complete("a1.1-1")
     o = {x["unit_id"]: x for x in await lessons.overview(units)}
     assert o["a1.1-2"]["open"] and o["a1.1-1"]["completed"]
+
+
+def test_every_unit_from_a1_to_c2_is_taught():
+    """The whole path is coursework, not a syllabus with two lessons at the front: every unit has a
+    lesson that teaches each of its grammar points, trains reading and listening on connected text,
+    and checks understanding (docs/CURRICULUM.md §5)."""
+    from app.services import curriculum
+
+    assert curriculum.PHASE_ORDER[0] == "a1.1" and curriculum.PHASE_ORDER[-1] == "c2.2"
+    assert len(curriculum.PHASE_ORDER) == 12
+    for u in curriculum.all_units():
+        lesson = lessons.for_unit(u["id"])
+        assert lesson, f"{u['id']} has no lesson"
+        types = [s["type"] for s in lesson["steps"]]
+        assert types.count("grammar") >= len(u["grammar"]), u["id"]
+        assert types.count("check") >= 5 and types.count("words") >= 2, u["id"]
+        skills = {s["skill"] for s in lesson["steps"] if s["type"] == "text"}
+        assert skills, f"{u['id']} has no text to read or hear"
+        if u["id"] >= "a2.1":
+            assert skills == {"read", "listen"}, u["id"]
+        for i, s in enumerate(lesson["steps"]):
+            if s["type"] == "text":
+                assert types[i + 1:i + 3] == ["check", "check"], f"{u['id']} step {i}: a text is followed by its checks"
+
+
+def test_a_text_step_must_have_lines_and_a_skill(monkeypatch, tmp_path):
+    import json
+
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "curriculum_path", tmp_path / "units.json")
+    for bad, match in ((({"type": "text", "title": "t", "skill": "watch", "lines": [{"de": "a", "en": "b"}]}), "skill"),
+                       (({"type": "text", "title": "t", "skill": "read", "lines": [{"de": "a"}]}), "lines")):
+        (tmp_path / "lessons.json").write_text(json.dumps({"a1.1-1": {"title": "x", "steps": [bad]}}))
+        lessons.load.cache_clear()
+        with pytest.raises(lessons.LessonError, match=match):
+            lessons.load()
+    lessons.load.cache_clear()
+
+
+def test_text_lines_are_playable():
+    step = {"type": "text", "skill": "listen", "title": "t", "lines": [{"who": "A", "de": "Hallo!", "en": "Hi!"}]}
+    assert lessons.spoken_lines({"steps": [step]}) == ["Hallo!"]
+
+
+def test_every_scenario_comes_with_a_briefing_and_its_words():
+    """Not only at A1.1: a learner opening any scene reads what is happening and gets its key phrases,
+    in their own version of the scene."""
+    from app.services import curriculum
+
+    for kind in ("engineer", "student"):
+        persona = {"kind": kind, "name": "X", "about": "", "work": "", "role_de": "", "city": "Amman", "gender": "m"}
+        for u in curriculum.all_units():
+            for sc in curriculum.render_for_user(u["scenarios"], persona):
+                assert sc.get("brief") and 6 <= len(sc.get("words") or []) <= 9, (kind, sc["id"])
+                assert "{{" not in sc["brief"] + sc["setup"] + sc["goal"]
 
 
 def test_beginner_scenarios_come_with_a_briefing_and_their_words():

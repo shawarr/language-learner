@@ -26,8 +26,8 @@ real life.
 - `must_include`: two to four concrete things the text must contain, each in English, each
   checkable ("say when the heating stopped working", "ask for a new appointment", "use one
   sentence with 'weil'"). At least one should push the learner to use a grammar target of this unit.
-- `words_min` and `words_max`: 40 to 80 at A1, 60 to 120 at A2, 90 to 160 at B1. A beginner
-  faced with 200 words gives up.
+- `words_min` and `words_max`: 40 to 80 at A1, 60 to 120 at A2, 90 to 160 at B1, 120 to 220 at B2,
+  180 to 300 at C1, 220 to 380 at C2. A beginner faced with 200 words gives up.
 
 Keep the task doable with the vocabulary of this unit. The learner should spend five minutes on it, not
 an evening. No German in `task` except for names, places and the key phrases the learner needs.

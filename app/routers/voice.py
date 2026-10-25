@@ -24,8 +24,9 @@ MAX_AUDIO_BYTES = 25 * 1024 * 1024  # Groq free-tier upload limit
 
 @router.get("/tts")
 async def speak(text: str = Query(min_length=1, max_length=1500),
-                speed: str = Query("normal", pattern="^(normal|slow)$")):
-    path = await tts.synthesize(text, speed)
+                speed: str = Query("normal", pattern="^(normal|slow)$"),
+                voice: int = Query(1, ge=1, le=2)):
+    path = await tts.synthesize(text, speed, voice)
     return FileResponse(path, media_type=tts.media_type(path),
                         headers={"Cache-Control": "private, max-age=31536000"})
 

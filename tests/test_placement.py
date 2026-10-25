@@ -131,6 +131,21 @@ def test_validate_clamps_skills_and_caps_level_on_thin_evidence():
     assert placement.validate_result({"level": "A1.1"}, answered=1)["level"] == "A1.1"
 
 
+def test_the_path_reaches_c2_but_b2_needs_the_opinion_task():
+    assert placement.LEVELS[-1] == "C2.2" and set(placement.SKILL_BASELINE) == set(placement.LEVELS)
+    assert placement.validate_result({"level": "C1.1"}, answered=5)["level"] == "C1.1"
+    assert placement.validate_result({"level": "C1.1"}, answered=4, upper_answered=False)["level"] == "B1.2"
+    assert placement.validate_result({"level": "B1.1"}, answered=4, upper_answered=False)["level"] == "B1.1"
+
+
+async def test_a_skipped_opinion_task_caps_the_level_at_b12(fresh_db):
+    FakeProvider.canned = {**GRADED, "level": "B2.2"}
+    sid = (await placement.start())["session_id"]
+    await placement.answer(sid, "intro", "Ich heiße Ahmad und arbeite seit Jahren als DevOps-Ingenieur in Amman.")
+    await placement.answer(sid, "problem", "Letzte Woche ist unser Cluster ausgefallen, nachdem jemand die Konfiguration geändert hatte.")
+    assert (await placement.finish(sid))["level"] == "B1.2"
+
+
 async def test_fewer_than_two_answers_caps_the_level_at_a12(fresh_db):
     FakeProvider.canned = {**GRADED, "level": "A2.2"}
     sid = (await placement.start())["session_id"]
@@ -163,7 +178,7 @@ def test_routes_end_to_end_with_text(auth_client):
     assert st == {"placement_done": False, "level": "A1.1", "unit_id": "a1.1-1"}
     start = auth_client.post("/api/placement/start").json()
     sid = start["session_id"]
-    assert len(start["tasks"]) == 4
+    assert len(start["tasks"]) == 5
     r = auth_client.post("/api/placement/answer", json={"session_id": sid, "task_id": "intro", "text": "Ich bin Ahmad."})
     assert r.status_code == 200 and r.json() == {"task_id": "intro", "text": "Ich bin Ahmad.", "transcript_provider": None}
     assert auth_client.post("/api/placement/answer", json={"session_id": sid, "task_id": "zzz", "text": "x"}).status_code == 404

@@ -22,10 +22,10 @@ let currentAudio = null;
 let onStateChange = () => {};
 export function setPlaybackListener(fn) { onStateChange = fn; }
 
-async function fetchClip(text, speed) {
-  const key = `${speed}|${text}`;
+async function fetchClip(text, speed, voice = 1) {
+  const key = `${speed}|${voice}|${text}`;
   if (urlCache.has(key)) return urlCache.get(key);
-  const res = await api(`/api/tts?speed=${speed}&text=${encodeURIComponent(text)}`, { raw: true, timeout: 45000 });
+  const res = await api(`/api/tts?speed=${speed}&voice=${voice}&text=${encodeURIComponent(text)}`, { raw: true, timeout: 45000 });
   const url = URL.createObjectURL(await res.blob());
   if (urlCache.size > 60) { const first = urlCache.keys().next().value; URL.revokeObjectURL(urlCache.get(first)); urlCache.delete(first); }
   urlCache.set(key, url);
@@ -38,8 +38,8 @@ export function stop() {
 
 /* Resolves when playback ends. Rejects with {name:'NotAllowedError'} when iOS refuses autoplay,
    so the caller shows a tap-to-play button rather than failing silently. */
-export async function speak(text, speed = 'normal', { id } = {}) {
-  const url = await fetchClip(text, speed);
+export async function speak(text, speed = 'normal', { id, voice = 1 } = {}) {
+  const url = await fetchClip(text, speed, voice);
   stop();
   const audio = new Audio(url);
   currentAudio = audio;
@@ -52,7 +52,7 @@ export async function speak(text, speed = 'normal', { id } = {}) {
   if (currentAudio === audio) { currentAudio = null; onStateChange(null); }
 }
 
-export function prefetch(text, speed = 'normal') { fetchClip(text, speed).catch(() => {}); }
+export function prefetch(text, speed = 'normal', voice = 1) { fetchClip(text, speed, voice).catch(() => {}); }
 
 export class Recorder {
   constructor({ onLevel, onTick } = {}) {

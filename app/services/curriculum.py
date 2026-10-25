@@ -25,7 +25,8 @@ from . import profile as profile_svc
 
 log = logging.getLogger(__name__)
 
-PHASE_ORDER = ["a1.1", "a1.2", "a2.1", "a2.2", "b1.1", "b1.2"]
+PHASE_ORDER = ["a1.1", "a1.2", "a2.1", "a2.2", "b1.1", "b1.2",
+               "b2.1", "b2.2", "c1.1", "c1.2", "c2.1", "c2.2"]
 _ID = re.compile(r"^[a-z0-9.\-]+$")
 
 # The only placeholders content may use. The pronouns are named after their masculine form but

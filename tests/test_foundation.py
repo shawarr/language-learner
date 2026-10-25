@@ -309,12 +309,14 @@ async def test_tts_cache_is_keyed_by_speed(monkeypatch, tmp_path):
         calls.append(speed)
         path.write_bytes(b"ID3")
 
-    monkeypatch.setitem(tts_mod._ENGINES, "edge", ("mp3", lambda: "voice", fake_edge))
+    monkeypatch.setitem(tts_mod._ENGINES, "edge", ("mp3", lambda slot: f"voice{slot}", fake_edge))
     a = await tts_mod.synthesize("Guten Tag", "normal")
     b = await tts_mod.synthesize("Guten Tag", "slow")
     await tts_mod.synthesize("Guten Tag", "normal")
     assert a != b
     assert calls == ["normal", "slow"], "the second normal request should come from cache"
+    other = await tts_mod.synthesize("Guten Tag", "normal", voice=2)
+    assert other != a and calls[-1] == "normal", "a dialogue's second speaker is a separate render"
 
 
 @pytest.mark.asyncio
@@ -330,15 +332,15 @@ async def test_tts_falls_back_when_edge_fails(monkeypatch, tmp_path):
     async def gemini_works(text, speed, voice, path):
         path.write_bytes(b"RIFF")
 
-    monkeypatch.setitem(tts_mod._ENGINES, "edge", ("mp3", lambda: "v", edge_fails))
-    monkeypatch.setitem(tts_mod._ENGINES, "gemini", ("wav", lambda: "v", gemini_works))
+    monkeypatch.setitem(tts_mod._ENGINES, "edge", ("mp3", lambda slot: "v", edge_fails))
+    monkeypatch.setitem(tts_mod._ENGINES, "gemini", ("wav", lambda slot: "v", gemini_works))
     assert (await tts_mod.synthesize("Hallo")).suffix == ".wav"
 
 
 def test_tts_endpoint_requires_auth_and_validates_speed(client, auth_client, monkeypatch, tmp_path):
     from app.providers import tts as tts_mod
 
-    async def fake_synth(text, speed="normal"):
+    async def fake_synth(text, speed="normal", voice=1):
         p = tmp_path / "x.mp3"
         p.write_bytes(b"ID3")
         return p
@@ -347,12 +349,14 @@ def test_tts_endpoint_requires_auth_and_validates_speed(client, auth_client, mon
     assert auth_client.get("/api/tts", params={"text": "Hallo", "speed": "turbo"}).status_code == 422
     r = auth_client.get("/api/tts", params={"text": "Hallo", "speed": "slow"})
     assert r.status_code == 200 and r.headers["content-type"] == "audio/mpeg"
+    assert auth_client.get("/api/tts", params={"text": "Hallo", "voice": 2}).status_code == 200
+    assert auth_client.get("/api/tts", params={"text": "Hallo", "voice": 3}).status_code == 422
 
 
 def test_provider_error_becomes_a_retryable_503(auth_client, monkeypatch):
     from app.providers import tts as tts_mod
 
-    async def fails(text, speed="normal"):
+    async def fails(text, speed="normal", voice=1):
         raise ProviderError("everything is down")
 
     monkeypatch.setattr(tts_mod, "synthesize", fails)

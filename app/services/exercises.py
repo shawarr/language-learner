@@ -133,7 +133,8 @@ def build(lesson: dict[str, Any], seed: int = 0) -> list[dict[str, Any]]:
             out.extend(_practise_words(step, vocabulary + sentences, rng, groups))
         elif kind == "grammar":
             out.extend(_practise_grammar(step, sentences, rng))
-        # `check` and `sounds` already are what they are: a question, and a reference page.
+        # `check` and `sounds` already are what they are: a question, and a reference page. A `text`
+        # is followed by its own authored checks, which test understanding rather than recall.
     return out
 
 

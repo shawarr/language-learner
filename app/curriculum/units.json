@@ -507,6 +507,7 @@
             "ask a colleague what they are working on and react to the answer"
           ],
           "grammar": [
+            "nouns have a gender: der, die, das and ein, eine (der Server, das Team, die App)",
             "regular present tense in all persons (wir, ihr, sie)",
             "separable verbs: anfangen, aufstehen, anrufen, aufhören (ich fange … an)",
             "time at the front, verb second: Um neun Uhr fange ich an",
@@ -782,6 +783,7 @@
                 "simple feelings and states: müde, beschäftigt, fertig"
               ],
               "grammar": [
+                "nouns have a gender: der, die, das and ein, eine (der Kurs, das Labor, die Vorlesung)",
                 "regular present tense in all persons (wir, ihr, sie)",
                 "separable verbs: anfangen, aufstehen, anrufen, aufhören (ich fange … an)",
                 "time at the front, verb second: Um neun Uhr fange ich an",
@@ -802,7 +804,8 @@
             "the accusative with definite and indefinite articles: den, einen (Ich nehme den Kaffee / einen Tee)",
             "möchte and hätte gern as fixed polite forms",
             "negation with kein and nicht",
-            "plural forms of common food nouns"
+            "plural forms of common food nouns",
+            "ja, nein and doch: answering a negative question (Möchtest du keinen Kaffee? Doch!)"
           ],
           "vocab_themes": [
             "bread, cakes and the bakery counter",
@@ -1186,7 +1189,8 @@
             "modal verbs können, müssen, wollen with the sentence bracket (Ich muss heute den Server neu starten)",
             "the du imperative for requests: Schau mal, Schick mir, Warte kurz",
             "possessive articles mein, dein, sein, ihr, unser, Ihr",
-            "verbs with accusative objects: brauchen, haben, suchen, finden"
+            "verbs with accusative objects: brauchen, haben, suchen, finden",
+            "personal pronouns in the accusative: mich, dich, ihn, sie, uns, euch (Kannst du mich anrufen?)"
           ],
           "vocab_themes": [
             "the developer's day: der Pull Request, der Fehler, die Änderung, der Branch, das Ticket",
@@ -1274,7 +1278,8 @@
                 "modal verbs können, müssen, wollen with the sentence bracket (Ich muss heute den Bericht abgeben)",
                 "the du imperative for requests: Schau mal, Schick mir, Warte kurz",
                 "possessive articles mein, dein, sein, ihr, unser, Ihr",
-                "verbs with accusative objects: brauchen, haben, suchen, finden"
+                "verbs with accusative objects: brauchen, haben, suchen, finden",
+                "personal pronouns in the accusative: mich, dich, ihn, sie, uns, euch (Kannst du mich anrufen?)"
               ]
             }
           }
@@ -1347,6 +1352,7 @@
             "tell a colleague in simple words why a task is late"
           ],
           "grammar": [
+            "the Präteritum of sein and haben: war, hatte (Wie war dein Wochenende? Ich hatte keine Zeit.)",
             "Perfekt with haben: regular participles ge-…-t (gemacht, getestet, gearbeitet)",
             "Perfekt with sein for movement and change: gegangen, gefahren, gekommen, aufgestanden",
             "the most common irregular participles: gesehen, geschrieben, gelesen, gefunden, gegessen",
@@ -1680,7 +1686,8 @@
             "dative verbs: gefallen, gehören, helfen, passen, fehlen (Die Wohnung gefällt mir)",
             "personal pronouns in the dative: mir, dir, ihm, ihr, uns, Ihnen",
             "comparative and als: größer, teurer, heller, besser … als",
-            "weil clauses with the verb at the end: Ich nehme die Wohnung, weil sie hell ist"
+            "weil clauses with the verb at the end: Ich nehme die Wohnung, weil sie hell ist",
+            "indefinite pronouns: jemand, niemand, etwas, nichts, alles; einer, keiner, welche (Hast du noch welche?)"
           ],
           "vocab_themes": [
             "the viewing: die Besichtigung, die Heizung, der Keller, die Waschmaschine, renoviert",
@@ -1732,7 +1739,8 @@
             "two-way prepositions (in, an, auf, über, unter, vor, hinter, neben, zwischen): accusative for movement, dative for position",
             "the question words wohin and wo",
             "verbs with prepositions as chunks: warten auf, sich interessieren für, fragen nach",
-            "the modal verb müssen in formal contexts: Sie müssen das Formular unterschreiben"
+            "the modal verb müssen in formal contexts: Sie müssen das Formular unterschreiben",
+            "position and movement verbs: stellen/stehen, legen/liegen, setzen/sitzen, hängen (Ich stelle den Laptop auf den Tisch. Er steht auf dem Tisch.)"
           ],
           "vocab_themes": [
             "the bank: das Girokonto, die Überweisung, die Gebühr, die Karte, die IBAN",
@@ -1788,10 +1796,11 @@
             "tell a colleague about a problem I solved last week"
           ],
           "grammar": [
-            "Präteritum of sein, haben and the modal verbs: war, hatte, konnte, musste, wollte",
+            "Präteritum of the modal verbs: konnte, musste, wollte, durfte, sollte (war and hatte are from A1.2)",
             "sequence words with verb-second: zuerst, dann, danach, später, am Ende",
             "weil and deshalb for cause and effect (clause order with each)",
-            "Perfekt of verbs with prefixes and foreign verbs: deployt, konfiguriert, neu gestartet, zurückgesetzt"
+            "Perfekt of verbs with prefixes and foreign verbs: deployt, konfiguriert, neu gestartet, zurückgesetzt",
+            "als for one event in the past, wenn for repeated ones: Als der Alarm kam, war ich im Meeting; Immer wenn das passiert, …"
           ],
           "vocab_themes": [
             "the incident: der Ausfall, der Fehler, die Ursache, das Rollback, das Log, die Warnung",
@@ -1877,10 +1886,11 @@
                 "the group's reaction: die Nachricht, Bescheid sagen, informieren, die Betreuerin"
               ],
               "grammar": [
-                "Präteritum of sein, haben and the modal verbs: war, hatte, konnte, musste, wollte",
+                "Präteritum of the modal verbs: konnte, musste, wollte, durfte, sollte (war and hatte are from A1.2)",
                 "sequence words with verb-second: zuerst, dann, danach, später, am Ende",
                 "weil and deshalb for cause and effect (clause order with each)",
-                "Perfekt of verbs with prefixes and foreign verbs: kalibriert, programmiert, neu gestartet, ausgetauscht"
+                "Perfekt of verbs with prefixes and foreign verbs: kalibriert, programmiert, neu gestartet, ausgetauscht",
+                "als for one event in the past, wenn for repeated ones: Als die Maschine stoppte, war ich im Labor; Immer wenn das passiert, …"
               ]
             }
           }
@@ -2010,7 +2020,8 @@
             "polite Konjunktiv II chunks: Könnten Sie …?, Ich hätte gern …, Ich würde gern …, Wäre es möglich …?",
             "noch nicht, nicht mehr, kein … mehr, schon",
             "aber / sondern after a negation: nicht zwei, sondern drei Pakete",
-            "Perfekt with the dative of the person: Ich habe Ihnen geschrieben, Sie haben mir geantwortet"
+            "Perfekt with the dative of the person: Ich habe Ihnen geschrieben, Sie haben mir geantwortet",
+            "adjective endings in the dative and with no article: mit dem falschen Betrag, in einem kleinen Paket, frische Brötchen"
           ],
           "vocab_themes": [
             "invoices and money: die Rechnung, der Betrag, die Mahnung, zurückzahlen, die Erstattung",
@@ -2062,7 +2073,8 @@
             "adjective endings after definite and indefinite articles in the nominative and accusative: der neue Kollege, ein kleines Restaurant",
             "the connectors denn, deshalb, trotzdem and their word order",
             "Würdest du …? / Hättest du Lust …? for invitations",
-            "ordinal numbers and dates: am dritten Oktober, im neunten Monat"
+            "ordinal numbers and dates: am dritten Oktober, im neunten Monat",
+            "relative clauses in the nominative and accusative: der Kollege, der neben mir sitzt; das Restaurant, das ich mag"
           ],
           "vocab_themes": [
             "the team dinner: einladen, die Einladung, anstoßen, die Vorspeise, teilen, die Rechnung",
@@ -2139,7 +2151,8 @@
             "man + verb for general statements: Man muss zuerst das Image bauen",
             "infinitive with zu: Es ist wichtig, die Logs zu prüfen; Ich habe vergessen, den Cache zu leeren",
             "um … zu for purpose: Wir nutzen Kubernetes, um die Services zu skalieren",
-            "the superlative: am schnellsten, der beste Weg, das größte Problem"
+            "the superlative: am schnellsten, der beste Weg, das größte Problem",
+            "Passiv Präsens for processes: Das Image wird gebaut, dann wird es getestet"
           ],
           "vocab_themes": [
             "the pipeline: bauen, testen, ausrollen, die Umgebung, das Image, der Container",
@@ -2228,7 +2241,8 @@
                 "man + verb for general statements: Man muss zuerst die Last berechnen",
                 "infinitive with zu: Es ist wichtig, die Maße zu prüfen; Ich habe vergessen, die Datei zu speichern",
                 "um … zu for purpose: Wir nutzen Aluminium, um Gewicht zu sparen",
-                "the superlative: am schnellsten, der beste Weg, das größte Problem"
+                "the superlative: am schnellsten, der beste Weg, das größte Problem",
+                "Passiv Präsens for processes: Das Teil wird gefräst, dann wird es gemessen"
               ]
             }
           }
@@ -2516,7 +2530,8 @@
             "Konjunktiv II of the modal verbs and the auxiliaries: könnte, müsste, sollte, dürfte, hätte, wäre",
             "würde + infinitive for wishes, suggestions and hypotheticals",
             "unreal conditions: Wenn wir mehr Zeit hätten, würden wir … / Wenn ich du wäre, …",
-            "an deiner Stelle würde ich … and softening with vielleicht, eigentlich, eventuell"
+            "an deiner Stelle würde ich … and softening with vielleicht, eigentlich, eventuell",
+            "damit and um … zu: purpose with a different subject or the same one (Ich schreibe es auf, damit du es nicht vergisst)"
           ],
           "vocab_themes": [
             "negotiation: die Frist, der Umfang, der Kompromiss, die Priorität, verschieben, einplanen",
@@ -2584,7 +2599,7 @@
             "understand and use the formal vocabulary of residence, insurance and registration"
           ],
           "grammar": [
-            "relative clauses in the nominative, accusative and dative: der Mitarbeiter, der mir geholfen hat; das Dokument, das ich brauche",
+            "relative clauses in the dative and with dessen and deren, building on A2.2: der Mitarbeiter, dem ich die Unterlagen gegeben habe; die Kollegin, deren Antrag schneller ging",
             "relative clauses with prepositions: die Behörde, bei der ich den Antrag gestellt habe",
             "the genitive: der Name des Arbeitgebers, das Ende des Vertrags",
             "prepositions with the genitive: wegen, trotz, während, innerhalb, außerhalb"
@@ -2659,7 +2674,9 @@
             "je … desto: Je länger ich hier bin, desto besser verstehe ich die Leute",
             "comparative and superlative with adjective endings: ein größeres Problem, die wichtigste Frage",
             "prepositional adverbs: darüber, damit, davon, worauf, womit (Ich freue mich darauf, dass …)",
-            "indirect questions with question words: Ich frage mich, warum …; Ich weiß nicht, wie …"
+            "indirect questions with question words: Ich frage mich, warum …; Ich weiß nicht, wie …",
+            "adjectives used as nouns: der/die Deutsche, die Bekannten, etwas Neues, nichts Besonderes",
+            "the n-declension: der Kollege → den Kollegen, der Nachbar → mit dem Nachbarn, der Mensch, der Kunde, der Name"
           ],
           "vocab_themes": [
             "culture and habits: die Gewohnheit, die Direktheit, die Höflichkeit, das Missverständnis, die Nachbarschaft",
@@ -2977,7 +2994,8 @@
             "lassen: etwas machen lassen, sich etwas zeigen lassen; sich + lassen for possibility",
             "brauchen + nur/nicht + zu: Sie brauchen nur anzurufen",
             "Plusquamperfekt and Präteritum together in a career narrative",
-            "two-part connectors and je … desto in argument (review)"
+            "two-part connectors and je … desto in argument (review)",
+            "ohne … zu and (an)statt … zu: Ich habe gekündigt, ohne eine neue Stelle zu haben"
           ],
           "vocab_themes": [
             "career: der Werdegang, die Erfahrung, die Stärke, die Schwäche, die Weiterbildung, die Verantwortung",
@@ -3077,7 +3095,8 @@
             "subordinate clauses before the main clause and chains of clauses: Als ich ankam, wusste ich noch nicht, dass …",
             "word order in the middle field: time, cause, manner, place (TeKaMoLo)",
             "relative clauses with was and wo: alles, was ich brauche; die Stadt, wo ich wohne",
-            "text cohesion: connectors and prepositional adverbs across sentences (dabei, dadurch, trotzdem, außerdem)"
+            "text cohesion: connectors and prepositional adverbs across sentences (dabei, dadurch, trotzdem, außerdem)",
+            "reflexive pronouns in the dative: Ich habe mir das gut überlegt; Ich wünsche mir mehr Zeit"
           ],
           "vocab_themes": [
             "the first year: ankommen, sich einleben, die Herausforderung, der Rückblick, stolz sein auf",

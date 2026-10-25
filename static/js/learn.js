@@ -7,7 +7,8 @@
    A lesson runs in the player: focus mode, a close button and a thick track on top, one exercise
    per screen, the action at the bottom. Teaching pages (sounds, words, grammar) are interleaved
    with practice generated from exactly what was just taught — match, listen, build from tiles, say
-   it out loud — and the authored checks. Progress saves per step, and a step you have passed stays
+   it out loud — and the authored checks. A text page (a dialogue to listen to, a letter or an
+   article to read) is followed by checks on what it said. Progress saves per step, and a step you have passed stays
    passed: going back never makes you answer it again to move on (you may, if you like). */
 import { api, upload, audioFilename } from './api.js';
 import { h, clear, toast, sheet, errorLine, skeleton, haptic, de } from './ui.js';
@@ -241,6 +242,7 @@ function render() {
   const next = S.list[S.i];
   const ahead = next && (next.audio || next.de || (next.items || [])[0]?.de || (next.examples || [])[0]?.de);
   if (ahead) prefetch(ahead);
+  if (next && next.type === 'text') next.lines.slice(0, 3).forEach((ln, i) => prefetch(ln.de, 'normal', voiceFor(next, i)));
 }
 
 const passed = (n) => S.furthest > n;
@@ -261,7 +263,7 @@ function waitFoot(n, ...rest) {
 
 function exercise(ex, n) {
   const make = {
-    sounds: soundsStep, words: wordsStep, grammar: grammarStep,
+    sounds: soundsStep, words: wordsStep, grammar: grammarStep, text: textStep,
     check: (e) => choiceStep(e, n, { question: e.question, options: e.options, answer: e.answer, why: e.why }),
     listen: listenStep, match: matchStep, build: buildStep, speak: speakStep,
   }[ex.type];
@@ -316,6 +318,73 @@ function grammarStep(step) {
     step.examples ? h('div', { class: 'lines' }, step.examples.map((it) => lineBtn({ text: it.de, main: [
       de(it.de, 'line-de sm'), h('span', { class: 'line-en' }, it.en || ''), it.note ? h('span', { class: 'line-note' }, it.note) : null] }))) : null,
     tip(step.note));
+}
+
+/* A dialogue or a passage. Listening comes first and the text stays hidden until asked for, because
+   the checks after it test the ear; a reading text is on the page from the start. Two speakers get
+   two voices: by ear alone, one voice playing both sides of a phone call is a monologue. */
+function voiceFor(step, i) {
+  const speakers = [...new Set(step.lines.map((ln) => ln.who).filter(Boolean))];
+  const who = step.lines[i].who;
+  return who && speakers.indexOf(who) % 2 === 1 ? 2 : 1;
+}
+
+function textStep(step) {
+  const listening = step.skill === 'listen';
+  const run = { token: 0 };
+  const rows = step.lines.map((ln, i) => {
+    const en = h('span', { class: 'line-en', hidden: true }, ln.en);
+    const btn = h('button', { class: 'line text-line', type: 'button', 'aria-label': `Play line ${i + 1}`, onClick: () => {
+      haptic(8); run.token += 1; unlockAudio();
+      speak(ln.de, 'normal', { voice: voiceFor(step, i) }).catch(() => toast('Audio unavailable right now.', { kind: 'err' }));
+    } }, h('span', { class: 'line-main' },
+      ln.who ? h('span', { class: 'line-who' }, ln.who) : null,
+      de(ln.de, 'line-de sm'), en), h('span', { class: 'say' }, icon('speaker', 20)));
+    return { btn, en };
+  });
+  const textBox = h('div', { class: 'lines text-lines', hidden: listening }, rows.map((r) => r.btn));
+
+  async function playAll(speed) {
+    const token = ++run.token;
+    unlockAudio();
+    playBtn.classList.add('playing');
+    try {
+      for (let i = 0; i < step.lines.length; i += 1) {
+        if (token !== run.token || !S.body.contains(textBox)) return;
+        rows.forEach((r, j) => r.btn.classList.toggle('now', j === i));
+        await speak(step.lines[i].de, speed, { voice: voiceFor(step, i) });
+      }
+    } catch (e) {
+      toast((e && e.detail) || 'Audio unavailable right now.', { kind: 'err' });
+    } finally {
+      if (token === run.token) { playBtn.classList.remove('playing'); rows.forEach((r) => r.btn.classList.remove('now')); }
+    }
+  }
+  const playBtn = h('button', { class: 'btn speak-big tactile', type: 'button', 'aria-label': 'Play the whole text', onClick: () => playAll('normal') }, icon('speaker', 36));
+  const slowBtn = h('button', { class: 'btn speak-slow tactile', type: 'button', 'aria-label': 'Play it slowly', onClick: () => playAll('slow') }, icon('slow', 26));
+
+  const toggles = h('div', { class: 'row text-toggles' });
+  const showText = h('button', { class: 'btn ghost small', type: 'button', onClick: () => {
+    textBox.hidden = !textBox.hidden;
+    showText.textContent = textBox.hidden ? 'Show the text' : 'Hide the text';
+    showEn.hidden = textBox.hidden;
+  } }, 'Show the text');
+  const showEn = h('button', { class: 'btn ghost small', type: 'button', hidden: listening, onClick: () => {
+    const on = rows[0].en.hidden;
+    rows.forEach((r) => { r.en.hidden = !on; });
+    showEn.textContent = on ? 'Hide English' : 'Show English';
+  } }, 'Show English');
+  if (listening) toggles.append(showText);
+  toggles.append(showEn);
+
+  if (listening) setTimeout(() => { if (S.body.contains(textBox)) playAll('normal'); }, 300);
+  return h('div', { class: 'stack-lg' },
+    h('div', { class: 'stack' },
+      h('span', { class: 'pill kind' }, icon(listening ? 'speaker' : 'book', 14), listening ? 'Listen' : 'Read'),
+      h('h1', { class: 'prompt-h' }, step.title)),
+    step.body ? h('p', { class: 'prompt-lead' }, step.body) : null,
+    listening ? h('div', { class: 'listen-row' }, playBtn, slowBtn) : null,
+    toggles, textBox, tip(step.note));
 }
 
 /* ---- practice --------------------------------------------------------- */

@@ -1,6 +1,6 @@
 """Placement: a short flow, not a quiz, that decides where on the path the learner starts.
 
-Four fixed tasks (three spoken, rising difficulty, then one written), each stored as it comes in,
+Five fixed tasks (four spoken, rising difficulty, then one written), each stored as it comes in,
 graded once at the end with `app/prompts/placement.md`. The grading writes the profile (level, unit,
 skills, facts — never the name, which comes from the account); `finish` is idempotent because a
 double tap on a phone is normal, and a second model call would both burn quota and possibly place
@@ -26,14 +26,17 @@ from . import curriculum, profile
 
 LEVELS = [p.upper() for p in curriculum.PHASE_ORDER]
 # Where a skill lands when the model leaves it out or returns garbage: roughly the midpoint of the
-# calibration the prompt gives (≈30 solid A1, ≈50 solid A2, ≈70 solid B1).
-SKILL_BASELINE = {"A1.1": 10, "A1.2": 20, "A2.1": 32, "A2.2": 42, "B1.1": 55, "B1.2": 65}
+# calibration the prompt gives (≈30 solid A1, ≈50 solid A2, ≈70 solid B1, ≈82 B2, ≈92 C1).
+SKILL_BASELINE = {"A1.1": 10, "A1.2": 20, "A2.1": 32, "A2.2": 42, "B1.1": 55, "B1.2": 65,
+                  "B2.1": 74, "B2.2": 80, "C1.1": 86, "C1.2": 90, "C2.1": 94, "C2.2": 97}
 MAX_LIST = 5
 MAX_FACTS = 10
 MAX_ANSWER_CHARS = 4000
 # With fewer answers than this, the level is capped at A1.2 whatever the model says.
 MIN_TASKS_FOR_FULL_RANGE = 2
 CAP_LEVEL = "A1.2"
+# B2 and above is an argument at length; without the opinion task nobody has shown one.
+UPPER_TASK, UPPER_CAP = "opinion", "B1.2"
 
 TASKS: list[dict] = [
     {
@@ -54,6 +57,14 @@ TASKS: list[dict] = [
         "instruction_en": "Tell the story of a problem you solved last week or last month, at work or in your "
                           "studies: what happened, what you did, how it ended. Past tense if you can.",
         "prompt_de": "Erzähl von einem Problem, das du letzte Woche gelöst hast. Was ist passiert, und was hast du gemacht?",
+    },
+    {
+        "id": "opinion", "kind": "speak", "title": "Deine Meinung",
+        "instruction_en": "Only if you can: argue a position for a minute or two. Should everyone be allowed to "
+                          "work or study from home? Give reasons, weigh up the other side, and come to a conclusion. "
+                          "Skip this one if it is too much for now; that is fine.",
+        "prompt_de": "Sollte jeder von zu Hause arbeiten oder studieren dürfen? Was spricht dafür, was dagegen, "
+                     "und wie siehst du das?",
     },
     {
         "id": "message", "kind": "write", "title": "Eine Nachricht an eine Kollegin oder einen Kollegen",
@@ -147,7 +158,7 @@ def _clean_list(value: object, limit: int) -> list[str]:
     return out[:limit]
 
 
-def validate_result(data: dict, answered: int) -> dict:
+def validate_result(data: dict, answered: int, *, upper_answered: bool = True) -> dict:
     """Coerce the model's reply into something safe to write. Conservative on every doubt."""
     level = data.get("level") if isinstance(data.get("level"), str) else ""
     level = level.strip().upper()
@@ -155,6 +166,8 @@ def validate_result(data: dict, answered: int) -> dict:
         level = LEVELS[0]
     if answered < MIN_TASKS_FOR_FULL_RANGE and LEVELS.index(level) > LEVELS.index(CAP_LEVEL):
         level = CAP_LEVEL
+    if not upper_answered and LEVELS.index(level) > LEVELS.index(UPPER_CAP):
+        level = UPPER_CAP
     baseline = SKILL_BASELINE[level]
     raw = data.get("skills") if isinstance(data.get("skills"), dict) else {}
     skills = {}
@@ -216,7 +229,7 @@ async def finish(session_id: int) -> dict:
                     answered=f"{len(answers)} of {len(TASKS)}", answers=_format_answers(answers))
     data = await llm.complete_json(system, [Message("user", f"Place {user['name']}.")], PLACEMENT_SCHEMA,
                                    tier="quality", temperature=0.2, max_tokens=1024)
-    graded = validate_result(data, answered=len(answers))
+    graded = validate_result(data, answered=len(answers), upper_answered=UPPER_TASK in answers)
     unit = curriculum.first_unit_of_level(graded["level"])
     # Profile first, session last: if the session write fails, the next finish() re-grades and
     # overwrites the profile with a fresh verdict; the other order would leave a stored result

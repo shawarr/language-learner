@@ -73,10 +73,13 @@ class Settings:
     # TTS: "edge" (free, no key) with gemini as fallback.
     tts_provider: str = field(default_factory=lambda: _env("TTS_PROVIDER", "edge"))
     tts_voice: str = field(default_factory=lambda: _env("TTS_VOICE", "de-DE-SeraphinaMultilingualNeural"))
+    # The second speaker of a lesson dialogue: two people in one voice are hard to tell apart by ear.
+    tts_voice_2: str = field(default_factory=lambda: _env("TTS_VOICE_2", "de-DE-FlorianMultilingualNeural"))
     tts_rate_normal: str = field(default_factory=lambda: _env("TTS_RATE_NORMAL", "-5%"))
     tts_rate_slow: str = field(default_factory=lambda: _env("TTS_RATE_SLOW", "-30%"))
     gemini_tts_model: str = field(default_factory=lambda: _env("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts"))
     gemini_tts_voice: str = field(default_factory=lambda: _env("GEMINI_TTS_VOICE", "Kore"))
+    gemini_tts_voice_2: str = field(default_factory=lambda: _env("GEMINI_TTS_VOICE_2", "Puck"))
 
     analyze_every_turns: int = field(default_factory=lambda: int(_env("ANALYZE_EVERY_TURNS", "8")))
     history_window: int = field(default_factory=lambda: int(_env("HISTORY_WINDOW", "14")))

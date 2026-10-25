@@ -661,6 +661,14 @@ textarea.input { resize: none; line-height: 1.5; }
 .heard-card { padding: 14px 16px; border-radius: var(--r-lg); background: var(--surface); border: 0; display: flex; flex-direction: column; gap: 6px; }
 .heard-card p { font-size: var(--t-md); line-height: 1.5; }
 .pill.kind { display: inline-flex; align-items: center; gap: 6px; color: var(--text-dim); }
+/* Lesson texts: the line being spoken is marked, so the ear can follow the page once it is shown. */
+.stack > .pill.kind { align-self: flex-start; }
+.text-toggles { gap: var(--s-2); flex-wrap: wrap; }
+.text-line { transition: background-color .2s ease; }
+.text-line.now { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+.line-who { font-size: var(--t-xs); font-weight: 600; color: var(--accent-ink); letter-spacing: .02em; }
+.btn.speak-big.playing { box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 18%, transparent); }
+@media (prefers-reduced-motion: reduce) { .text-line { transition: none; } }
 .type-instead > summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: var(--t-sm); font-weight: 600; }
 .type-instead > summary::-webkit-details-marker { display: none; }
 .type-instead[open] > summary { color: var(--text); }

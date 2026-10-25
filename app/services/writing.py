@@ -16,11 +16,12 @@ from ..providers.llm import LLMUnavailable, llm
 from . import curriculum, mistakes, profile
 
 NONE_YET = profile.NONE_YET
-WORDS_MIN, WORDS_MAX = 20, 250
+WORDS_MIN, WORDS_MAX = 20, 400
 MAX_CORRECTIONS = 8
 RECENT_PROMPTS = 5
 # Defaults when the model's word range is unusable. Scaled by level: a beginner given 200 words quits.
-WORDS_BY_LEVEL = {"A1": (40, 80), "A2": (60, 120), "B1": (90, 160), "B2": (120, 200)}
+WORDS_BY_LEVEL = {"A1": (40, 80), "A2": (60, 120), "B1": (90, 160), "B2": (120, 220),
+                  "C1": (180, 300), "C2": (220, 380)}
 
 PROMPT_SCHEMA = {
     "type": "object",
@@ -73,7 +74,7 @@ def _default_words(level: str) -> tuple[int, int]:
 
 
 def _word_range(lo: object, hi: object, level: str) -> tuple[int, int]:
-    """Clamp the model's range to 20..250 and keep min below max; fall back to the level's default."""
+    """Clamp the model's range to WORDS_MIN..WORDS_MAX and keep min below max; fall back to the level's default."""
     d_lo, d_hi = _default_words(level)
     try:
         lo_i, hi_i = int(lo), int(hi)  # type: ignore[arg-type]

@@ -543,6 +543,7 @@ async def test_the_tutor_can_explain_in_english_to_a_beginner(fresh_db):
     from app.services import profile
     assert "freely" in profile.english_policy("A1.1")
     assert "Stay in German" in profile.english_policy("B1.2")
+    assert "native speed" in profile.english_policy("C1.1") and "native speed" in profile.english_policy("C2.2")
     prompt = await tutor._system_prompt(None)
     assert "coach_en" in prompt and "{{" not in prompt and "explain in plain English" in prompt
     assert "coach_en" in tutor.TUTOR_TURN_SCHEMA["properties"]
