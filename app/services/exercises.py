@@ -6,6 +6,7 @@ chunk is immediately followed by generated practice on exactly the material just
 
     teach 6 greetings  ->  match them  ->  hear one, pick it  ->  say one out loud
     teach "verb second" ->  build the sentence from tiles    ->  the authored check
+    teach "dem after mit" ->  fill the gap: mit ___ Bus (der / den / dem)
 
 Generated rather than authored, because the exercises are mechanical while the explanations are the
 part that needs a human. Distractors come from the same lesson, which is also the pedagogically
@@ -25,6 +26,7 @@ from typing import Any
 MAX_MATCH_PAIRS = 5
 LISTEN_PER_WORDS = 2
 BUILD_PER_GRAMMAR = 2
+GAP_PER_GRAMMAR = 1
 MIN_BUILD_WORDS = 3
 MAX_BUILD_WORDS = 9
 
@@ -182,7 +184,8 @@ def _practise_grammar(step: dict, sentences: list[str], rng: random.Random) -> l
     examples = [e for e in step.get("examples", []) if e.get("de") and e.get("en")]
     out: list[dict] = []
     usable = [e for e in examples if MIN_BUILD_WORDS <= len(_words_of(e["de"])) <= MAX_BUILD_WORDS]
-    for ex in _sample(usable, BUILD_PER_GRAMMAR, rng):
+    builds = _sample(usable, BUILD_PER_GRAMMAR, rng)
+    for ex in builds:
         words = _words_of(ex["de"])
         # One decoy from another sentence, so word order is the thing being tested, not the word list.
         decoys = [w for s in sentences for w in _words_of(s) if w not in words]
@@ -192,7 +195,81 @@ def _practise_grammar(step: dict, sentences: list[str], rng: random.Random) -> l
         # for both du and Sie), and then no answer is knowable from the prompt alone.
         out.append({"type": "build", "mode": "practise", "title": "Put it in order",
                     "en": ex["en"], "hint": ex.get("note"), "answer": words, "tiles": tiles})
+    # Building tests word order; the gap tests the form itself (den or dem, mich or mir, -en or -em),
+    # which is what most grammar points are about. Prefer an example the tiles did not just show.
+    rest = [e for e in examples if e not in builds] or examples
+    gaps = [g for g in (_gap(e, rng) for e in rest) if g]
+    gaps.sort(key=lambda g: -g.pop("_weight"))
+    out.extend(gaps[:GAP_PER_GRAMMAR])
     return out
+
+
+# Forms a learner picks between. A gap blanks one of these and offers its siblings, so the choice is
+# always between real German words that differ in exactly the way the grammar step is about.
+_FAMILIES = [
+    ["der", "die", "das", "den", "dem", "des"],
+    ["ein", "eine", "einen", "einem", "einer", "eines"],
+    ["kein", "keine", "keinen", "keinem", "keiner"],
+    *[[s, s + "e", s + "en", s + "em", s + "er"] for s in ("mein", "dein", "sein", "unser", "euer")],
+    ["mich", "mir", "ich"], ["dich", "dir", "du"], ["ihn", "ihm", "er"], ["uns", "wir", "unser"],
+    ["bin", "bist", "ist", "sind", "seid"], ["habe", "hast", "hat", "haben", "habt"],
+    ["war", "warst", "waren"], ["hatte", "hattest", "hatten"],
+    ["im", "am", "um", "zum", "zur", "beim", "vom"],
+    ["als", "wenn", "wann", "ob"], ["dass", "weil", "obwohl", "damit"],
+    ["deshalb", "trotzdem", "denn"], ["wurde", "wird", "worden", "werden"],
+    ["dessen", "deren", "denen"],
+]
+# The genitive arrives at B1; before that "des" is noise, not a plausible mistake.
+_GENITIVE = {"des", "eines"}
+_FAMILY_OF = {w: fam for fam in _FAMILIES for w in fam}
+# Which gap a grammar step gets when an example offers several: the rarer form wins, because an
+# example only contains "dessen" or "obwohl" when that is what the step is teaching.
+_ADVANCED = {w for fam in _FAMILIES if fam[0] in ("war", "hatte", "als", "dass", "deshalb", "wurde", "dessen") for w in fam}
+_BASIC = {"ich", "du", "er", "wir", "bin", "bist", "ist", "sind", "seid", "habe", "hast", "hat", "haben", "habt"}
+_ARTICLE_LIKE = {w for fam in _FAMILIES[:8] for w in fam}
+_ENDINGS = ("en", "em", "er", "es", "e")
+
+
+def _gap(example: dict, rng: random.Random) -> dict | None:
+    words = _words_of(example["de"])
+    if not 3 <= len(words) <= 14:
+        return None
+    candidates = []
+    for i, raw in enumerate(words):
+        core = raw.strip(".,!?;:„“\"'()")
+        if not core or core != raw.rstrip(".,!?;:“\"')") or "{{" in core:
+            continue
+        low = core.lower()
+        nxt = words[i + 1] if i + 1 < len(words) else ""
+        prev = words[i - 1].lower() if i else ""
+        # An adjective between an article and its noun: the ending is the whole point of A2.2.
+        ending = next((e for e in _ENDINGS if low.endswith(e) and len(low) - len(e) >= 3), None)
+        if ending and prev in _ARTICLE_LIKE and nxt[:1].isupper() and core[:1].islower():
+            stem = core[: -len(ending)]
+            options = [core] + [stem + e for e in _ENDINGS if e != ending]
+            candidates.append((4, i, raw, core, options))
+        elif low in _FAMILY_OF:
+            # An article only counts in front of its noun (or adjective + noun): "Das ist gut" is a
+            # pronoun, and "Der ist gut" would be right too.
+            after = words[i + 2] if i + 2 < len(words) else ""
+            if low in _ARTICLE_LIKE and not (nxt[:1].isupper() or (nxt[:1].islower() and after[:1].isupper())):
+                continue
+            options = [w for w in _FAMILY_OF[low] if w != low and (low in _GENITIVE or w not in _GENITIVE)]
+            if core[:1].isupper():
+                options = [w[:1].upper() + w[1:] for w in options]
+            weight = 3 if low in _ADVANCED else 1 if low in _BASIC else 2
+            candidates.append((weight, i, raw, core, [core] + options))
+    if not candidates:
+        return None
+    weight, i, raw, core, options = max(candidates, key=lambda c: (c[0], rng.random()))
+    picked = [core] + rng.sample(options[1:], min(2, len(options) - 1))
+    if len(picked) < 3:
+        return None
+    rng.shuffle(picked)
+    tail = raw[len(core):]
+    return {"type": "gap", "mode": "practise", "title": "Fill the gap", "_weight": weight,
+            "before": " ".join(words[:i]), "after": (tail + " " + " ".join(words[i + 1:])).strip(),
+            "options": picked, "answer": picked.index(core), "de": example["de"], "en": example["en"]}
 
 
 def _unaligned(pairs: list[dict], rng: random.Random, attempts: int = 30) -> tuple[list[str], list[str]]:
@@ -223,7 +300,7 @@ def grade(exercise: dict, answer: Any) -> bool:
     """Server-side truth for an exercise. The client grades too, for instant feedback; this is what
     the progress counters trust."""
     kind = exercise.get("type")
-    if kind in ("listen", "check"):
+    if kind in ("listen", "check", "gap"):
         return isinstance(answer, int) and answer == exercise.get("answer")
     if kind == "build":
         return [_clean(w) for w in (answer or [])] == list(exercise.get("answer") or [])

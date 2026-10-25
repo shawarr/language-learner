@@ -314,3 +314,21 @@ def test_beginner_scenarios_come_with_a_briefing_and_their_words():
                 assert sc.get("brief") and len(sc.get("words") or []) >= 5, (kind, sc["id"])
                 assert "one question per turn" in sc["setup"], sc["id"]
                 assert "{{" not in sc["brief"] + sc["setup"]
+
+
+def test_a_gap_tests_the_form_the_step_teaches():
+    """Tiles test word order; the gap tests the form: one word blanked, offered with its siblings."""
+    import random
+
+    from app.services import exercises
+
+    g = exercises._gap({"de": "Ich fahre mit dem neuen Bus.", "en": "I take the new bus."}, random.Random(0))
+    assert g["options"][g["answer"]] == "neuen" and g["before"] == "Ich fahre mit dem" and g["after"] == "Bus."
+    g = exercises._gap({"de": "Der Kollege, dessen Laptop kaputt ist, wartet.", "en": "x"}, random.Random(0))
+    assert g["options"][g["answer"]] == "dessen", "the rarer form is the one the step is about"
+    g = exercises._gap({"de": "Ich bleibe zu Hause, weil ich krank bin.", "en": "x"}, random.Random(0))
+    assert g["options"][g["answer"]] == "weil" and len(set(g["options"])) == 3
+    # "Das ist gut": a pronoun, where "Der ist gut" would be right too. The verb is the gap, never "Das".
+    for seed in range(5):
+        assert exercises._gap({"de": "Das ist gut.", "en": "x"}, random.Random(seed))["before"] == "Das"
+    assert exercises.grade(g, g["answer"]) and not exercises.grade(g, (g["answer"] + 1) % 3)

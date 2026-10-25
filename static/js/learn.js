@@ -265,7 +265,7 @@ function exercise(ex, n) {
   const make = {
     sounds: soundsStep, words: wordsStep, grammar: grammarStep, text: textStep,
     check: (e) => choiceStep(e, n, { question: e.question, options: e.options, answer: e.answer, why: e.why }),
-    listen: listenStep, match: matchStep, build: buildStep, speak: speakStep,
+    listen: listenStep, match: matchStep, build: buildStep, speak: speakStep, gap: gapStep,
   }[ex.type];
   const el = make ? make(ex, n) : h('p', { class: 'muted' }, 'This step type is not supported here yet.');
   if (ex.mode === 'teach' && ex.type !== 'check') S.foot.actions(backBtn(n), continueBtn(n));
@@ -344,7 +344,7 @@ function textStep(step) {
   });
   const textBox = h('div', { class: 'lines text-lines', hidden: listening }, rows.map((r) => r.btn));
 
-  async function playAll(speed) {
+  async function playAll(speed, { quiet = false } = {}) {
     const token = ++run.token;
     unlockAudio();
     playBtn.classList.add('playing');
@@ -355,7 +355,7 @@ function textStep(step) {
         await speak(step.lines[i].de, speed, { voice: voiceFor(step, i) });
       }
     } catch (e) {
-      toast((e && e.detail) || 'Audio unavailable right now.', { kind: 'err' });
+      if (!quiet) toast((e && e.detail) || 'Audio unavailable right now.', { kind: 'err' });
     } finally {
       if (token === run.token) { playBtn.classList.remove('playing'); rows.forEach((r) => r.btn.classList.remove('now')); }
     }
@@ -377,7 +377,7 @@ function textStep(step) {
   if (listening) toggles.append(showText);
   toggles.append(showEn);
 
-  if (listening) setTimeout(() => { if (S.body.contains(textBox)) playAll('normal'); }, 300);
+  if (listening) setTimeout(() => { if (S.body.contains(textBox)) playAll('normal', { quiet: true }); }, 300);
   return h('div', { class: 'stack-lg' },
     h('div', { class: 'stack' },
       h('span', { class: 'pill kind' }, icon(listening ? 'speaker' : 'book', 14), listening ? 'Listen' : 'Read'),
@@ -399,11 +399,11 @@ function verdict(n, ok, detail, { cta = 'Continue' } = {}) {
   S.foot.verdict({ ok, title: ok ? 'Richtig' : 'Not quite', detail, cta, onContinue: () => go(n + 1) });
 }
 
-function choiceStep(ex, n, { question, options, answer, why, audio = null, title = null }) {
+function choiceStep(ex, n, { question, options, answer, why, audio = null, title = null, head = null, onAnswer = null }) {
   const opts = h('div', { class: 'options' });
   let done = false;
   options.forEach((text, i) => {
-    opts.append(h('button', { class: 'option tactile', type: 'button', lang: audio ? 'de' : undefined, onClick: () => {
+    opts.append(h('button', { class: 'option tactile', type: 'button', lang: audio || head ? 'de' : undefined, onClick: () => {
       if (done) return;
       done = true;
       const ok = i === answer;
@@ -412,12 +412,13 @@ function choiceStep(ex, n, { question, options, answer, why, audio = null, title
         if (j === answer) b.classList.add('right');
         else if (j === i) b.classList.add('wrong');
       }
+      if (onAnswer) onAnswer(ok);
       verdict(n, ok, why || (ok ? null : `It was “${options[answer]}”.`));
     } }, text));
   });
   waitFoot(n, h('span', { class: 'foot-hint' }, 'Pick one'));
   return h('div', { class: 'stack-lg' },
-    audio ? listenControls(audio, title) : h('h1', { class: 'prompt-h', lang: 'en' }, question),
+    head || (audio ? listenControls(audio, title) : h('h1', { class: 'prompt-h', lang: 'en' }, question)),
     opts);
 }
 
@@ -434,6 +435,19 @@ function listenStep(ex, n) {
   setTimeout(() => say(ex.audio, { quiet: true }), 200);
   return choiceStep(ex, n, { options: ex.options, answer: ex.answer,
     why: ex.en ? `“${ex.options[ex.answer]}” means ${ex.en}.` : '', audio: ex.audio });
+}
+
+/* One form missing from a sentence the lesson just taught. The English is there because a gap can be
+   grammatical more than one way ("weil" or "obwohl"): the meaning says which one is wanted. */
+function gapStep(ex, n) {
+  const blank = h('span', { class: 'gap-blank', 'aria-label': 'blank' }, '\u2009');
+  const tight = /^[.,!?;:]/.test(ex.after);
+  const sentence = h('p', { class: 'gap-sentence', lang: 'de' },
+    ex.before ? `${ex.before} ` : '', blank, ex.after ? (tight ? ex.after : ` ${ex.after}`) : '');
+  const head = h('div', { class: 'stack' },
+    h('h1', { class: 'prompt-h' }, 'Fill the gap'), sentence, h('p', { class: 'prompt-lead', lang: 'en' }, ex.en));
+  return choiceStep(ex, n, { options: ex.options, answer: ex.answer, why: `“${ex.de}” — ${ex.en}`, head,
+    onAnswer: () => { blank.textContent = ex.options[ex.answer]; blank.classList.add('filled'); say(ex.de, { quiet: true }); } });
 }
 
 function matchStep(ex, n) {

@@ -664,6 +664,9 @@ textarea.input { resize: none; line-height: 1.5; }
 /* Lesson texts: the line being spoken is marked, so the ear can follow the page once it is shown. */
 .stack > .pill.kind { align-self: flex-start; }
 .text-toggles { gap: var(--s-2); flex-wrap: wrap; }
+.gap-sentence { font-size: 24px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.gap-blank { display: inline-block; min-width: 3.2em; border-bottom: 3px solid var(--text-dim); text-align: center; color: var(--accent-ink); }
+.gap-blank.filled { border-bottom-color: var(--accent); }
 .text-line { transition: background-color .2s ease; }
 .text-line.now { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
 .line-who { font-size: var(--t-xs); font-weight: 600; color: var(--accent-ink); letter-spacing: .02em; }
