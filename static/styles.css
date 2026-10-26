@@ -664,6 +664,23 @@ textarea.input { resize: none; line-height: 1.5; }
 /* Lesson texts: the line being spoken is marked, so the ear can follow the page once it is shown. */
 .stack > .pill.kind { align-self: flex-start; }
 .text-toggles { gap: var(--s-2); flex-wrap: wrap; }
+/* Ask about this: quiet under the exercise, a sheet with the screen as context. */
+.ask-btn { align-self: flex-start; margin-top: var(--s-3); gap: 8px; color: var(--text-dim); }
+.ask-ctx { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface); }
+.ask-ctx .k { font-size: var(--t-xs); color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.ask-ctx .s { font-size: var(--t-md); font-weight: 600; overflow-wrap: anywhere; }
+.ask-ctx .r { font-size: var(--t-sm); color: var(--text-dim); }
+.ask-ctx .r b { color: var(--text); font-weight: 600; }
+.ask-thread { display: flex; flex-direction: column; gap: var(--s-3); }
+.ask-thread:empty { display: none; }
+.ask-thread .msg { max-width: 100%; }
+.ask-thread .bubble p { line-height: 1.5; }
+.ask-thread .lines { margin-top: 10px; background: var(--bg); }
+.ask-thread .bubble.typing { display: inline-flex; gap: 5px; align-items: center; min-height: 42px; }
+.ask-thread .bubble.typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); animation: breathe 1.2s infinite; }
+.ask-thread .bubble.typing span:nth-child(2) { animation-delay: .15s; }
+.ask-thread .bubble.typing span:nth-child(3) { animation-delay: .3s; }
+.btn.icon.rec { color: var(--warn); }
 .gap-sentence { font-size: 24px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
 .gap-blank { display: inline-block; min-width: 3.2em; border-bottom: 3px solid var(--text-dim); text-align: center; color: var(--accent-ink); }
 .gap-blank.filled { border-bottom-color: var(--accent); }

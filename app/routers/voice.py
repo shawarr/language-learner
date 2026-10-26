@@ -32,7 +32,8 @@ async def speak(text: str = Query(min_length=1, max_length=1500),
 
 
 @router.post("/voice/transcribe")
-async def transcribe(file: UploadFile = File(...), compare: bool = Form(False), said: str = Form("")):
+async def transcribe(file: UploadFile = File(...), compare: bool = Form(False), said: str = Form(""),
+                     language: str = Form("de", pattern="^(de|auto)$")):
     """Returns {"text", "provider", "model"} or, with compare=true, both engines side by side.
 
     `compare` is the transcription lab: it keeps the clip and both transcripts on disk so the
@@ -44,7 +45,7 @@ async def transcribe(file: UploadFile = File(...), compare: bool = Form(False), 
     if len(audio) > MAX_AUDIO_BYTES:
         return {"detail": "recording too large (25 MB max)", "retryable": False}
     if not compare:
-        t = await stt.transcribe(audio, file.content_type, file.filename)
+        t = await stt.transcribe(audio, file.content_type, file.filename, None if language == "auto" else language)
         return {"text": t.text, "provider": t.provider, "model": t.model}
 
     results = await stt.transcribe_compare(audio, file.content_type, file.filename)
