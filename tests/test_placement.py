@@ -30,9 +30,9 @@ def test_prompt_and_service_agree_on_placeholders():
     assert placeholders("placement") == {"name", "about", "answered", "answers"}
 
 
-async def test_start_creates_a_placement_session_with_four_tasks(fresh_db):
+async def test_start_creates_a_placement_session_with_five_tasks(fresh_db):
     out = await placement.start()
-    assert [t["kind"] for t in out["tasks"]] == ["speak", "speak", "speak", "write"]
+    assert [t["kind"] for t in out["tasks"]] == ["speak", "speak", "speak", "speak", "write"]
     assert all({"id", "kind", "title", "instruction_en", "prompt_de"} <= set(t) for t in out["tasks"])
     row = await fresh_db.fetchone("SELECT * FROM sessions WHERE id=?", (out["session_id"],))
     assert row["mode"] == "placement" and row["ended_at"] is None
@@ -90,7 +90,7 @@ async def test_finish_grades_writes_profile_and_is_idempotent(fresh_db):
     assert loads(row["meta"], {})["result"] == res
     # The grading prompt saw the raw answers and used the quality tier's chain.
     sent = FakeProvider.calls[-1]
-    assert "Letzte Woche der Server ist kaputt" in sent.system and "4 of 4" in sent.system
+    assert "Letzte Woche der Server ist kaputt" in sent.system and "4 of 5" in sent.system
     assert sent.json_schema is placement.PLACEMENT_SCHEMA
 
     calls_before = len(FakeProvider.calls)
@@ -224,4 +224,4 @@ def test_multipart_answer_stores_the_raw_transcript(auth_client, monkeypatch):
     FakeProvider.canned = GRADED
     assert auth_client.post("/api/placement/finish", json={"session_id": sid}).status_code == 200
     sent = FakeProvider.calls[-1].system
-    assert "1 of 4" in sent and "transcribed by groq" in sent and "ich bin Ahmad" in sent
+    assert "1 of 5" in sent and "transcribed by groq" in sent and "ich bin Ahmad" in sent

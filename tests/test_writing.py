@@ -91,7 +91,7 @@ async def test_new_prompt_shape_and_word_clamping(fresh_db):
                            "words_min": 5, "words_max": 900}
     out = await writing.new_prompt()
     assert set(out) == {"task", "to", "must_include", "words_min", "words_max", "unit_id"}
-    assert (out["words_min"], out["words_max"]) == (20, 250)
+    assert (out["words_min"], out["words_max"]) == (20, 400)
     assert out["must_include"] == ["say what broke", "ask for help", "x", "y"]
     assert out["unit_id"] == (await profile.get_profile())["unit_id"]
     assert FakeProvider.calls[-1].json_schema is writing.PROMPT_SCHEMA

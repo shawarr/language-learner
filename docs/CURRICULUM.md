@@ -140,7 +140,7 @@ The four exam skills, and where each is trained:
 
 ## 4. The syllabus
 
-A1.1–B1.2 are in `app/curriculum/units.json` as before, with the moves and additions of §2. The
+A1.1–B1.2 keep their units, with the moves and additions of §2. The
 new phases:
 
 ### B2.1 — Making the case
@@ -276,3 +276,16 @@ For every unit, in `app/curriculum/lessons.json`:
 For every scenario in `units.json`: `brief` (two or three English sentences: where you are, who you
 are talking to, what you want) and 6–8 `words` (the phrases the learner will actually need, at the
 unit's level), in each variant too.
+
+## 6. How the content was built, and how to change it
+
+All twelve phases are in `units.json` and every unit has a lesson in `lessons.json`. Two tests hold
+the line: `test_every_unit_from_a1_to_c2_is_taught` in `tests/test_lessons.py`
+and `test_every_scenario_comes_with_a_briefing_and_its_words`. A scene without a
+student variant is played by both learners, so its setup never casts the other person as a work
+colleague, and setups name third parties instead of using bare pronouns (the persona tests check
+this, since a bare "he" is how a learner gets misgendered).
+
+Facts that date (fees, deadlines, residence rules) are kept general or marked as examples; the ones
+worth re-checking now and then are in b2.1-1 (recognition fees), b2.2-3 (labour and tenancy law),
+c2.2-3 (Bescheid and Widerspruch) and c2.2-5 (naturalisation).

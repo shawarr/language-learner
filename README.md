@@ -269,7 +269,7 @@ app/
   providers/          gemini, groq, fake; llm router, stt, tts
   routers/            FastAPI routers
   services/           app logic
-  curriculum/         units.json (A1.1 → B1.2)
+  curriculum/         units.json + lessons.json (A1.1 → C2.2, see docs/CURRICULUM.md)
 static/               the PWA
 deploy/               nginx conf, deploy.sh, backup.sh
 docs/                 FOUNDATION.md, TASKS.md, STT-FINDINGS.md
