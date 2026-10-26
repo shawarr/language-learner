@@ -3,7 +3,8 @@
    and the account actions: avatar, placement re-run, log out. */
 import { api } from './api.js';
 import { h, clear, toast, sheet, errorLine, skeleton, fmtDays } from './ui.js';
-import { katze, VARIANTS, variantName, personColor } from './katze.js';
+import { katze, katzeReact, VARIANTS, variantName, personColor } from './katze.js';
+import { meow, soundOn, setSound } from './meow.js';
 import { ringAround } from './rings.js';
 import { badgeIcon, maybeCelebrate } from './moment.js';
 import * as progress from './progress.js';
@@ -72,6 +73,14 @@ function render(game, board) {
         onClick: () => sheet.open(h('div', { class: 'stack center' }, badgeIcon(b.icon, 44, on ? 'var(--warn)' : 'var(--text-dim)'), h('h2', {}, b.title), h('p', { class: 'muted' }, b.description), h('p', { class: 'muted xs' }, on ? 'Earned' : 'Not yet')), { title: null }) },
         badgeIcon(b.icon, 26, on ? badgeColor(b.icon) : 'var(--text-dim)'), h('span', { class: 'xs' }, b.title));
     }))));
+
+  // Katze's sounds: on by default, and only ever on the learner's own actions.
+  const toggle = h('input', { type: 'checkbox', id: 'katze-sound', class: 'switch', checked: soundOn(),
+    onChange: (e) => { setSound(e.target.checked); if (e.target.checked) { meow('right'); katzeReact(S.body.querySelector('.you-head .katze'), 'right'); } } });
+  S.body.append(h('label', { class: 'card row between setting', for: 'katze-sound' },
+    h('div', {}, h('div', { class: 'card-title' }, 'Katze\u2019s sounds'),
+      h('div', { class: 'muted xs' }, 'A purr when you pet her, a mrrp for a right answer, a meow when a lesson is done.')),
+    toggle));
 
   S.body.append(S.progressEl);
 }

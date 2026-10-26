@@ -6,7 +6,8 @@
 import { api, audioFilename } from './api.js';
 import { h, clear, errorLine, prefs, skeleton, de } from './ui.js';
 import { createHoldToTalk } from './mic.js';
-import { katze } from './katze.js';
+import { katze, katzeReact } from './katze.js';
+import { meow } from './meow.js';
 import { ringAround } from './rings.js';
 import { icon } from './icons.js';
 import { maybeCelebrate } from './moment.js';
@@ -118,8 +119,10 @@ function renderResult(r) {
   S.root.scrollTop = 0;
   const adv = r.advanced_to;
   if (r.passed) {
+    const cat = katze({ variant: me().avatar, size: 110 });
+    setTimeout(() => { katzeReact(cat, 'party'); meow('party'); }, 250);
     S.body.append(h('div', { class: 'finish' },
-      h('div', { class: 'finish-cat' }, katze({ variant: me().avatar, mood: 'cheering', size: 110 })),
+      h('div', { class: 'finish-cat' }, cat),
       adv && adv.phase_changed && adv.phase ? h('div', { class: 'level-mark num' }, adv.phase.level) : null,
       h('h2', { class: 'finish-h' }, r.finished_curriculum ? 'You finished the whole path' : adv && adv.phase_changed ? `You're now in ${adv.phase.level}` : 'Unit passed'),
       adv && adv.unit ? h('p', { class: 'finish-sub' }, 'Next: ', de(adv.unit.title)) : null));

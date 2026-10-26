@@ -12,7 +12,7 @@ import { h, clear, toast, sheet, errorLine, prefs, tappableWords, plural, haptic
 import { speak, stop as stopAudio, unlockAudio, setPlaybackListener } from './audio.js';
 import { createHoldToTalk, micIcon } from './mic.js';
 import { store } from './store.js';
-import { katze } from './katze.js';
+import { katze, katzeState } from './katze.js';
 import { icon } from './icons.js';
 import { katzeSays } from './kit.js';
 
@@ -331,6 +331,8 @@ function onPlayback(st) {
   for (const m of S.chat.querySelectorAll('.msg.tutor')) {
     const on = !!st && m.dataset.id === String(st.id);
     m.classList.toggle('playing', on);
+    const cat = m.querySelector('.katze');
+    if (cat && cat.classList.contains('k-talk') !== on) katzeState(cat, on ? 'talk' : null);
     const line = m.querySelector('.audio-line > i');
     if (line) line.style.width = on ? `${Math.round((st.progress || 0) * 100)}%` : '0%';
     const slow = m.querySelector('.bubble-tool.slow');
@@ -537,6 +539,8 @@ function buildComposer() {
   S.mic = createHoldToTalk({
     onStart: async () => { if (S.pending) return false; if (!S.session) { await startSession(); } return !!S.session; },
     onResult: (result) => sendRecording(result),
+    // While the learner speaks, the tutor's last Katze leans in and listens.
+    onUi: (st) => katzeState([...S.chat.querySelectorAll('.msg.tutor .katze')].pop(), st === 'idle' ? null : 'listen'),
     side: toText,
   });
   S.composerMic = S.mic.el;

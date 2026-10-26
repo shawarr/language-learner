@@ -16,7 +16,8 @@ import { api, upload, audioFilename } from './api.js';
 import { h, clear, toast, sheet, errorLine, skeleton, haptic, de } from './ui.js';
 import { speak, prefetch, stop as stopAudio, unlockAudio, Recorder } from './audio.js';
 import { createHoldToTalk } from './mic.js';
-import { katze } from './katze.js';
+import { katze, katzeReact } from './katze.js';
+import { meow } from './meow.js';
 import { rings } from './rings.js';
 import { icon } from './icons.js';
 import { maybeCelebrate } from './moment.js';
@@ -730,14 +731,16 @@ function renderDone() {
   const stats = [[String(S.list.length), 'steps']];
   if (S.asked) stats.push([`${S.right}/${S.asked}`, 'right first time']);
   if (S.finishedFirst) stats.push(['+40', 'XP']);
+  const cat = katze({ variant: me().avatar, size: 120 });
   S.body.append(h('div', { class: 'finish' },
-    h('div', { class: 'finish-cat' }, katze({ variant: me().avatar, mood: 'proud', size: 120 })),
+    h('div', { class: 'finish-cat' }, cat),
     h('h2', { class: 'finish-h' }, 'Lesson finished'),
     h('p', { class: 'finish-sub' }, l.outro || 'Now use it: the conversation is where it sticks.'),
     statStrip(stats)));
   S.foot.actions(
     h('button', { class: 'btn ghost', type: 'button', onClick: closePlayer }, 'Done'),
     h('button', { class: 'btn primary lg tactile grow', type: 'button', onClick: () => { closePlayer(); window.dtSwitchTo('talk'); } }, 'Practise in Talk'));
+  setTimeout(() => { katzeReact(cat, 'party'); meow('party'); }, 250);
 }
 
 /* ---- navigation ------------------------------------------------------- */
