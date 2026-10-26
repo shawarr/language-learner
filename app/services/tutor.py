@@ -28,6 +28,7 @@ from . import analyzer, curriculum, profile, vocab
 
 log = logging.getLogger(__name__)
 
+MAX_STEP = 20
 MAX_CORRECTIONS = 3
 MAX_NEW_VOCAB = 3
 
@@ -69,6 +70,7 @@ TUTOR_TURN_SCHEMA = {
                       "required": ["word", "translation"]},
         },
         "scenario_done": {"type": "boolean", "description": "True when the scenario's goal has been reached."},
+        "scenario_step": {"type": "integer", "description": "The number of the step in the scenario's setup that `reply` is on: the question you are asking now. 0 for free conversation, a scenario without numbered steps, or once the goal is reached."},
     },
     "required": ["reply", "meaning_en", "corrections", "new_vocab", "scenario_done"],
 }
@@ -135,7 +137,15 @@ def sanitize_turn(data: dict) -> dict:
     return {"reply": reply, "meaning_en": _text(data.get("meaning_en")) or None,
             "coach_en": _text(data.get("coach_en")) or None,
             "corrections": corrections[:MAX_CORRECTIONS], "praise": _text(data.get("praise")) or None,
-            "english_help": english_help, "new_vocab": new_vocab[:MAX_NEW_VOCAB], "scenario_done": bool(done)}
+            "english_help": english_help, "new_vocab": new_vocab[:MAX_NEW_VOCAB], "scenario_done": bool(done),
+            "scenario_step": _step(data.get("scenario_step"))}
+
+
+def _step(value: object) -> int:
+    try:
+        return max(0, min(MAX_STEP, int(value)))  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return 0
 
 
 # -- background analysis --------------------------------------------------------
@@ -181,11 +191,43 @@ async def _load(session_id: int) -> dict:
     return row
 
 
-async def _system_prompt(scenario: dict | None) -> str:
+async def _system_prompt(scenario: dict | None, state: str = "") -> str:
     # The profile's unit, even when the scenario was picked from another one: the context describes
     # where the learner is, the scenario only what is being played.
     unit = await curriculum.current_unit()
-    return render("tutor_talk", **await profile.build_context(unit, scenario))
+    base = render("tutor_talk", **await profile.build_context(unit, scenario))
+    return f"{base}\n\n{state}" if state else base
+
+
+async def _turn_state(session_id: int, meta: dict, scenario: dict | None) -> str:
+    """Where the conversation stands, said outright every turn. Left to infer it from the history, the
+    model lost its place in a scripted scene: it asked the third question twice, corrected an answer
+    to "when do you finish" into the answer to "when do you start", and announced the goal reached
+    on every turn after it had been."""
+    last = await db.fetchone("SELECT content, meaning_en FROM messages WHERE session_id=? AND role='assistant' "
+                             "ORDER BY id DESC LIMIT 1", (session_id,))
+    if not last:
+        return ""
+    step = int(meta.get("step") or 0)
+    if not scenario:
+        step_line = ""
+    elif meta.get("done"):
+        step_line = ""
+    elif step:
+        step_line = (f"Your last message was step {step} of the scenario's setup. If the learner answered it, even with "
+                     f"one word or with mistakes, move on to step {step + 1}. If they asked you something, did not "
+                     f"understand, or answered something else, help them and ask step {step} again, more simply.")
+    else:
+        step_line = "Follow the scenario's setup in order; say in `scenario_step` which step your reply is on."
+    done_line = ("The scenario's goal was already reached earlier in this conversation: keep `scenario_done` false. "
+                 "Answer whatever the learner asks; offer to play the scene again from the start, or to talk freely."
+                 if meta.get("done") else "")
+    return render("tutor_turn_state", last_reply=last["content"], last_meaning=last["meaning_en"] or "no translation",
+                  step_line=step_line, done_line=done_line)
+
+
+async def _save_meta(session_id: int, meta: dict) -> None:
+    await db.conn.execute("UPDATE sessions SET meta=? WHERE id=?", (json.dumps(meta), session_id))
 
 
 
@@ -222,13 +264,13 @@ async def start_session(mode: str = "talk", scenario_id: str | None = None) -> d
     data = await llm.complete_json(system, [Message("user", OPENING_MESSAGE)], TUTOR_TURN_SCHEMA)
     turn = sanitize_turn(data)
     # There is no user message yet, so anything "corrected" here would be hallucinated.
-    turn.update(corrections=[], english_help=None, praise=None)
+    turn.update(corrections=[], english_help=None, praise=None, scenario_done=False)
     now = time.time()
     try:
         cur = await db.conn.execute(
-            "INSERT INTO sessions (user_id, mode, scenario_id, scenario_title, unit_id, started_at) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO sessions (user_id, mode, scenario_id, scenario_title, unit_id, started_at, meta) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (users.user_id(), mode, scenario["id"] if scenario else None, scenario["title"] if scenario else None,
-             unit["id"], now))
+             unit["id"], now, json.dumps({"step": turn["scenario_step"] or 1} if scenario else {})))
         session_id = int(cur.lastrowid or 0)
         message_id = await _write_assistant(session_id, turn, data.get("_model"), now)
         await db.conn.commit()
@@ -353,12 +395,23 @@ async def take_turn(session_id: int, text: str, *, input_kind: str = "text",
     if session["scenario_id"] and not found:
         # The curriculum moved on under a live session; carrying on as free talk beats a dead screen.
         log.warning("scenario %r is gone from the curriculum; continuing without it", session["scenario_id"])
-    system = await _system_prompt(found[1] if found else None)
+    scenario = found[1] if found else None
+    meta = loads(session.get("meta"), {})
+    meta = meta if isinstance(meta, dict) else {}
+    system = await _system_prompt(scenario, await _turn_state(session_id, meta, scenario))
     history = await _history(session_id)
     data = await llm.complete_json(system, history + [Message("user", text)], TUTOR_TURN_SCHEMA)
     turn = sanitize_turn(data)
+    # "Scenario complete" is news once. After that the model may well say it again on every turn.
+    if meta.get("done"):
+        turn["scenario_done"] = False
+    elif turn["scenario_done"] and scenario:
+        meta["done"] = True
+    if turn["scenario_step"]:
+        meta["step"] = turn["scenario_step"]
     now = time.time()
     try:
+        await _save_meta(session_id, meta)
         cur = await db.conn.execute(
             "INSERT INTO messages (session_id, role, content, transcript_raw, input_kind, stt_provider, created_at) "
             "VALUES (?, 'user', ?, ?, ?, ?, ?)", (session_id, text, transcript_raw, input_kind, stt_provider, now))

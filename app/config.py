@@ -95,7 +95,7 @@ class Settings:
     gemini_tts_voice_2: str = field(default_factory=lambda: _env("GEMINI_TTS_VOICE_2", "Puck"))
 
     analyze_every_turns: int = field(default_factory=lambda: int(_env("ANALYZE_EVERY_TURNS", "8")))
-    history_window: int = field(default_factory=lambda: int(_env("HISTORY_WINDOW", "14")))
+    history_window: int = field(default_factory=lambda: int(_env("HISTORY_WINDOW", "24")))
 
     def __post_init__(self) -> None:
         self.data_dir = self.data_dir.resolve()

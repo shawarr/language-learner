@@ -70,7 +70,7 @@ def test_sanitize_handles_wrong_types_and_unknown_category():
                                "english_help": {"english": "a", "german": "b", "literal": "c"},
                                "praise": "Sehr gut!"})
     assert out == {"reply": "Ja.", "meaning_en": None, "coach_en": None, "corrections": [], "praise": "Sehr gut!", "new_vocab": [],
-                   "scenario_done": False, "english_help": {"english": "a", "german": "b", "literal": "c"}}
+                   "scenario_done": False, "scenario_step": 0, "english_help": {"english": "a", "german": "b", "literal": "c"}}
     out = tutor.sanitize_turn({"reply": "Ja.", "corrections": [{"wrong": "a", "right": "b", "category": "made-up"}]})
     assert out["corrections"] == [{"wrong": "a", "right": "b", "category": "other", "explanation": ""}]
 
@@ -549,3 +549,39 @@ async def test_the_tutor_can_explain_in_english_to_a_beginner(fresh_db):
     assert "coach_en" in tutor.TUTOR_TURN_SCHEMA["properties"]
     assert ("messages", "coach_en", "TEXT") in __import__("app.db", fromlist=["MIGRATIONS"]).MIGRATIONS
     assert "{{english_policy}}" in (settings.base_dir / "prompts" / "tutor_talk.md").read_text()
+
+
+async def test_the_tutor_is_told_where_the_scene_stands_every_turn(fresh_db, quiet_catch_up):
+    """Left to infer its place from the history, the tutor asked the wrong question of a scripted scene
+    and corrected an answer to "when do you finish" into the answer to "when do you start"."""
+    sid = curriculum.phase("a1.1")["units"][1]["scenarios"][0]["id"]
+    FakeProvider.canned = {**TURN, "reply": "Wann fängst du an?", "meaning_en": "When do you start?", "scenario_step": 1}
+    session_id = (await tutor.start_session(scenario_id=sid))["session"]["id"]
+    FakeProvider.canned = {**TURN, "reply": "Gut! Wann hörst du auf?", "meaning_en": "When do you finish?", "scenario_step": 2}
+    await tutor.take_turn(session_id, "Ich fange um neun an.")
+    system = FakeProvider.calls[-1].system
+    assert "«Wann fängst du an?» (When do you start?)" in system
+    assert "step 1 of the scenario" in system and "move on to step 2" in system
+    FakeProvider.canned = {**TURN, "reply": "Um zehn? Passt das?", "scenario_step": 3}
+    await tutor.take_turn(session_id, "Um fünf.")
+    assert "«Gut! Wann hörst du auf?»" in FakeProvider.calls[-1].system and "step 2 of the scenario" in FakeProvider.calls[-1].system
+
+
+async def test_scenario_complete_is_announced_once(fresh_db, quiet_catch_up):
+    sid = curriculum.phase("a1.1")["units"][1]["scenarios"][0]["id"]
+    FakeProvider.canned = {**TURN, "scenario_step": 1}
+    session_id = (await tutor.start_session(scenario_id=sid))["session"]["id"]
+    FakeProvider.canned = {**TURN, "scenario_done": True}
+    assert (await tutor.take_turn(session_id, "Ja, das passt."))["scenario_done"] is True
+    assert (await tutor.take_turn(session_id, "Was heißt das?"))["scenario_done"] is False, "not a second card"
+    system = FakeProvider.calls[-1].system
+    assert "goal was already reached" in system and "step " not in system.split("Where this conversation is")[1].split("\n")[4]
+
+
+def test_the_prompt_has_the_rules_this_conversation_broke():
+    from app.config import settings
+
+    prompt = (settings.base_dir / "prompts" / "tutor_talk.md").read_text()
+    assert "only ever your own character's line" in prompt
+    assert "Correct only an attempt at German" in prompt
+    assert "translate it piece by piece" in prompt
