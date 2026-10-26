@@ -250,10 +250,10 @@ async def test_transcribe_rejects_empty_audio():
 async def test_transcribe_falls_back_to_the_other_engine(monkeypatch):
     from app.providers import stt as stt_mod
 
-    async def groq_fails(audio, ext, mime):
+    async def groq_fails(audio, ext, mime, language="de"):
         raise ProviderError("whisper down")
 
-    async def gemini_works(audio, ext, mime):
+    async def gemini_works(audio, ext, mime, language="de"):
         return stt_mod.Transcript(text="ich bin müde", provider="gemini", model="g")
 
     monkeypatch.setattr(stt_mod.stt, "_groq", groq_fails)
@@ -266,7 +266,7 @@ async def test_transcribe_falls_back_to_the_other_engine(monkeypatch):
 async def test_compare_reports_errors_instead_of_raising(monkeypatch):
     from app.providers import stt as stt_mod
 
-    async def fails(audio, ext, mime):
+    async def fails(audio, ext, mime, language="de"):
         raise ProviderError("nope")
 
     monkeypatch.setattr(stt_mod.stt, "_groq", fails)

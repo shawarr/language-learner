@@ -80,7 +80,7 @@ class OpenAICompatProvider:
                            usage={"input": u.get("prompt_tokens", 0), "output": u.get("completion_tokens", 0)})
 
     async def transcribe(self, model: str, audio: bytes, filename: str, mime: str,
-                         language: str = "de", prompt: str = "") -> str:
+                         language: str | None = "de", prompt: str = "") -> str:
         """Whisper-style transcription. No prompt by default: a prompt written in clean German
         makes Whisper fix the learner's grammar (docs/STT-FINDINGS.md).
 
@@ -88,8 +88,10 @@ class OpenAICompatProvider:
         and drops the segments it invented over silence (see `speech_only`)."""
         if not self.api_key:
             raise ProviderError(f"{self.name} api key not set")
-        data: dict[str, Any] = {"model": model, "language": language, "response_format": "verbose_json",
-                                "temperature": "0"}
+        data: dict[str, Any] = {"model": model, "response_format": "verbose_json", "temperature": "0"}
+        # No language means Whisper detects it: a question about the lesson may well be in English.
+        if language:
+            data["language"] = language
         if prompt:
             data["prompt"] = prompt
         try:

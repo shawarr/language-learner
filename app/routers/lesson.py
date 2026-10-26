@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from .. import auth
-from ..services import curriculum, exercises, lessons
+from ..services import curriculum, exercises, lesson_ask, lessons
 
 router = APIRouter(prefix="/lesson", dependencies=[Depends(auth.require_auth)], tags=["lesson"])
 
@@ -15,6 +15,19 @@ class StepBody(BaseModel):
 class CheckBody(BaseModel):
     step: int = Field(ge=0, le=200)
     correct: bool
+
+
+class AskTurn(BaseModel):
+    q: str = Field(max_length=lesson_ask.MAX_QUESTION_CHARS)
+    a: str = Field(max_length=2000)
+
+
+class AskBody(BaseModel):
+    unit_id: str = Field(max_length=40)
+    exercise: dict
+    picked: str | None = Field(default=None, max_length=300)
+    question: str = Field(min_length=1, max_length=lesson_ask.MAX_QUESTION_CHARS)
+    history: list[AskTurn] = Field(default_factory=list, max_length=lesson_ask.MAX_HISTORY)
 
 
 async def _lesson_payload(unit_id: str, seed: int = 0) -> dict:
@@ -53,6 +66,20 @@ async def overview():
     cur = await curriculum.current()
     phase = curriculum.phase(cur["phase"]["id"]) or {"units": []}
     return {"units": await lessons.overview([u["id"] for u in phase["units"]])}
+
+
+@router.post("/ask")
+async def ask(body: AskBody):
+    """"Ask about this": one model call about the screen the learner is on."""
+    if curriculum.unit(body.unit_id) is None:
+        raise HTTPException(status_code=404, detail="No such unit.")
+    if not lesson_ask.exercise_size_ok(body.exercise):
+        raise HTTPException(status_code=413, detail="That screen is too large to ask about.")
+    try:
+        return await lesson_ask.ask(body.unit_id, body.exercise, body.picked, body.question,
+                                    [t.model_dump() for t in body.history])
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/{unit_id}")

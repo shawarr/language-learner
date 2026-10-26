@@ -5,7 +5,7 @@
    modules next to old ones, which is what broke the Talk screen on an iPhone. Install downloads with
    cache: 'reload' so the browser's own HTTP cache cannot slip an old file into a new version.
    Still bump CACHE_VERSION with each release, so the old cache is dropped. */
-const CACHE_VERSION = 'v18-curriculum';
+const CACHE_VERSION = 'v19-ask';
 const CACHE = `tutor-shell-${CACHE_VERSION}`;
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js', '/js/api.js', '/js/ui.js', '/js/audio.js',

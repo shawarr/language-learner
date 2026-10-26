@@ -8,11 +8,13 @@
    per screen, the action at the bottom. Teaching pages (sounds, words, grammar) are interleaved
    with practice generated from exactly what was just taught — match, listen, build from tiles, say
    it out loud — and the authored checks. A text page (a dialogue to listen to, a letter or an
-   article to read) is followed by checks on what it said. Progress saves per step, and a step you have passed stays
-   passed: going back never makes you answer it again to move on (you may, if you like). */
+   article to read) is followed by checks on what it said. Every screen has "Ask about this": a
+   question to the tutor about exactly what is on it, with the learner's own answer as context.
+   Progress saves per step, and a step you have passed stays passed: going back never makes you
+   answer it again to move on (you may, if you like). */
 import { api, upload, audioFilename } from './api.js';
 import { h, clear, toast, sheet, errorLine, skeleton, haptic, de } from './ui.js';
-import { speak, prefetch, stop as stopAudio, unlockAudio } from './audio.js';
+import { speak, prefetch, stop as stopAudio, unlockAudio, Recorder } from './audio.js';
 import { createHoldToTalk } from './mic.js';
 import { katze } from './katze.js';
 import { rings } from './rings.js';
@@ -23,7 +25,7 @@ import { focusMode, playerHead, playerFoot, katzeSays, statStrip } from './kit.j
 const S = {
   root: null, pathView: null, pathBody: null, playerView: null, head: null, body: null, foot: null,
   view: 'path', unitId: null, unitTitle: '', lesson: null, list: [], i: 0, furthest: 0,
-  right: 0, asked: 0, seed: 0, scored: new Set(), finishedFirst: false,
+  right: 0, asked: 0, seed: 0, scored: new Set(), finishedFirst: false, picked: {},
 };
 const me = () => window.dtUser || {};
 
@@ -210,7 +212,7 @@ function openPlayer(data, { from = null, review = false } = {}) {
   // A finished lesson, or one reopened from the path, has every step passed already.
   S.furthest = review || (data.progress && data.progress.completed) ? S.list.length + 1 : saved;
   S.i = Math.max(1, from || saved || 1);
-  S.right = 0; S.asked = 0; S.scored = new Set(); S.finishedFirst = false;
+  S.right = 0; S.asked = 0; S.scored = new Set(); S.finishedFirst = false; S.picked = {};
   S.view = 'player';
   S.pathView.hidden = true;
   S.playerView.hidden = false;
@@ -274,7 +276,7 @@ function exercise(ex, n) {
   if (ex.mode !== 'teach' || ex.type === 'check') {
     if (passed(n)) wrap.append(h('p', { class: 'done-before' }, icon('check', 16), 'Done before. Answer again if you like, or continue.'));
   }
-  wrap.append(el);
+  wrap.append(el, askButton(ex, n));
   return wrap;
 }
 
@@ -387,6 +389,118 @@ function textStep(step) {
     toggles, textBox, tip(step.note));
 }
 
+/* ---- ask about this ---------------------------------------------------- */
+function askButton(ex, n) {
+  return h('button', { class: 'btn ghost small ask-btn', type: 'button', onClick: () => openAsk(ex, n) },
+    icon('chat', 18), 'Ask about this');
+}
+
+const rightAnswer = (ex) => (Array.isArray(ex.options) && Number.isInteger(ex.answer) ? ex.options[ex.answer]
+  : ex.type === 'build' ? (ex.answer || []).join(' ') : null);
+
+/* What the panel shows the question is about: the sentence or the page, and the learner's answer. */
+function askContext(ex, picked) {
+  const kind = { gap: 'Fill the gap', check: 'Question', listen: 'What do you hear?', build: 'Put it in order',
+    speak: 'Say it out loud', match: 'Match the pairs', words: 'Words', grammar: 'Grammar', sounds: 'Sounds',
+    text: ex.skill === 'listen' ? 'Listening' : 'Reading' }[ex.type] || 'This step';
+  const main = ex.type === 'gap' ? `${ex.before} ___ ${ex.after}`.trim()
+    : ex.type === 'listen' ? ex.audio : ex.type === 'speak' ? ex.de : ex.type === 'build' ? ex.en
+      : ex.question || ex.title || '';
+  const right = rightAnswer(ex);
+  const result = picked != null && right != null
+    ? (picked === right ? h('span', { class: 'r' }, 'You answered ', h('b', {}, picked), ', which is right')
+      : h('span', { class: 'r' }, 'You picked ', h('b', {}, picked), ' · the answer is ', h('b', {}, right)))
+    : picked != null ? h('span', { class: 'r' }, 'You said ', h('b', {}, picked)) : null;
+  return h('div', { class: 'ask-ctx' }, h('span', { class: 'k' }, kind),
+    main ? h('span', { class: 's', lang: ['gap', 'listen', 'speak'].includes(ex.type) ? 'de' : undefined }, main) : null, result);
+}
+
+/* One-tap questions that fit the screen, so a beginner never has to phrase one. */
+function askChips(ex, picked) {
+  const right = rightAnswer(ex);
+  if (right && picked && picked !== right) return [`Why is it “${right}”?`, `Why not “${picked}”?`, 'More examples'];
+  if (right && !picked) return ['Give me a hint', 'Explain the rule', 'More examples'];
+  return {
+    words: ['How do I say these?', 'When do I use them?', 'More examples'],
+    grammar: ['Explain it more simply', 'Common mistakes', 'More examples'],
+    sounds: ['How do I make these sounds?', 'More examples'],
+    text: ['Explain the hard parts', 'Translate it for me', 'Which words matter here?'],
+    build: ['Why this word order?', 'More examples'],
+    speak: ['How do I pronounce it?', 'What does it mean word by word?'],
+    match: ['Help me remember these', 'More examples'],
+  }[ex.type] || ['Explain this', 'More examples'];
+}
+
+function openAsk(ex, n) {
+  const history = [];
+  const picked = S.picked[n] ?? null;
+  const thread = h('div', { class: 'ask-thread', 'aria-live': 'polite' });
+  const input = h('textarea', { class: 'input composer-input', rows: '1', placeholder: 'Ask in English or German…',
+    'aria-label': 'Your question', autocomplete: 'off', enterkeyhint: 'send',
+    onKeydown: (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } } });
+  const sendBtn = h('button', { class: 'btn icon primary send-btn', type: 'button', 'aria-label': 'Send', onClick: () => send() }, icon('send', 22));
+  const rec = Recorder.supported ? new Recorder() : null;
+  let recording = false;
+  let busy = false;
+  const micBtn = rec ? h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Ask with your voice', onClick: toggleMic }, icon('mic', 22)) : null;
+  const chips = h('div', { class: 'chip-row wrap' }, askChips(ex, picked).map((t) =>
+    h('button', { class: 'chip', type: 'button', onClick: () => send(t) }, t)));
+  sheet.open([askContext(ex, picked), chips, thread, h('div', { class: 'composer' }, micBtn, input, sendBtn)], { title: 'Ask about this' });
+
+  async function toggleMic() {
+    if (busy) return;
+    if (!recording) {
+      try { await rec.start(); } catch { toast('The microphone is blocked. Allow it in the browser settings, or type.', { kind: 'err' }); return; }
+      recording = true; micBtn.classList.add('rec'); micBtn.replaceChildren(icon('stop', 22));
+      micBtn.setAttribute('aria-label', 'Stop and ask');
+      input.placeholder = 'Listening… tap stop when you are done';
+      return;
+    }
+    recording = false; micBtn.classList.remove('rec'); micBtn.replaceChildren(icon('mic', 22));
+    micBtn.setAttribute('aria-label', 'Ask with your voice');
+    input.placeholder = 'Writing it down…';
+    const res = await rec.stop();
+    input.placeholder = 'Ask in English or German…';
+    if (!res) return;
+    try {
+      // The language is detected: a question about German is usually asked in English.
+      const t = await upload('/api/voice/transcribe', res.blob, audioFilename(res.mime), { language: 'auto' });
+      if ((t.text || '').trim()) send(t.text.trim());
+      else toast('Nothing was heard. Try again, or type.');
+    } catch (e) {
+      toast((e && e.detail) || 'Could not hear that. Try again, or type.', { kind: 'err' });
+    }
+  }
+
+  async function send(text) {
+    const q = (text ?? input.value).trim();
+    if (!q || busy) return;
+    busy = true; input.value = ''; sendBtn.disabled = true; chips.hidden = true;
+    thread.append(h('div', { class: 'msg user' }, h('div', { class: 'bubble' }, q)));
+    const wait = h('div', { class: 'msg tutor' }, h('div', { class: 'msg-avatar' }, katze({ variant: me().avatar, mood: 'thinking', size: 34 })),
+      h('div', { class: 'bubble typing' }, h('span'), h('span'), h('span')));
+    thread.append(wait);
+    wait.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    try {
+      const { mode, ...shown } = ex;
+      const r = await api('/api/lesson/ask', { method: 'POST', timeout: 45000,
+        body: { unit_id: S.unitId, exercise: shown, picked, question: q, history } });
+      history.push({ q, a: r.answer });
+      wait.replaceWith(h('div', { class: 'msg tutor' }, h('div', { class: 'msg-avatar' }, katze({ variant: me().avatar, size: 34 })),
+        h('div', { class: 'msg-body' }, h('div', { class: 'bubble' }, h('p', {}, r.answer),
+          r.examples && r.examples.length ? h('div', { class: 'lines' }, r.examples.map((e) => lineBtn({ text: e.de, main: [
+            de(e.de, 'line-de sm'), h('span', { class: 'line-en' }, e.en)] }))) : null))));
+      input.placeholder = 'Ask a follow-up…';
+    } catch (e) {
+      const retry = errorLine(e, () => { retry.remove(); thread.lastElementChild?.remove(); send(q); });
+      wait.replaceWith(retry);
+    } finally {
+      busy = false; sendBtn.disabled = false;
+      thread.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+
 /* ---- practice --------------------------------------------------------- */
 /* Shows the verdict in the foot. Only a first pass counts toward the score and the server's tally. */
 function verdict(n, ok, detail, { cta = 'Continue' } = {}) {
@@ -412,6 +526,7 @@ function choiceStep(ex, n, { question, options, answer, why, audio = null, title
         if (j === answer) b.classList.add('right');
         else if (j === i) b.classList.add('wrong');
       }
+      S.picked[n] = text;
       if (onAnswer) onAnswer(ok);
       verdict(n, ok, why || (ok ? null : `It was “${options[answer]}”.`));
     } }, text));
@@ -500,6 +615,7 @@ function buildStep(ex, n) {
     if (done || !chosen.length) return;
     done = true;
     const ok = chosen.map((c) => c.word).join(' ') === ex.answer.join(' ');
+    S.picked[n] = chosen.map((c) => c.word).join(' ');
     slot.classList.add(ok ? 'right' : 'wrong');
     for (const b of [...bank.children, ...slot.children]) b.disabled = true;
     if (!ok) say(ex.answer.join(' '), { quiet: true });
@@ -556,6 +672,7 @@ function speakStep(ex, n) {
           return;
         }
         heard.textContent = `Heard: “${said}”`;
+        S.picked[n] = said;
         const ok = matches(ex.de, said);
         verdict(n, ok, ok ? (tries > 1 ? 'Got it that time.' : null)
           : tries === 1 ? 'Close is fine. Say it once more with the mic, or continue.' : 'Listen once more and try again, or continue.');

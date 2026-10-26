@@ -42,6 +42,12 @@ VERBATIM_PROMPT = (
     "word (ähm, also) and English word the speaker uses. Do NOT correct, improve, translate or complete anything. "
     "Use normal German spelling and punctuation. If the audio has no speech, return an empty transcript."
 )
+# A question to the tutor, not German practice: whatever language it comes in, written down as said.
+ANY_LANGUAGE_PROMPT = (
+    "You are a verbatim transcription engine. Transcribe exactly what is said, in the language it is said in "
+    "(English, German or Arabic, often mixed). Do not translate, correct or complete anything. "
+    "If the audio has no speech, return an empty transcript."
+)
 VERBATIM_SCHEMA = {
     "type": "object",
     "properties": {"transcript": {"type": "string"}},
@@ -120,17 +126,17 @@ class STT:
         from .llm import llm  # late import: llm.py owns the provider instances
         self._llm = llm
 
-    async def _groq(self, audio: bytes, ext: str, mime: str) -> Transcript:
+    async def _groq(self, audio: bytes, ext: str, mime: str, language: str | None = "de") -> Transcript:
         text = await self._llm.groq.transcribe(settings.groq_stt_model, audio, f"audio.{ext}", mime,
-                                               language="de", prompt=settings.whisper_prompt)
+                                               language=language, prompt=settings.whisper_prompt)
         return Transcript(text=text, provider="groq", model=settings.groq_stt_model)
 
-    async def _gemini(self, audio: bytes, ext: str, mime: str) -> Transcript:
+    async def _gemini(self, audio: bytes, ext: str, mime: str, language: str | None = "de") -> Transcript:
         # Gemini is happier with mp3/wav than with browser webm/mp4 containers; convert when we can.
         conv = await _to_mp3(audio, ext) if ext != "mp3" else None
         if conv:
             audio, ext, mime = conv
-        req = LLMRequest(system=VERBATIM_PROMPT, messages=[Message("user", "Transcribe this audio verbatim.")],
+        req = LLMRequest(system=VERBATIM_PROMPT if language else ANY_LANGUAGE_PROMPT, messages=[Message("user", "Transcribe this audio verbatim.")],
                          json_schema=VERBATIM_SCHEMA, temperature=0.0, max_tokens=512, audio=audio, audio_mime=mime)
         res = await self._llm.gemini.complete(settings.gemini_stt_model, req)
         from .llm import parse_json
@@ -141,8 +147,10 @@ class STT:
         order = [settings.stt_provider, "gemini" if settings.stt_provider == "groq" else "groq"]
         return [getattr(self, f"_{name}") for name in order]
 
-    async def transcribe(self, audio: bytes, mime: str | None, filename: str | None = None) -> Transcript:
-        """Primary engine, then the other one. Raises ProviderError if both fail (caller keeps the recording)."""
+    async def transcribe(self, audio: bytes, mime: str | None, filename: str | None = None,
+                         language: str | None = "de") -> Transcript:
+        """Primary engine, then the other one. Raises ProviderError if both fail (caller keeps the recording).
+        `language=None` lets the engine detect it, for a learner asking a question in English."""
         if not audio:
             raise ProviderError("empty recording", retryable=False)
         ext, mime_c = normalize_mime(mime, filename)
@@ -156,7 +164,7 @@ class STT:
         errors: list[str] = []
         for engine in self._engines():
             try:
-                return await engine(audio, ext, mime_c)
+                return await engine(audio, ext, mime_c, language)
             except ProviderError as e:
                 log.warning("stt %s failed: %s", engine.__name__, e)
                 errors.append(str(e))

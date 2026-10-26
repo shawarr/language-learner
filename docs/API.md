@@ -18,7 +18,7 @@ Shapes marked **(spec)** are copied from `docs/TASKS.md` verbatim.
 | POST | `/auth/avatar` | `{"avatar": "katze-3"}` | `{"ok": true, "user": {…}}`; 422 for an unknown id |
 | GET | `/system/status` | — | models/voices/keys present |
 | GET | `/tts?text=&speed=normal|slow` | — | audio/mpeg (cached) |
-| POST | `/voice/transcribe` | multipart `file`, `compare` | `{"text","provider","model"}` |
+| POST | `/voice/transcribe` | multipart `file`, `compare`, `language` (`de` default, `auto` to detect) | `{"text","provider","model"}` |
 
 ## Curriculum (C2)
 
@@ -153,6 +153,9 @@ every time, correct, and free of quota.
   `progress` never moves backwards, so "do the lesson again" would otherwise reload onto the
   finished card.
 - `POST /lesson/{unit_id}/complete` → progress. Idempotent; keeps the first completion time.
+- `POST /lesson/ask` `{"unit_id","exercise":{…as shown},"picked"?,"question","history":[{"q","a"}]≤4}` →
+  `{"answer","examples":[{"de","en"}]≤3}`. "Ask about this": one model call, default tier. The
+  exercise is written out as text server-side (unknown fields are dropped); 413 if it is huge.
 
 ```
 exercise = teaching step (mode "teach") or one of, all mode "practise":
