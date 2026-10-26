@@ -7,7 +7,7 @@ import { api, upload, audioFilename } from './api.js';
 import { h, clear, errorLine, skeleton, de } from './ui.js';
 import { speak, unlockAudio } from './audio.js';
 import { createHoldToTalk } from './mic.js';
-import { katze } from './katze.js';
+import { katze, katzeState } from './katze.js';
 import { icon } from './icons.js';
 import { focusMode, playerHead, playerFoot, katzeSays, wordMeter } from './kit.js';
 
@@ -126,7 +126,8 @@ function renderTask() {
       last ? 'Skip and finish' : 'Skip this one'));
   }
   if (speakTask) {
-    const mic = createHoldToTalk({ label: 'Tap to answer, or hold', onResult: (res) => sendAudio(t, res, status) });
+    const mic = createHoldToTalk({ label: 'Tap to answer, or hold', onResult: (res) => sendAudio(t, res, status),
+      onUi: (st) => katzeState(S.body.querySelector('.says .katze'), st === 'idle' ? null : 'listen') });
     const typed = h('details', { class: 'type-instead' }, h('summary', {}, 'Type instead'), textAnswer(t, status));
     status.append(mic.el, typed);
   } else {

@@ -4,7 +4,8 @@
    close button and a thick progress track on top, and the action sits in a bar at the bottom, where
    the thumb is. An answer turns that bar into a verdict panel with Katze in it. */
 import { h, clear } from './ui.js';
-import { katze } from './katze.js';
+import { meow } from './meow.js';
+import { katze, katzeReact } from './katze.js';
 import { icon } from './icons.js';
 
 const me = () => window.dtUser || {};
@@ -62,14 +63,17 @@ export function playerFoot() {
     verdict({ ok, title, detail = null, cta = 'Continue', onContinue }) {
       el.className = `player-foot ${ok ? 'ok' : 'no'}`;
       const btn = h('button', { class: `btn block lg tactile ${ok ? 'good' : 'warn'}`, type: 'button', onClick: onContinue }, cta);
+      const cat = katze({ variant: me().avatar, size: 44 });
       clear(el).append(
         h('div', { class: 'verdict', role: 'status' },
-          katze({ variant: me().avatar, mood: ok ? 'proud' : 'thinking', size: 44 }),
+          cat,
           h('div', { class: 'grow' },
             h('div', { class: 'verdict-title' }, title || (ok ? 'Richtig' : 'Not quite')),
             detail ? h('div', { class: 'verdict-detail' }, detail) : null)),
         btn);
       setTimeout(() => btn.focus({ preventScroll: true }), 60);
+      katzeReact(cat, ok ? 'right' : 'wrong');
+      meow(ok ? 'right' : 'wrong');
       return btn;
     },
     clear() { el.className = 'player-foot'; clear(el); },

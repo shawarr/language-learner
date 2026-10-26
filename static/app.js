@@ -7,7 +7,8 @@
 import { api, setUnauthorizedHandler } from './js/api.js';
 import { $, $$, h, clear, toast, prefs, currentUid, setCurrentUid } from './js/ui.js';
 import { unlockAudio } from './js/audio.js';
-import { katze } from './js/katze.js';
+import { katze, onPet } from './js/katze.js';
+import { meow } from './js/meow.js';
 import * as home from './js/home.js';
 import * as learn from './js/learn.js';
 import * as talk from './js/talk.js';
@@ -116,6 +117,7 @@ export function switchTo(name, opts = {}) {
   if (TABS.includes(name)) prefs.set('tab', name);
   screens[name].show && screens[name].show(opts);
 }
+onPet(() => meow('pet'));   // tap any Katze: she purrs
 window.dtSwitchTo = switchTo;   // screens navigate through this without importing app.js (no cycle)
 
 async function showApp() {

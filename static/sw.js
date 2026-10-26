@@ -5,7 +5,7 @@
    modules next to old ones, which is what broke the Talk screen on an iPhone. Install downloads with
    cache: 'reload' so the browser's own HTTP cache cannot slip an old file into a new version.
    Still bump CACHE_VERSION with each release, so the old cache is dropped. */
-const CACHE_VERSION = 'v19-ask';
+const CACHE_VERSION = 'v20-katze';
 const CACHE = `tutor-shell-${CACHE_VERSION}`;
 const SHELL = [
   '/', '/index.html', '/styles.css', '/app.js', '/js/api.js', '/js/ui.js', '/js/audio.js',
@@ -13,7 +13,7 @@ const SHELL = [
   '/js/review.js', '/js/progress.js', '/js/placement.js', '/js/checkpoint.js',
   '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png',
   '/icons/apple-touch-icon.png', '/js/home.js', '/js/katze.js', '/js/moment.js', '/js/practice.js',
-  '/js/rings.js', '/js/you.js', '/js/icons.js', '/js/kit.js',
+  '/js/rings.js', '/js/you.js', '/js/icons.js', '/js/kit.js', '/js/meow.js',
   '/fonts/instrument-sans-latin.woff2', '/fonts/instrument-sans-latin-ext.woff2', '/fonts/instrument-serif-latin.woff2'
 ];
 

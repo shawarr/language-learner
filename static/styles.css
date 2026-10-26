@@ -634,7 +634,6 @@ textarea.input { resize: none; line-height: 1.5; }
 /* ---- the end of a session ------------------------------------------ */
 .finish { display: flex; flex-direction: column; align-items: center; gap: var(--s-4); padding-top: var(--s-5); text-align: center; }
 .finish-cat { display: grid; place-items: center; }
-.finish-cat .katze svg { animation: hop 900ms var(--ease) 1; }
 .finish-h { font-size: var(--t-xl); font-weight: 600; letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
 .finish-sub { max-width: 34ch; font-size: var(--t-md); line-height: 1.5; color: var(--text-dim); text-wrap: pretty; }
 .finish-actions { width: 100%; display: flex; flex-direction: column; gap: var(--s-2); margin-top: var(--s-2); }
@@ -952,9 +951,85 @@ mark.better { background: var(--good-dim); }
 
 
 /* ---- Katze, rings, game layer ------------------------------------------------------------- */
-.katze { display: inline-flex; line-height: 0; }
-.katze svg { display: block; }
-.katze-cheering svg, .katze-proud svg { animation: hop 900ms var(--ease) 1; }
+.katze { display: inline-flex; line-height: 0; position: relative; }
+.katze svg { display: block; overflow: visible; }
+
+/* A settings row with an on/off switch (a styled checkbox: keyboard and screen readers for free). */
+.setting { gap: var(--s-3); align-items: center; cursor: pointer; }
+.switch { appearance: none; -webkit-appearance: none; flex: none; width: 52px; height: 32px; border-radius: 999px; background: var(--surface-2); border: 1.5px solid var(--line); position: relative; cursor: pointer; transition: background var(--base) var(--ease); margin: 0; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 23px; height: 23px; border-radius: 50%; background: var(--bg); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform var(--base) var(--ease); }
+.switch:checked { background: var(--accent); border-color: var(--accent); }
+.switch:checked::after { transform: translateX(20px); }
+.switch:focus-visible { outline: 3px solid var(--ring-2); outline-offset: 2px; }
+
+/* ---- Katze, alive (katze.js). Every moving part is a group; a state is a class on the wrapper. ---- */
+.katze .p { transform-box: fill-box; }
+.katze.alive .k-body { transform-origin: 50% 90%; animation: k-breathe 3.4s ease-in-out infinite; }
+@keyframes k-breathe { 0%, 100% { transform: none; } 50% { transform: scale(1.012, 1.03); } }
+.katze.alive .k-whisk-l { transform-origin: 100% 50%; animation: k-whisk 4.2s ease-in-out infinite; }
+.katze.alive .k-whisk-r { transform-origin: 0% 50%; animation: k-whisk 4.2s ease-in-out infinite reverse; }
+@keyframes k-whisk { 0%, 100% { transform: none; } 50% { transform: rotate(4deg); } }
+.katze .k-ear-l { transform-origin: 80% 100%; } .katze .k-ear-r { transform-origin: 20% 100%; }
+.katze .k-ear-l, .katze .k-ear-r { transition: transform .35s var(--ease); }
+.katze .k-head { transform-origin: 50% 80%; transition: transform .5s var(--ease); }
+.katze.k-flick-l .k-ear-l { animation: k-flick-l .45s var(--ease); }
+.katze.k-flick-r .k-ear-r { animation: k-flick-r .45s var(--ease); }
+@keyframes k-flick-l { 30% { transform: rotate(-14deg); } 60% { transform: rotate(4deg); } }
+@keyframes k-flick-r { 30% { transform: rotate(14deg); } 60% { transform: rotate(-4deg); } }
+.katze .k-eyes { transform-origin: 50% 50%; transition: transform .09s ease-in, opacity .15s; }
+.katze.k-blink .k-eyes { transform: scaleY(.08); }
+.katze .k-pupils { transition: transform .4s var(--ease); }
+.katze .k-eyes-happy, .katze .k-eyes-shut, .katze .k-mouth-open, .katze .k-blush, .katze .k-brow { opacity: 0; transition: opacity .15s; }
+.katze .k-mouth { transition: opacity .15s; }
+/* moods */
+.katze.k-think .k-pupils { transform: translate(2.4px, -2.6px); }
+.katze.k-think .k-brow { opacity: 1; }
+.katze.k-think .k-head { transform: rotate(8deg); }
+.katze.k-proud .k-eyes, .katze.k-right .k-eyes, .katze.k-pet .k-eyes, .katze.k-party .k-eyes { opacity: 0; }
+.katze.k-proud .k-eyes-happy, .katze.k-right .k-eyes-happy, .katze.k-pet .k-eyes-happy, .katze.k-party .k-eyes-happy { opacity: 1; }
+.katze.k-proud .k-blush, .katze.k-right .k-blush, .katze.k-pet .k-blush, .katze.k-party .k-blush { opacity: .7; }
+.katze.k-sleep .k-eyes { opacity: 0; } .katze.k-sleep .k-eyes-shut { opacity: 1; }
+.katze.k-sleep .k-body { animation-duration: 5.5s; }
+.katze.k-sleep .k-head { transform: rotate(-7deg) translateY(2px); }
+.katze.k-sleep .k-ear-l { transform: rotate(-20deg) translateY(2px); } .katze.k-sleep .k-ear-r { transform: rotate(20deg) translateY(2px); }
+.katze.k-hop .k-all { transform-origin: 50% 100%; animation: k-hop .7s var(--ease) .15s 1 backwards; }
+/* states */
+.katze.k-listen .k-ear-l { animation: k-perk .9s ease-in-out infinite; }
+.katze.k-listen .k-ear-r { transform: rotate(10deg) translateY(-2px) scale(1.08); }
+.katze.k-listen .k-eyes { transform: scale(1.15); }
+.katze.k-listen .k-head { animation: k-lean 2.4s ease-in-out infinite; }
+@keyframes k-perk { 0%, 100% { transform: rotate(-10deg) translateY(-2px) scale(1.08); } 50% { transform: rotate(-16deg) translateY(-3px) scale(1.1); } }
+@keyframes k-lean { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(-2deg) translateY(-1px); } }
+.katze.k-talk .k-mouth-open { opacity: 1; transform-origin: 50% 0%; animation: k-jaw .32s ease-in-out infinite alternate; }
+.katze.k-talk .k-head { animation: k-nod 1.6s ease-in-out infinite; }
+@keyframes k-jaw { from { transform: scaleY(.2); } to { transform: scaleY(1.05); } }
+@keyframes k-nod { 0%, 100% { transform: none; } 25% { transform: rotate(2.5deg); } 75% { transform: rotate(-2deg); } }
+/* reactions */
+.katze.k-right .k-all { transform-origin: 50% 100%; animation: k-hop .7s var(--ease); }
+.katze.k-party .k-all { transform-origin: 50% 100%; animation: k-hop .7s var(--ease) 2; }
+@keyframes k-hop { 0% { transform: none; } 18% { transform: scale(1.08, .88); } 45% { transform: translateY(-16%) scale(.95, 1.07); } 70% { transform: scale(1.05, .94); } 100% { transform: none; } }
+.katze.k-wrong .k-ear-l { transform: rotate(-38deg) translate(-2px, 3px); }
+.katze.k-wrong .k-ear-r { transform: rotate(38deg) translate(2px, 3px); }
+.katze.k-wrong .k-pupils { transform: translate(-1px, 2.4px); }
+.katze.k-wrong .k-head { animation: k-tilt 1.8s var(--ease) forwards; }
+@keyframes k-tilt { 30% { transform: rotate(-9deg); } 70% { transform: rotate(-9deg); } 85% { transform: rotate(-4deg) translateY(1px); } 100% { transform: rotate(-6deg); } }
+.katze.k-pet .k-head { transform-origin: 50% 85%; animation: k-rub .9s ease-in-out 2; }
+.katze.k-pet .k-body { animation: k-purr .08s linear infinite; }
+@keyframes k-rub { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+@keyframes k-purr { 50% { transform: translateX(.35px); } }
+.katze.alive { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+/* sparks, hearts, confetti */
+.k-fx { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 1; }
+.k-fx i { position: absolute; left: 50%; top: 40%; font-style: normal; font-weight: 700; line-height: 1; }
+.k-fx .k-spark { width: 8px; height: 8px; background: #ffb84d; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: k-burst .8s var(--ease) forwards; }
+.k-fx .k-heart { color: #f17fb0; font-size: 18px; animation: k-float 1.6s var(--ease) forwards; }
+.k-fx .k-conf { width: 7px; height: 11px; border-radius: 2px; animation: k-conf 1.3s cubic-bezier(.2, .6, .4, 1) forwards; }
+@keyframes k-burst { from { transform: translate(-50%, -50%) scale(.3); opacity: 1; } to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.1) rotate(90deg); opacity: 0; } }
+@keyframes k-float { from { transform: translate(-50%, 0) scale(.5); opacity: 0; } 20% { opacity: 1; } to { transform: translate(calc(-50% + var(--x)), -70px) scale(1.15); opacity: 0; } }
+@keyframes k-conf { from { transform: translate(-50%, -50%) rotate(0); opacity: 1; } to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .katze *, .k-fx i { animation: none !important; transition: none !important; }
+}
 @keyframes hop { 0%, 100% { transform: none; } 35% { transform: translateY(-6px) rotate(-3deg); } 65% { transform: translateY(0) rotate(2deg); } }
 .ring-arc { transition: stroke-dashoffset 900ms var(--ease); }
 .ring-wrap { position: relative; flex: 0 0 auto; }

@@ -45,7 +45,7 @@ export function explainMicDenied(e) {
 
 /* onStart (optional, async) runs before recording and may return false to abort (e.g. no session).
    The name is historical: holding is now one of two ways to use it. */
-export function createHoldToTalk({ onResult, onStart, label = 'Tap to talk, or hold', side = null } = {}) {
+export function createHoldToTalk({ onResult, onStart, onUi, label = 'Tap to talk, or hold', side = null } = {}) {
   const btn = h('button', { class: 'mic-btn', type: 'button', 'aria-label': 'Start recording', 'aria-pressed': 'false' }, icon('mic', 30));
   const timerEl = h('span', { class: 'mic-timer num' }, '0:00');
   const wave = h('div', { class: 'mic-wave', 'aria-hidden': 'true' }, Array.from({ length: BARS }, () => h('i')));
@@ -70,6 +70,7 @@ export function createHoldToTalk({ onResult, onStart, label = 'Tap to talk, or h
     if (state === uiState) return;
     const starting = uiState === 'idle';
     uiState = state;
+    if (onUi) onUi(state);
     const on = state !== 'idle';
     btn.classList.toggle('on', on);
     btn.classList.toggle('latched', state === 'latched');
