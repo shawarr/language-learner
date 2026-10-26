@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import re
 import struct
 from pathlib import Path
 
@@ -68,16 +69,17 @@ async def _gemini(text: str, speed: str, voice: str, path: Path) -> None:
         raise ProviderError(f"could not write tts cache file: {e}") from e
 
 
-# provider -> (extension, voice setting, engine)
+# provider -> (extension, voice setting by speaker slot, engine)
 _ENGINES = {
-    "edge": ("mp3", lambda: settings.tts_voice, _edge),
-    "gemini": ("wav", lambda: settings.gemini_tts_voice, _gemini),
+    "edge": ("mp3", lambda slot: settings.tts_voice_2 if slot == 2 else settings.tts_voice, _edge),
+    "gemini": ("wav", lambda slot: settings.gemini_tts_voice_2 if slot == 2 else settings.gemini_tts_voice, _gemini),
 }
 
 
-async def synthesize(text: str, speed: str = "normal") -> Path:
+async def synthesize(text: str, speed: str = "normal", voice: int = 1) -> Path:
     """Returns the path of a cached audio file. Raises ProviderError when every engine fails."""
-    text = " ".join(text.split())
+    # Lessons write alternatives as "heute / morgen": a voice reads the slash out ("Schrägstrich").
+    text = re.sub(r"\s+/\s+", ", ", " ".join(text.split()))
     if not text:
         raise ProviderError("nothing to say", retryable=False)
     # db.connect() creates this at startup, but a script or a test can reach TTS without it, and a
@@ -91,12 +93,12 @@ async def synthesize(text: str, speed: str = "normal") -> Path:
     errors: list[str] = []
     for name in order:
         ext, voice_of, engine = _ENGINES[name]
-        voice = voice_of()
-        path = _cache_path(text, speed, name, voice, ext)
+        voice_name = voice_of(voice)
+        path = _cache_path(text, speed, name, voice_name, ext)
         if path.exists():
             return path
         try:
-            await engine(text, speed, voice, path)
+            await engine(text, speed, voice_name, path)
             return path
         except ProviderError as e:
             log.warning("tts %s failed: %s", name, e)

@@ -61,7 +61,7 @@ touches `/api/*`.
   targets so a failed checkpoint actually changes the next sessions.
 - `mistakes.py` — the single merge path (category + normalised pattern) used by the analyzer, the
   writing feedback and the drills. `examples` capped at 5, `resolve`/`fail` for drills.
-- `curriculum.py` + `curriculum/units.json` — six phases A1.1→B1.2, 30 units, 90 scenarios written
+- `curriculum.py` + `curriculum/units.json` — twelve phases A1.1→C2.2, 60 units, 180 scenarios written
   to Ahmad's life (standup, broken deploy, Ausländerbehörde, flat viewing, landlord, doctor,
   Packstation, delayed train, team dinner…), each unit with authored checkpoint tasks; validated at
   load; a stale `unit_id` falls back to the first unit of the level instead of crashing.

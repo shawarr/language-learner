@@ -5,7 +5,9 @@ something a learner can use. These lessons are the teaching, hand-written in
 `curriculum/lessons.json` rather than generated: a beginner's first contact with German should be
 identical every time, correct, and free of quota.
 
-A unit's lesson is a list of steps (`sounds`, `words`, `grammar`, `check`). Progress is the furthest
+A unit's lesson is a list of steps (`sounds`, `words`, `grammar`, `text`, `check`). A `text` is a
+short dialogue or passage to read or to listen to, with ordinary checks after it: every course and
+every exam from A1 to C2 trains Lesen and Hören on connected text, not only on single words. Progress is the furthest
 step reached, so closing the app mid-lesson costs nothing; it is kept per (user, unit).
 """
 from __future__ import annotations
@@ -23,7 +25,9 @@ from ..db import db
 
 log = logging.getLogger(__name__)
 
-STEP_TYPES = {"sounds", "words", "grammar", "check"}
+STEP_TYPES = {"sounds", "words", "grammar", "text", "check"}
+# `skill`, not `mode`: the exercise builder already uses `mode` for teach/practise.
+TEXT_SKILLS = {"read", "listen"}
 
 
 class LessonError(Exception):
@@ -52,6 +56,14 @@ def _validate(unit_id: str, lesson: dict) -> None:
             raise LessonError(f"lesson {unit_id} step {i}: unknown type {kind!r}")
         if kind in ("words", "sounds") and not step.get("items"):
             raise LessonError(f"lesson {unit_id} step {i}: {kind} needs items")
+        if kind == "text":
+            lines = step.get("lines")
+            if step.get("skill") not in TEXT_SKILLS or not step.get("title"):
+                raise LessonError(f"lesson {unit_id} step {i}: a text needs a title and a skill of {sorted(TEXT_SKILLS)}")
+            if not isinstance(lines, list) or not lines or not all(
+                    isinstance(ln, dict) and str(ln.get("de") or "").strip() and str(ln.get("en") or "").strip()
+                    for ln in lines):
+                raise LessonError(f"lesson {unit_id} step {i}: a text needs lines, each with de and en")
         if kind == "check":
             options = step.get("options") or []
             if not step.get("question") or len(options) < 2:
@@ -77,7 +89,7 @@ def spoken_lines(lesson: dict) -> list[str]:
         for item in step.get("items", []) or []:
             if item.get("de"):
                 out.append(item["de"])
-        for ex in step.get("examples", []) or []:
+        for ex in (step.get("examples") or []) + (step.get("lines") or []):
             if ex.get("de"):
                 out.append(ex["de"])
     return out

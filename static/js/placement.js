@@ -1,7 +1,7 @@
-/* Placement: first launch (or a re-run from You). Three spoken tasks of rising difficulty and one
-   written task, then a conservative placement. Skippable: "start at A1.1".
+/* Placement: first launch (or a re-run from You). Four spoken tasks of rising difficulty and one
+   written task, each skippable, then a conservative placement. Skippable as a whole: "start at A1.1".
 
-   It runs in the player with the tab bar aside: a four-segment track on top, Katze asking each
+   It runs in the player with the tab bar aside: a segmented track (one per task) on top, Katze asking each
    question (in German, with play), the mic in the middle, the next step in the bottom bar. */
 import { api, upload, audioFilename } from './api.js';
 import { h, clear, errorLine, skeleton, de } from './ui.js';
@@ -117,6 +117,14 @@ function renderTask() {
         h('button', { class: 'bubble-tool', type: 'button', onClick: () => say(t.prompt_de) }, icon('play', 16), 'Play'))) : null,
     status);
   if (saved) { showSaved(status, t, saved); return; }
+  // Every task is optional: a beginner cannot argue a position yet, and should not have to try. The
+  // grader treats a skipped task as unknown, and at least one answer is still needed to finish.
+  const answered = Object.keys(S.answers).length;
+  const last = S.idx + 1 >= S.tasks.length;
+  if (!last || answered) {
+    S.foot.actions(h('button', { class: 'btn ghost grow', type: 'button', onClick: () => { S.idx += 1; renderTask(); } },
+      last ? 'Skip and finish' : 'Skip this one'));
+  }
   if (speakTask) {
     const mic = createHoldToTalk({ label: 'Tap to answer, or hold', onResult: (res) => sendAudio(t, res, status) });
     const typed = h('details', { class: 'type-instead' }, h('summary', {}, 'Type instead'), textAnswer(t, status));
@@ -175,7 +183,7 @@ async function finish() {
   track();
   S.foot.clear();
   clear(S.body).append(h('div', { class: 'intro' },
-    katzeSays('Moment…', { mood: 'thinking', size: 80, lang: 'de', sub: 'Reading your four answers against the CEFR descriptors. A few seconds…' }),
+    katzeSays('Moment…', { mood: 'thinking', size: 80, lang: 'de', sub: 'Reading your answers against the CEFR descriptors. A few seconds…' }),
     skeleton(3)));
   try {
     const r = await api('/api/placement/finish', { method: 'POST', body: { session_id: S.session }, timeout: 90000 });

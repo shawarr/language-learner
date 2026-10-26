@@ -7,7 +7,8 @@
    A lesson runs in the player: focus mode, a close button and a thick track on top, one exercise
    per screen, the action at the bottom. Teaching pages (sounds, words, grammar) are interleaved
    with practice generated from exactly what was just taught — match, listen, build from tiles, say
-   it out loud — and the authored checks. Progress saves per step, and a step you have passed stays
+   it out loud — and the authored checks. A text page (a dialogue to listen to, a letter or an
+   article to read) is followed by checks on what it said. Progress saves per step, and a step you have passed stays
    passed: going back never makes you answer it again to move on (you may, if you like). */
 import { api, upload, audioFilename } from './api.js';
 import { h, clear, toast, sheet, errorLine, skeleton, haptic, de } from './ui.js';
@@ -241,6 +242,7 @@ function render() {
   const next = S.list[S.i];
   const ahead = next && (next.audio || next.de || (next.items || [])[0]?.de || (next.examples || [])[0]?.de);
   if (ahead) prefetch(ahead);
+  if (next && next.type === 'text') next.lines.slice(0, 3).forEach((ln, i) => prefetch(ln.de, 'normal', voiceFor(next, i)));
 }
 
 const passed = (n) => S.furthest > n;
@@ -261,9 +263,9 @@ function waitFoot(n, ...rest) {
 
 function exercise(ex, n) {
   const make = {
-    sounds: soundsStep, words: wordsStep, grammar: grammarStep,
+    sounds: soundsStep, words: wordsStep, grammar: grammarStep, text: textStep,
     check: (e) => choiceStep(e, n, { question: e.question, options: e.options, answer: e.answer, why: e.why }),
-    listen: listenStep, match: matchStep, build: buildStep, speak: speakStep,
+    listen: listenStep, match: matchStep, build: buildStep, speak: speakStep, gap: gapStep,
   }[ex.type];
   const el = make ? make(ex, n) : h('p', { class: 'muted' }, 'This step type is not supported here yet.');
   if (ex.mode === 'teach' && ex.type !== 'check') S.foot.actions(backBtn(n), continueBtn(n));
@@ -318,6 +320,73 @@ function grammarStep(step) {
     tip(step.note));
 }
 
+/* A dialogue or a passage. Listening comes first and the text stays hidden until asked for, because
+   the checks after it test the ear; a reading text is on the page from the start. Two speakers get
+   two voices: by ear alone, one voice playing both sides of a phone call is a monologue. */
+function voiceFor(step, i) {
+  const speakers = [...new Set(step.lines.map((ln) => ln.who).filter(Boolean))];
+  const who = step.lines[i].who;
+  return who && speakers.indexOf(who) % 2 === 1 ? 2 : 1;
+}
+
+function textStep(step) {
+  const listening = step.skill === 'listen';
+  const run = { token: 0 };
+  const rows = step.lines.map((ln, i) => {
+    const en = h('span', { class: 'line-en', hidden: true }, ln.en);
+    const btn = h('button', { class: 'line text-line', type: 'button', 'aria-label': `Play line ${i + 1}`, onClick: () => {
+      haptic(8); run.token += 1; unlockAudio();
+      speak(ln.de, 'normal', { voice: voiceFor(step, i) }).catch(() => toast('Audio unavailable right now.', { kind: 'err' }));
+    } }, h('span', { class: 'line-main' },
+      ln.who ? h('span', { class: 'line-who' }, ln.who) : null,
+      de(ln.de, 'line-de sm'), en), h('span', { class: 'say' }, icon('speaker', 20)));
+    return { btn, en };
+  });
+  const textBox = h('div', { class: 'lines text-lines', hidden: listening }, rows.map((r) => r.btn));
+
+  async function playAll(speed, { quiet = false } = {}) {
+    const token = ++run.token;
+    unlockAudio();
+    playBtn.classList.add('playing');
+    try {
+      for (let i = 0; i < step.lines.length; i += 1) {
+        if (token !== run.token || !S.body.contains(textBox)) return;
+        rows.forEach((r, j) => r.btn.classList.toggle('now', j === i));
+        await speak(step.lines[i].de, speed, { voice: voiceFor(step, i) });
+      }
+    } catch (e) {
+      if (!quiet) toast((e && e.detail) || 'Audio unavailable right now.', { kind: 'err' });
+    } finally {
+      if (token === run.token) { playBtn.classList.remove('playing'); rows.forEach((r) => r.btn.classList.remove('now')); }
+    }
+  }
+  const playBtn = h('button', { class: 'btn speak-big tactile', type: 'button', 'aria-label': 'Play the whole text', onClick: () => playAll('normal') }, icon('speaker', 36));
+  const slowBtn = h('button', { class: 'btn speak-slow tactile', type: 'button', 'aria-label': 'Play it slowly', onClick: () => playAll('slow') }, icon('slow', 26));
+
+  const toggles = h('div', { class: 'row text-toggles' });
+  const showText = h('button', { class: 'btn ghost small', type: 'button', onClick: () => {
+    textBox.hidden = !textBox.hidden;
+    showText.textContent = textBox.hidden ? 'Show the text' : 'Hide the text';
+    showEn.hidden = textBox.hidden;
+  } }, 'Show the text');
+  const showEn = h('button', { class: 'btn ghost small', type: 'button', hidden: listening, onClick: () => {
+    const on = rows[0].en.hidden;
+    rows.forEach((r) => { r.en.hidden = !on; });
+    showEn.textContent = on ? 'Hide English' : 'Show English';
+  } }, 'Show English');
+  if (listening) toggles.append(showText);
+  toggles.append(showEn);
+
+  if (listening) setTimeout(() => { if (S.body.contains(textBox)) playAll('normal', { quiet: true }); }, 300);
+  return h('div', { class: 'stack-lg' },
+    h('div', { class: 'stack' },
+      h('span', { class: 'pill kind' }, icon(listening ? 'speaker' : 'book', 14), listening ? 'Listen' : 'Read'),
+      h('h1', { class: 'prompt-h' }, step.title)),
+    step.body ? h('p', { class: 'prompt-lead' }, step.body) : null,
+    listening ? h('div', { class: 'listen-row' }, playBtn, slowBtn) : null,
+    toggles, textBox, tip(step.note));
+}
+
 /* ---- practice --------------------------------------------------------- */
 /* Shows the verdict in the foot. Only a first pass counts toward the score and the server's tally. */
 function verdict(n, ok, detail, { cta = 'Continue' } = {}) {
@@ -330,11 +399,11 @@ function verdict(n, ok, detail, { cta = 'Continue' } = {}) {
   S.foot.verdict({ ok, title: ok ? 'Richtig' : 'Not quite', detail, cta, onContinue: () => go(n + 1) });
 }
 
-function choiceStep(ex, n, { question, options, answer, why, audio = null, title = null }) {
+function choiceStep(ex, n, { question, options, answer, why, audio = null, title = null, head = null, onAnswer = null }) {
   const opts = h('div', { class: 'options' });
   let done = false;
   options.forEach((text, i) => {
-    opts.append(h('button', { class: 'option tactile', type: 'button', lang: audio ? 'de' : undefined, onClick: () => {
+    opts.append(h('button', { class: 'option tactile', type: 'button', lang: audio || head ? 'de' : undefined, onClick: () => {
       if (done) return;
       done = true;
       const ok = i === answer;
@@ -343,12 +412,13 @@ function choiceStep(ex, n, { question, options, answer, why, audio = null, title
         if (j === answer) b.classList.add('right');
         else if (j === i) b.classList.add('wrong');
       }
+      if (onAnswer) onAnswer(ok);
       verdict(n, ok, why || (ok ? null : `It was “${options[answer]}”.`));
     } }, text));
   });
   waitFoot(n, h('span', { class: 'foot-hint' }, 'Pick one'));
   return h('div', { class: 'stack-lg' },
-    audio ? listenControls(audio, title) : h('h1', { class: 'prompt-h', lang: 'en' }, question),
+    head || (audio ? listenControls(audio, title) : h('h1', { class: 'prompt-h', lang: 'en' }, question)),
     opts);
 }
 
@@ -365,6 +435,19 @@ function listenStep(ex, n) {
   setTimeout(() => say(ex.audio, { quiet: true }), 200);
   return choiceStep(ex, n, { options: ex.options, answer: ex.answer,
     why: ex.en ? `“${ex.options[ex.answer]}” means ${ex.en}.` : '', audio: ex.audio });
+}
+
+/* One form missing from a sentence the lesson just taught. The English is there because a gap can be
+   grammatical more than one way ("weil" or "obwohl"): the meaning says which one is wanted. */
+function gapStep(ex, n) {
+  const blank = h('span', { class: 'gap-blank', 'aria-label': 'blank' }, '\u2009');
+  const tight = /^[.,!?;:]/.test(ex.after);
+  const sentence = h('p', { class: 'gap-sentence', lang: 'de' },
+    ex.before ? `${ex.before} ` : '', blank, ex.after ? (tight ? ex.after : ` ${ex.after}`) : '');
+  const head = h('div', { class: 'stack' },
+    h('h1', { class: 'prompt-h' }, 'Fill the gap'), sentence, h('p', { class: 'prompt-lead', lang: 'en' }, ex.en));
+  return choiceStep(ex, n, { options: ex.options, answer: ex.answer, why: `“${ex.de}” — ${ex.en}`, head,
+    onAnswer: () => { blank.textContent = ex.options[ex.answer]; blank.classList.add('filled'); say(ex.de, { quiet: true }); } });
 }
 
 function matchStep(ex, n) {

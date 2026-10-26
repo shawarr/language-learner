@@ -178,7 +178,8 @@ async def build_context(unit: dict, scenario: dict | None = None) -> dict[str, s
 
 def english_policy(level: str | None) -> str:
     """How much English the tutor may speak, by level. A beginner cannot be tutored in German alone:
-    at A1 it explains in English whenever the learner needs it; by B1 it stays in German unless asked."""
+    at A1 it explains in English whenever the learner needs it; by B1 it stays in German unless asked,
+    and from C1 even a question about German is best answered in German."""
     lv = str(level or "A1").upper()
     if lv.startswith("A1"):
         return ("The learner is a beginner. Use `coach_en` freely: whenever the learner writes in English, "
@@ -188,6 +189,9 @@ def english_policy(level: str | None) -> str:
     if lv.startswith("A2"):
         return ("Use `coach_en` when the learner writes in English, is clearly lost, or asks about German: "
                 "a short English explanation, then back to German. Not on turns that go fine.")
-    return ("Stay in German. Use `coach_en` only when the learner explicitly asks for English or asks a question "
-            "about German grammar or words, and keep it to one or two sentences.")
+    if lv.startswith("B"):
+        return ("Stay in German. Use `coach_en` only when the learner explicitly asks for English or asks a question "
+                "about German grammar or words, and keep it to one or two sentences.")
+    return ("Stay in German, at native speed and register. Use `coach_en` only when the learner explicitly asks for "
+            "English; a question about German is answered in German, in `reply`, as a colleague would.")
 
