@@ -234,13 +234,14 @@
               }
             },
             "writing": {
-              "prompt": "Write a short message for your team's chat channel to introduce yourself on your first day. Say who you are, where you are, what you do and one thing you like. Greet at the start and say goodbye at the end.",
-              "hint": "Hallo zusammen! Ich bin … / Viele Grüße",
+              "prompt": "Write a short message for your team's chat channel to introduce yourself on your first day. Say who you are, where you come from, where you live, what you do and which languages you speak. Greet at the start and say goodbye at the end.",
+              "hint": "Hallo zusammen! Ich heiße … Ich komme aus … Ich wohne in … Ich bin … Viele Grüße",
               "words_min": 30,
               "words_max": 60,
               "variants": {
                 "student": {
-                  "prompt": "Write a short message for your course's group chat to introduce yourself on the first day of a German summer school. Say who you are, where you are from, what you study and one thing you like. Greet at the start and say goodbye at the end."
+                  "prompt": "Write a short message for your course's group chat to introduce yourself on the first day of a German summer school. Say who you are, where you come from, where you live, what you study and which languages you speak. Greet at the start and say goodbye at the end.",
+                  "hint": "Hallo zusammen! Ich heiße … Ich komme aus … Ich wohne in … Ich studiere … Viele Grüße"
                 }
               }
             }
@@ -476,23 +477,24 @@
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Describe your typical working week: which days you work, when you start, when the standup is, when you have lunch and when you stop. Then say your phone number and your birthday in German.",
-              "hint": "Ich arbeite von Montag bis Freitag. Ich fange um … Uhr an. Das Standup ist um …",
+              "prompt": "Describe your working week: which days you work, from when to when, and on which day and at what time you have a meeting or the standup. Then say your phone number, digit by digit, and ask a colleague whether they have time on Monday.",
+              "hint": "Ich arbeite von Montag bis Freitag, von neun bis fünf. Das Standup ist am Montag um zehn. Meine Nummer ist null, sieben, neun … Hast du am Montag Zeit?",
               "variants": {
                 "student": {
-                  "prompt": "Describe your typical week at university: which days you have lectures, when you start, when the lab or the study group is, when you have lunch and when you finish. Then say your phone number and your birthday in German.",
-                  "hint": "Ich habe von Montag bis Donnerstag Vorlesungen. Ich fange um … Uhr an. Die Lerngruppe ist um …"
+                  "prompt": "Describe your week at university: which days you have lectures, from when to when, and on which day and at what time your study group meets. Then say your phone number, digit by digit, and ask a fellow student whether they have time on Monday.",
+                  "hint": "Ich habe von Montag bis Donnerstag Vorlesungen, von neun bis drei. Die Lerngruppe ist am Mittwoch um vier. Meine Nummer ist null, sieben, neun … Hast du am Montag Zeit?"
                 }
               }
             },
             "writing": {
-              "prompt": "A colleague in Berlin asks when you are available for a call this week. Reply with two possible days and times in Amman time, say how long the call can be, and ask which one suits them.",
-              "hint": "Am Dienstag habe ich von … bis … Zeit. Passt das?",
+              "prompt": "A colleague in Berlin asks when you have time for a call this week. Reply with two possible days and times (from … to …, in Amman time) and ask which one suits them.",
+              "hint": "Hallo Jonas, am Dienstag habe ich von zehn bis elf Zeit. Am Donnerstag habe ich um halb drei Zeit. Passt das?",
               "words_min": 30,
               "words_max": 60,
               "variants": {
                 "student": {
-                  "prompt": "Your German tandem partner in Berlin asks when you are available for a video call this week. Reply with two possible days and times in Amman time, say how long the call can be, and ask which one suits them."
+                  "prompt": "Your German tandem partner in Berlin asks when you have time for a video call this week. Reply with two possible days and times (from … to …, in Amman time) and ask which one suits them.",
+                  "hint": "Hallo Lena, am Dienstag habe ich von zehn bis elf Zeit. Am Donnerstag habe ich um halb drei Zeit. Passt das?"
                 }
               }
             }
@@ -757,14 +759,14 @@
               }
             },
             "writing": {
-              "prompt": "Write a message to your manager describing your normal working day: start time, standup, what you usually do, lunch, end of the day. Mention one thing you like about your work.",
-              "hint": "Mein Arbeitstag beginnt um … Ich mache … / Ich finde … gut.",
+              "prompt": "Write a message to your manager describing your normal working day: when you get up, when you start, the standup, what you usually do, your break, when you finish, and how you are in the evening (müde, fertig …).",
+              "hint": "Ich stehe um sieben auf. Ich fange um neun an. Um zehn ist das Standup. Ich schreibe Code und teste die App. Um eins mache ich Pause. Ich höre um fünf auf. Am Abend bin ich müde.",
               "words_min": 40,
               "words_max": 70,
               "variants": {
                 "student": {
-                  "prompt": "Write a message to your German tandem partner describing a normal day at university: when you start, your lectures or lab, what you usually do, lunch, the end of the day. Mention one thing you like about your studies.",
-                  "hint": "Mein Tag beginnt um … Um zehn Uhr habe ich … / Ich finde … gut."
+                  "prompt": "Write a message to your German tandem partner describing a normal day at university: when you get up, when you start, your lectures or lab, your break, when you finish, and how you are in the evening (müde, fertig …).",
+                  "hint": "Ich stehe um sieben auf. Die Vorlesung fängt um neun an. Um elf habe ich Labor. Um eins mache ich Pause. Ich höre um vier auf. Am Abend bin ich müde."
                 }
               }
             }
@@ -969,13 +971,14 @@
               "hint": "Ich hätte gern zwei Brötchen und … Ist da Schweinefleisch drin? Was kostet das?"
             },
             "writing": {
-              "prompt": "Write a message to a colleague who is organising a team dinner. Say what you like to eat, what you do not eat, which drink you want, and ask what time and where the dinner is.",
-              "hint": "Ich esse gern … Ich esse kein … Wann und wo ist das Essen?",
+              "prompt": "Write a message to a colleague who is organising a team dinner. Say what you would like to eat, what you do not eat, which drink you would like, and ask what time and where the dinner is.",
+              "hint": "Ich möchte Hähnchen mit Reis. Ich esse kein Schweinefleisch. Ich trinke keinen Alkohol, ich nehme ein Wasser. Wann und wo ist das Essen?",
               "words_min": 40,
               "words_max": 70,
               "variants": {
                 "student": {
-                  "prompt": "Write a message to a fellow student who is organising a dinner for your study group. Say what you like to eat, what you do not eat, which drink you want, and ask what time and where the dinner is."
+                  "prompt": "Write a message to a fellow student who is organising a dinner for your study group. Say what you would like to eat, what you do not eat, which drink you would like, and ask what time and where the dinner is.",
+                  "hint": "Ich möchte Hähnchen mit Reis. Ich esse kein Schweinefleisch. Ich trinke keinen Alkohol, ich nehme ein Wasser. Wann und wo ist das Essen?"
                 }
               }
             }
@@ -1157,14 +1160,14 @@
               "hint": "Gehen Sie geradeaus, dann die zweite Straße links. Der Supermarkt ist neben … Können Sie das bitte wiederholen?"
             },
             "writing": {
-              "prompt": "A colleague is visiting Amman and asks how to get from the airport to your office. Write a message with simple directions: taxi or bus, how long it takes, and where the office is (next to what, which floor).",
-              "hint": "Nimm ein Taxi. Das dauert … Minuten. Das Büro ist im … Stock, neben …",
+              "prompt": "A German colleague you have not met yet is visiting Amman and asks how to get from the airport to your office. Write a polite message (use Sie) with simple directions: take a taxi, how many minutes it is, and where the office is (next to what, which floor).",
+              "hint": "Nehmen Sie ein Taxi. Das sind vierzig Minuten. Das Büro ist neben der Bank, im ersten Stock.",
               "words_min": 40,
               "words_max": 80,
               "variants": {
                 "student": {
-                  "prompt": "A German exchange student is visiting Amman and asks how to get from the airport to your university. Write a message with simple directions: taxi or bus, how long it takes, and where your faculty building is (next to what, which floor).",
-                  "hint": "Nimm ein Taxi. Das dauert … Minuten. Die Fakultät ist neben … Mein Labor ist im … Stock."
+                  "prompt": "A German professor you have not met yet is visiting Amman and asks how to get from the airport to your university. Write a polite message (use Sie) with simple directions: take a taxi, how many minutes it is, and where your faculty building is (next to what, which floor).",
+                  "hint": "Nehmen Sie ein Taxi. Das sind vierzig Minuten. Die Fakultät ist neben der Bibliothek. Mein Labor ist im ersten Stock."
                 }
               }
             }
@@ -2061,13 +2064,14 @@
               "hint": "Ich möchte nach … fahren. Wann fährt der nächste Zug? Von welchem Gleis? Der Zug hat Verspätung. Wie komme ich zum Hotel?"
             },
             "writing": {
-              "prompt": "You are travelling to the Berlin office. Write a message to a colleague who will pick you up: which train you take, when it leaves and arrives, and what to do if the train is late.",
-              "hint": "Ich nehme den Zug um … Er kommt um … in Berlin an. Wenn der Zug Verspätung hat, …",
+              "prompt": "You are travelling to the Berlin office. Write a message to a colleague who will pick you up: which train you take, when it leaves and when it arrives, and that you will write again if the train is late.",
+              "hint": "Ich nehme den Zug um neun Uhr. Er fährt in Hamburg ab und kommt um elf Uhr in Berlin an. Der Zug hat vielleicht Verspätung. Dann schreibe ich dir.",
               "words_min": 40,
               "words_max": 80,
               "variants": {
                 "student": {
-                  "prompt": "You are travelling to a summer school at a university in Berlin. Write a message to your German tandem partner who will pick you up: which train you take, when it leaves and arrives, and what to do if the train is late."
+                  "prompt": "You are travelling to a summer school at a university in Berlin. Write a message to your German tandem partner who will pick you up: which train you take, when it leaves and when it arrives, and that you will write again if the train is late.",
+                  "hint": "Ich nehme den Zug um neun Uhr. Er fährt in Hamburg ab und kommt um elf Uhr in Berlin an. Der Zug hat vielleicht Verspätung. Dann schreibe ich dir."
                 }
               }
             }
@@ -2223,8 +2227,8 @@
               "hint": "Meine Wohnung hat … Zimmer. Im Wohnzimmer steht … Ich suche … Wie hoch sind die Nebenkosten?"
             },
             "writing": {
-              "prompt": "Write a message to a landlord about a flat ad: who you are, what you do, which flat you mean, three questions about it, and when you can come for a viewing.",
-              "hint": "Guten Tag Herr …, ich interessiere mich für die Wohnung in der … Ist die Wohnung möbliert? Wann kann ich sie besichtigen?",
+              "prompt": "Write a message to a landlord about a flat ad: who you are, what you do, which flat you mean, three questions about it (size, rent, furnished?), and when you can come to see it.",
+              "hint": "Guten Tag, ich heiße … und bin … Ich suche eine Wohnung. Ist die Wohnung in der … noch frei? Wie groß ist sie? Wie hoch ist die Miete? Ist sie möbliert? Ich kann am Samstag kommen.",
               "words_min": 40,
               "words_max": 80
             }
