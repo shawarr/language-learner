@@ -166,6 +166,7 @@ async function submit(item, answer, { box = null, chosen = null, input = null, c
       title: r.correct ? 'Richtig' : 'Not quite',
       detail: h('span', {},
         r.correct ? null : h('span', { class: 'block' }, 'Answer: ', h('b', { lang: 'de' }, r.answer)),
+        r.answer_en ? h('span', { class: 'block muted' }, `“${r.answer_en}”`) : null,
         r.explanation ? h('span', { class: 'block' }, r.explanation) : null,
         r.beaten ? h('span', { class: 'block' }, 'That one is beaten: it leaves the tutor’s list.') : null),
       cta: last ? 'See how it went' : 'Next',

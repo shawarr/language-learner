@@ -14,6 +14,16 @@ feedback.
 {{mistakes}}
 
 ## How to build the items
+- **Start every item from the meaning.** First decide the correct German sentence and what it means,
+  and write that meaning in `answer_en`. The English in `prompt` asks for exactly that meaning and
+  nothing else. A wrong option may be wrong in form or say something else, but the question must never
+  describe what a wrong option means. Bad: "Which version is correct for calling someone at five?" with
+  the answer "Ich höre um fünf Uhr auf" (that means "I stop at five"). Good: "How do you say 'I finish
+  work at five'?" with that answer, and "Ich rufe um fünf Uhr auf" as a distractor.
+- **When a correction changed the word, not only its form,** the learner meant the corrected sentence:
+  the learner said "Ich rufe um fünf auf" but meant "Ich höre um fünf auf". Drill what they meant to
+  say ("I finish at five"), with their wrong word as a distractor.
+- No option other than `answer` may be a correct German sentence for the meaning asked.
 - Build every item from one of the learner's own sentences above whenever there is one: keep that sentence,
   fix everything except the drilled point, and make that point the thing to produce. The learner
   should re-meet the learner's own mistake, not a textbook example. Set `mistake_ref` to the number of the

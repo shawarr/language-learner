@@ -41,6 +41,7 @@ GENERATE_SCHEMA = {
                     "options": {"type": "array", "items": {"type": "string"},
                                 "description": "choose: 3-4 choices incl. the answer; fill_blank: 3 short choices; reorder/transform: empty."},
                     "answer": {"type": "string", "description": "Exactly what the learner must produce."},
+                    "answer_en": {"type": "string", "description": "What the whole correct sentence means, in natural English. The prompt asks for exactly this meaning."},
                     "category": {"type": "string", "enum": taxonomy.CATEGORY_SLUGS},
                     "explanation": {"type": "string", "description": "One sentence, English, concrete: the rule and the result."},
                     "mistake_ref": {"type": "integer", "description": "Number of the mistake this item is built from, or -1."},
@@ -140,7 +141,8 @@ def _validate_item(raw: object, refs: list[dict]) -> dict | None:
     mistake_id = refs[ref - 1]["id"] if isinstance(ref, int) and not isinstance(ref, bool) and 1 <= ref <= len(refs) else None
     return {"type": kind, "prompt": prompt, "options": options, "answer": answer,
             "category": taxonomy.normalize(_text(raw.get("category"))),
-            "explanation": _text(raw.get("explanation")), "mistake_id": mistake_id}
+            "explanation": _text(raw.get("explanation")), "answer_en": _text(raw.get("answer_en")),
+            "mistake_id": mistake_id}
 
 
 def _format_refs(refs: list[dict]) -> str:
@@ -246,7 +248,7 @@ async def _grade_one(drill: dict, index: int, given: str) -> dict:
     correct, explanation = await _grade(item, given)
     beaten = await _touch_mistake(item, correct)
     result = {"index": index, "correct": correct, "answer": item["answer"], "your_answer": given,
-              "explanation": explanation, "beaten": beaten}
+              "explanation": explanation, "answer_en": item.get("answer_en") or None, "beaten": beaten}
     drill["answers"][index] = given
     drill["results"][index] = result
     finished = all(r is not None for r in drill["results"])
