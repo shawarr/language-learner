@@ -165,6 +165,10 @@ async function boot() {
     app.style.height = sized ? `${vv.height}px` : '';
     app.style.top = sized ? `${vv.offsetTop}px` : '';
     app.style.bottom = sized ? 'auto' : '';
+    // Sheets live outside #app; they read the same visible area, or the keyboard covers their input.
+    const root = document.documentElement.style;
+    if (sized) { root.setProperty('--vv-h', `${vv.height}px`); root.setProperty('--vv-top', `${vv.offsetTop}px`); }
+    else { root.removeProperty('--vv-h'); root.removeProperty('--vv-top'); }
     if (keyboard !== wasKeyboard) {
       wasKeyboard = keyboard;
       app.classList.toggle('keyboard', keyboard);

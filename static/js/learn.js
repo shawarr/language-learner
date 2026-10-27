@@ -439,14 +439,19 @@ function openAsk(ex, n) {
   const input = h('textarea', { class: 'input composer-input', rows: '1', placeholder: 'Ask in English or German…',
     'aria-label': 'Your question', autocomplete: 'off', enterkeyhint: 'send',
     onKeydown: (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } } });
-  const sendBtn = h('button', { class: 'btn icon primary send-btn', type: 'button', 'aria-label': 'Send', onClick: () => send() }, icon('send', 22));
+  // Tapping Send or a suggestion keeps the keyboard up: letting the field blur moves the sheet
+  // under the finger mid-tap.
+  const keepFocus = (e) => { if (document.activeElement === input) e.preventDefault(); };
+  const sendBtn = h('button', { class: 'btn icon primary send-btn', type: 'button', 'aria-label': 'Send', onClick: () => send(), onPointerdown: keepFocus }, icon('send', 22));
   const rec = Recorder.supported ? new Recorder() : null;
   let recording = false;
   let busy = false;
   const micBtn = rec ? h('button', { class: 'btn icon ghost', type: 'button', 'aria-label': 'Ask with your voice', onClick: toggleMic }, icon('mic', 22)) : null;
   const chips = h('div', { class: 'chip-row wrap' }, askChips(ex, picked).map((t) =>
-    h('button', { class: 'chip', type: 'button', onClick: () => send(t) }, t)));
-  sheet.open([askContext(ex, picked), chips, thread, h('div', { class: 'composer' }, micBtn, input, sendBtn)], { title: 'Ask about this' });
+    h('button', { class: 'chip', type: 'button', onClick: () => send(t), onPointerdown: keepFocus }, t)));
+  const panel = sheet.open([askContext(ex, picked), chips, thread, h('div', { class: 'composer ask-composer' }, micBtn, input, sendBtn)], { title: 'Ask about this' });
+  // Once the keyboard is up the sheet is shorter: keep the newest message and the box in view.
+  input.addEventListener('focus', () => setTimeout(() => { panel.scrollTop = panel.scrollHeight; }, 350));
 
   async function toggleMic() {
     if (busy) return;
