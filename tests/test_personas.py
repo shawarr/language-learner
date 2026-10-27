@@ -144,9 +144,9 @@ async def test_checkpoint_task_variants_replace_only_what_they_name(fresh_db):
     maryan = (await curriculum.current_unit())["checkpoint"]
     assert maryan["speaking"]["prompt"] == raw["speaking"]["variants"]["student"]["prompt"]
     assert maryan["speaking"]["hint"] == raw["speaking"]["variants"]["student"]["hint"]
-    # The writing variant names no hint, so the default hint and the word range stay.
+    # The writing variant names its own prompt and hint; the word range is not in it, so it stays.
     assert maryan["writing"]["prompt"] == raw["writing"]["variants"]["student"]["prompt"] != raw["writing"]["prompt"]
-    assert maryan["writing"]["hint"] == raw["writing"]["hint"]
+    assert maryan["writing"]["hint"] == raw["writing"]["variants"]["student"]["hint"] != raw["writing"]["hint"]
     assert (maryan["writing"]["words_min"], maryan["writing"]["words_max"]) == (raw["writing"]["words_min"], raw["writing"]["words_max"])
 
 
