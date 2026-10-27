@@ -88,7 +88,12 @@ export const sheet = {
       h('div', { class: 'sheet-grip', 'aria-hidden': 'true' }),
       title ? h('h2', { class: 'sheet-title' }, title) : null,
       h('div', { class: 'sheet-body' }, content));
-    const back = h('div', { class: 'sheet-backdrop', onClick: () => this.close() }, panel);
+    // Close only on a tap that starts and ends on the backdrop. When the keyboard closes mid-tap the
+    // sheet moves under the finger, and the click then lands on the backdrop and closed the sheet.
+    let downOnBack = false;
+    const back = h('div', { class: 'sheet-backdrop',
+      onPointerdown: (e) => { downOnBack = e.target === back; },
+      onClick: (e) => { if (e.target === back && downOnBack) this.close(); downOnBack = false; } }, panel);
     panel.addEventListener('click', (e) => e.stopPropagation());
     this._drag(panel);
     root.append(back);

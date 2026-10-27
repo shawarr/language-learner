@@ -388,13 +388,14 @@ textarea.input { resize: none; line-height: 1.5; }
 
 /* ---- bottom sheet --------------------------------------------------- */
 .sheet-backdrop {
-  position: fixed; inset: 0; z-index: 55; background: var(--scrim);
+  /* The visible area, not the layout viewport: with the iOS keyboard up, inset: 0 reaches under the keys. */
+  position: fixed; left: 0; right: 0; top: var(--vv-top, 0px); height: var(--vv-h, 100%); z-index: 55; background: var(--scrim);
   display: flex; align-items: flex-end; justify-content: center;
   opacity: 0; transition: opacity var(--base) var(--ease);
 }
 .sheet-backdrop.open { opacity: 1; }
 .sheet {
-  width: 100%; max-width: var(--col); max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;
+  width: 100%; max-width: var(--col); max-height: min(85dvh, calc(100% - 8px)); overflow-y: auto; overscroll-behavior: contain;
   background: var(--bg); border-radius: 26px 26px 0 0;
   padding: var(--s-2) var(--s-4) calc(var(--s-4) + var(--safe-b));
   transform: translateY(16px); transition: transform var(--base) var(--ease); box-shadow: var(--shadow);
@@ -671,6 +672,9 @@ textarea.input { resize: none; line-height: 1.5; }
 .ask-ctx .r { font-size: var(--t-sm); color: var(--text-dim); }
 .ask-ctx .r b { color: var(--text); font-weight: 600; }
 .ask-thread { display: flex; flex-direction: column; gap: var(--s-3); }
+/* The question box stays on screen while the thread scrolls under it. */
+.ask-composer { position: sticky; bottom: calc(-1 * (var(--s-4) + var(--safe-b))); z-index: 1; margin: 0 calc(-1 * var(--s-4)); padding: var(--s-2) var(--s-4) calc(var(--s-4) + var(--safe-b)); background: var(--bg); }
+#app.keyboard ~ #sheet-root .ask-composer, :root[style*="--vv-h"] .ask-composer { padding-bottom: var(--s-2); }
 .ask-thread:empty { display: none; }
 .ask-thread .msg { max-width: 100%; }
 .ask-thread .bubble p { line-height: 1.5; }
