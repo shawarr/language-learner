@@ -109,7 +109,7 @@ result = {"passed": bool, "scores": {"task_completion": {"score": 1-5, "comment"
 ## Drill (D3)
 
 - `GET /drill/new?n=8` → `{"id", "categories": [slug…], "items": [{"index","type":"fill_blank"|"choose"|"reorder"|"transform","prompt","options": [str]|null,"category"}]}` — answers and explanations withheld
-- `POST /drill/{id}/answer` `{"index","answer"}` → `{"index","correct": bool,"answer": "the right one","your_answer","explanation","finished": bool,"score": n|null,"total": n}` — instant per-item feedback; grades locally when exact, model (`tier="fast"`) only for free-text `transform` items
+- `POST /drill/{id}/answer` `{"index","answer"}` → `{"index","correct": bool,"answer": "the right one","answer_en": "what it means"|null,"your_answer","explanation","finished": bool,"score": n|null,"total": n}` — instant per-item feedback; grades locally when exact, model (`tier="fast"`) only for free-text `transform` items
 - `POST /drill/{id}/submit` `{"answers": [str|null…]}` → `{"results": [{"index","correct","answer","your_answer","explanation"}], "score", "total"}`
 
 A correct answer bumps `mistakes.resolved` for the item's source mistake; a wrong one bumps `count`.

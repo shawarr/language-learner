@@ -28,7 +28,7 @@ async def seed_mistakes() -> dict[str, int]:
 
 def item(kind: str, ref: int = -1, **kw) -> dict:
     base = {"type": kind, "prompt": f"{kind} prompt ___", "options": [], "answer": "mit dem", "category": "case",
-            "explanation": "'mit' takes the dative.", "mistake_ref": ref}
+            "explanation": "'mit' takes the dative.", "mistake_ref": ref, "answer_en": "I take the bus."}
     if kind in ("fill_blank", "choose"):
         base["options"] = ["mit dem", "mit den", "mit der"]
     return {**base, **kw}
@@ -127,7 +127,7 @@ async def test_answering_moves_the_mistake_log_and_finishes_the_drill(fresh_db):
 
     right = await drills.answer(d["id"], 0, "MIT DEM")
     assert right == {"index": 0, "correct": True, "answer": "mit dem", "your_answer": "MIT DEM",
-                     "explanation": "'mit' takes the dative.", "beaten": False, "finished": False, "score": None,
+                     "explanation": "'mit' takes the dative.", "answer_en": "I take the bus.", "beaten": False, "finished": False, "score": None,
                      "total": 4}, "one of four resolved: right, but not beaten yet"
     assert (await fresh_db.fetchone("SELECT resolved, count FROM mistakes WHERE id=?", (ids["case"],)))["resolved"] == 1
 
@@ -253,7 +253,7 @@ def test_drill_routes(auth_client):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["total"] == 4 and body["score"] == 3 and len(body["results"]) == 4
-    assert all(set(x) == {"index", "correct", "answer", "your_answer", "explanation", "beaten"} for x in body["results"])
+    assert all(set(x) == {"index", "correct", "answer", "answer_en", "your_answer", "explanation", "beaten"} for x in body["results"])
     assert auth_client.post("/api/drill/999/submit", json={"answers": []}).status_code == 404
     assert auth_client.post(f"/api/drill/{d['id']}/submit", json={"answers": "x"}).status_code == 422
     assert auth_client.get("/api/drill/new").status_code == 200, "n defaults to settings.drill_items"
