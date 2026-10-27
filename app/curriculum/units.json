@@ -2440,7 +2440,7 @@
             },
             "writing": {
               "prompt": "Write an email to the Bürgeramt or to a practice: you have to cancel your appointment on a certain date, give the reason, and ask for a new one. Say which days and times you are free.",
-              "hint": "Sehr geehrte Damen und Herren, leider kann ich den Termin am … nicht wahrnehmen, weil … Ich bitte um einen neuen Termin …",
+              "hint": "Sehr geehrte Damen und Herren, leider muss ich meinen Termin am … absagen. Ich bin krank. Ich hätte gern einen neuen Termin. Ich kann am Montag nach der Arbeit oder am Donnerstag zwischen neun und elf Uhr. Mit freundlichen Grüßen",
               "words_min": 60,
               "words_max": 100
             }
@@ -3776,7 +3776,7 @@
             },
             "writing": {
               "prompt": "Write a formal complaint email about a wrong invoice: your customer number, what is wrong, what you expect (correction and refund), and a deadline. Keep it polite.",
-              "hint": "Sehr geehrte Damen und Herren, auf meiner Rechnung vom … steht ein Betrag von …, aber … Ich bitte Sie, … Bitte antworten Sie bis zum …",
+              "hint": "Sehr geehrte Damen und Herren, meine Kundennummer ist … Auf meiner Rechnung vom … steht ein Betrag von …, aber im Vertrag steht … Könnten Sie die Rechnung bitte korrigieren und mir die Differenz zurückzahlen? Bitte antworten Sie mir innerhalb von zwei Wochen. Mit freundlichen Grüßen",
               "words_min": 70,
               "words_max": 120
             }
@@ -4014,7 +4014,7 @@
           "checkpoint": {
             "speaking": {
               "prompt": "You are at a team dinner in Germany. Describe a typical Jordanian dinner with your family, explain one tradition (for example Ramadan or hospitality), say what surprises you about German work culture, and invite a colleague to visit Amman.",
-              "hint": "Bei uns isst die ganze Familie zusammen. Wir essen … Im Ramadan fasten wir, deshalb … Hättest du Lust, nach Amman zu kommen?",
+              "hint": "Bei uns isst die ganze Familie zusammen. Wir essen … Im Ramadan fasten wir, deshalb … Hättest du Lust auf einen Besuch in Amman?",
               "variants": {
                 "student": {
                   "prompt": "You are at a dinner with German exchange students. Describe a typical Jordanian dinner with your family, explain one tradition (for example Ramadan or hospitality), say what surprises you about German students or German universities, and invite one of them to visit Amman."
@@ -4813,12 +4813,12 @@
           ],
           "checkpoint": {
             "speaking": {
-              "prompt": "Take a position on a real technical question in your team (for example: should you adopt a new tool, should everything be in Kubernetes). State your opinion, give three arguments, admit one argument against, and say what you would decide. Speak for about two minutes.",
-              "hint": "Meiner Meinung nach sollten wir … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …",
+              "prompt": "Take a position on a real technical question in your team (for example: should you adopt a new tool, should everything be in Kubernetes). State your opinion, give three arguments, admit one argument against, and say in the end which option you are for. Speak for about two minutes.",
+              "hint": "Meiner Meinung nach brauchen wir … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass wir …",
               "variants": {
                 "student": {
-                  "prompt": "Take a position on a real question from your studies (for example: should exams be online, should every student do an internship abroad, which CAD program the faculty should teach). State your opinion, give three arguments, admit one argument against, and say what you would decide. Speak for about two minutes.",
-                  "hint": "Meiner Meinung nach sollte die Uni … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …"
+                  "prompt": "Take a position on a real question from your studies (for example: should exams be online, should every student do an internship abroad, which CAD program the faculty should teach). State your opinion, give three arguments, admit one argument against, and say in the end which option you are for. Speak for about two minutes.",
+                  "hint": "Meiner Meinung nach muss die Uni … Erstens …, zweitens … Zwar …, aber … Obwohl …, bin ich dafür, dass …"
                 }
               }
             },
@@ -5380,7 +5380,7 @@
           "checkpoint": {
             "speaking": {
               "prompt": "Negotiate with a product manager who wants a feature too early: explain the problem, propose two alternatives, and say what you would do in their place. Then call your landlord about a repair that is overdue and set a polite but firm deadline.",
-              "hint": "Könnten wir den Umfang reduzieren? Wenn wir zwei Wochen mehr hätten, könnten wir … Ich wäre Ihnen dankbar, wenn der Handwerker bis Freitag käme.",
+              "hint": "Könnten wir den Umfang reduzieren? Wenn wir zwei Wochen mehr hätten, könnten wir … Ich wäre Ihnen dankbar, wenn der Handwerker bis Freitag kommen würde.",
               "variants": {
                 "student": {
                   "prompt": "Negotiate with a professor or a project partner who wants your group's report too early: explain the problem, propose two alternatives, and say what you would do in their place. Then call your landlord about a repair that is overdue and set a polite but firm deadline."
@@ -5389,7 +5389,7 @@
             },
             "writing": {
               "prompt": "Write an email to your landlord: the heating has been broken for two weeks despite two calls. Describe the problem, set a deadline, say what you will do if it is not fixed (rent reduction), and stay polite.",
-              "hint": "Sehr geehrter Herr Weber, trotz meiner Anrufe vom … ist die Heizung immer noch defekt. Ich bitte Sie, den Mangel bis zum … zu beheben. Andernfalls müsste ich …",
+              "hint": "Sehr geehrter Herr Weber, obwohl ich Sie am … und am … angerufen habe, ist die Heizung immer noch defekt. Ich bitte Sie, den Mangel bis zum … zu beheben. Wenn der Handwerker bis dahin nicht kommt, müsste ich die Miete mindern.",
               "words_min": 90,
               "words_max": 150
             }
@@ -5636,7 +5636,7 @@
             },
             "writing": {
               "prompt": "Write a formal letter to the Ausländerbehörde: refer to your appointment and application, explain which document you are sending now and why it was missing, and ask for a confirmation that your application is complete.",
-              "hint": "Sehr geehrte Frau Nowak, bezüglich meines Antrags vom … sende ich Ihnen die Meldebescheinigung, die bei dem Termin gefehlt hat. Wegen … Ich bitte um …",
+              "hint": "Sehr geehrte Frau Nowak, am … hatte ich wegen meines Antrags auf … einen Termin bei Ihnen. Anbei sende ich Ihnen die Meldebescheinigung, die bei dem Termin gefehlt hat. Wegen … konnte ich sie nicht früher schicken. Ich bitte um eine Bestätigung, dass mein Antrag jetzt vollständig ist.",
               "words_min": 90,
               "words_max": 150
             }
@@ -5837,7 +5837,7 @@
             },
             "writing": {
               "prompt": "Write a message to a friend in Amman who is thinking about moving to Germany: compare the two places honestly in at least four areas, say what surprised you, what you miss, and give one piece of advice.",
-              "hint": "In Berlin ist … teurer als in Amman, aber … Was mich überrascht hat: … Ich vermisse … An deiner Stelle würde ich …",
+              "hint": "In Berlin ist … teurer als in Amman, aber … Mich hat überrascht, dass … Ich vermisse … An deiner Stelle würde ich …",
               "words_min": 100,
               "words_max": 160
             }
@@ -6423,7 +6423,7 @@
           "checkpoint": {
             "speaking": {
               "prompt": "Two situations: first, give a junior colleague critical feedback about their work, concretely and kindly, and agree on a change. Second, a colleague blames you for an outage that was partly your fault. Clear it up, take your share, apologise and propose a fix.",
-              "hint": "Mir ist aufgefallen, dass … Ich hätte das vielleicht früher ansprechen sollen. Das war doch nicht so gemeint. Lass uns darauf einigen, dass …",
+              "hint": "Mir ist aufgefallen, dass … Ich hätte das vielleicht früher ansprechen sollen. Das war doch nicht so gemeint. Können wir uns darauf einigen, dass …?",
               "variants": {
                 "student": {
                   "prompt": "Two situations: first, give a younger student in your project group critical feedback about their work, concretely and kindly, and agree on a change. Second, a group member blames you for a failed test that was partly your fault. Clear it up, take your share, apologise and propose a fix."
@@ -8099,7 +8099,7 @@
             },
             "writing": {
               "prompt": "Write a letter to your property management about the problems with the bins in your building: describe the situation, explain why it affects everyone, propose two concrete measures, and ask for a reply. Use the formal letter structure.",
-              "hint": "Betreff: Mülltrennung im Haus … Sehr geehrte Damen und Herren, seit einigen Wochen … Dies führt dazu, dass … Die Situation ließe sich verbessern, indem … Ich bitte Sie daher, …",
+              "hint": "Betreff: Mülltrennung im Haus … Sehr geehrte Damen und Herren, seit einigen Wochen … Dies führt dazu, dass … Die Situation lässt sich verbessern, indem … Ich bitte Sie daher, …",
               "words_min": 130,
               "words_max": 190
             }
@@ -10162,7 +10162,7 @@
               "variants": {
                 "student": {
                   "prompt": "Write an email to the researcher you work for as a Hiwi, declining extra work during your exam period: acknowledge the request, explain the problem with facts (your contract hours, your exams), say what would suffer, ask for a priority decision and propose an alternative.",
-                  "hint": "Vielen Dank für Ihr Vertrauen. / In meiner Prüfungsphase ist das nicht zu schaffen. / Das ginge deutlich über meine vereinbarten Stunden hinaus. / Was hätte für Sie Priorität? / Ich schlage stattdessen vor, …"
+                  "hint": "Vielen Dank für Ihr Vertrauen. / In meiner Prüfungsphase ist das nicht zu schaffen. / Das würde deutlich über meine vereinbarten Stunden hinausgehen. / Was hätte für Sie Priorität? / Ich schlage stattdessen vor, …"
                 }
               }
             }
